@@ -582,91 +582,149 @@ function draw(){
       zb.onclick=()=>{Array.from(ztabs.children).forEach(b=>b.className="btn b2");zb.className="btn";zgrid.textContent="";zones[zn].forEach(item=>{const ib=el("button","btn b2",item);ib.style.flex="none";ib.style.marginTop="4px";ib.style.fontSize="12px";ib.style.padding="6px 9px";ib.onclick=()=>askAI(item.split(" "));zgrid.appendChild(ib)})};
       ztabs.appendChild(zb);
     });
-    box.append(ztabs,zgrid);ztabs.firstChild.click();
-    const inpRow=el("div","btns");inpRow.style.marginTop="8px";
-    const inp=el("input");inp.placeholder="Введите первые буквы: не едет, вывоз, перегруз...";inp.style.marginTop="0";
-    const micBtn=el("button","btn b2","🎤");micBtn.style.flex="none";micBtn.style.width="46px";micBtn.style.fontSize="18px";
-    micBtn.onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("На iPhone нажмите микрофон в правом нижнем углу клавиатуры!");inp.focus();return}const rec=new SR();rec.lang="ru-RU";micBtn.textContent="🔴";rec.onresult=e=>{inp.value=e.results.transcript;micBtn.textContent="🎤";askAI(inp.value)};rec.onerror=rec.onend=()=>{micBtn.textContent="🎤"};rec.start()};
-    inpRow.append(inp,micBtn);
-    const sugBox=el("div","btns");sugBox.style.flexWrap="wrap";sugBox.style.marginTop="4px";
-    const goBtn=el("button","btn","🔍 Найти решение и аварийный обход");goBtn.style.width="100%";goBtn.style.marginTop="8px";
-    const ans=el("div","");ans.style.marginTop="12px";
-
-    const hints=["Не едет (нет хода вперед / назад)","Не заводится двигатель Deutz","Полностью пропало питание / погасла панель","Активирована аварийная кнопка по корзине (S102)","Задняя часть в КЗ — аварийный вывоз машины (+24В)","Не складывается стрела / не поднимаются аутригеры","Горит перегруз люльки B15 — блокирует стрелу","Не поворачивает руль (отказ рулевого Y74/Y75)","КЗ по джойстикам B41–B44 / ошибка CAN 3","Нет связи CAN с прицепом (разъём P10)","Отказ бесконтактного датчика (опоры / стрела)","Не качает зарядный модуль Orica (F102)","Не работает аварийный электронасос M1 / S20","Не снимается со стояночного тормоза / ручника","Едет только на 1-й (черепашьей) скорости","Погасли фары / рабочий свет / пропал сигнал","Не работают дворники и омыватель (F37 25А)","Ошибка пожаротушения FSS / блок A100","Нет зарядки / горит лампа АКБ (генератор G3 / R1)","Светомузыка на прицепе / отгнила масса Z5–Z8","Выбивает предохранитель FU13 (5А) при зажигании"];
-    inp.oninput=()=>{const v=inp.value.toLowerCase().trim();sugBox.textContent="";if(v.length<2)return;hints.filter(h=>h.toLowerCase().includes(v)).slice(0,4).forEach(h=>{const sb=el("button","btn b2","💡 "+h);sb.style.flex="none";sb.style.marginTop="4px";sb.style.fontSize="12px";sb.style.textAlign="left";sb.onclick=()=>{inp.value=h;sugBox.textContent="";askAI(h)};sugBox.appendChild(sb)})};
-
-    function askAI(txt){
-      const raw=(txt||inp.value).trim();if(!raw)return;
-      inp.value=raw;sugBox.textContent="";ans.textContent="";
-      const s=raw.toLowerCase().replace(/fu\s*(\d+)/g,"f$1").replace(/ф\s*(\d+)/g,"f$1"),norm=s.replace(/\s+/g,"");
-      const plainMap={
-        "вывоз":"👴 Простыми словами: Где-то сзади на прицепе или стреле перетёрся провод и лёг на железо. Из-за этого сгорает пред, и мозги машины (блок A1) думают, что нажата красная кнопка СТОП. Отстегни разъём P10, чтобы отрезать коротыш, и кинь проводок с +24В на вход кнопки стопа (клемма X3) в переднем шкафу — машина спокойно выедет.",
-        "не едет":"👴 Простыми словами: Мозги машины специально держат тормоз, потому что думают, что открыта дверь, выжат тормоз или не подняты лапы. Проверь пред F29 (3А) или кинь +24В с X1 на входы дверей и тормоза (A1:176, 194, 170) в шкафу.",
-        "не завод":"👴 Простыми словами: Дизель Deutz не заводится либо потому, что питание не доходит до стартера (держит стоп S100 или пред), либо не включился компьютер двигателя через реле K26 и пред F48 (30А).",
-        "пропало питание":"👴 Простыми словами: Пропало питание мозгов и приборки. Смотри массу S1, преды F13 (5А), F5 (3А) и диоды D1–D6 на рейке в шкафу тягача (часто пробивает D6).",
-        "корзин":"👴 Простыми словами: Красная кнопка в корзине (S102) работает по двум проводам. Если грибок забился пылью или в гусенице стрелы переломился проводок — всё блокируется. Также проверь петлю блока Orica.",
-        "датчик":"👴 Простыми словами: Бесконтактные датчики — это «глаза» машины. Когда подносишь железяку (2–5 мм), на датчике загорается жёлтый огонёк, и он шлёт +24В в компьютер. Если датчик сбило камнем — откинь его провод и подай +24В напрямую.",
-        "джойст":"👴 Простыми словами: Все 4 джойстика сидят на шине CAN 3. Если под пыльник попала вода или перетёрся кабель в стреле, вся шина падает. Отключи разъём люльки в шкафу прицепа (X20/X22) — если пульт на прицепе ожил, коротыш наверху.",
-        "can":"👴 Простыми словами: Шина CAN — это связь между передним и задним компьютерами через разъём P10. На выключенной массе между проводами CAN должно быть ровно 60 Ом.",
-        "orica":"👴 Простыми словами: На модуль Orica идёт питание +24В через пред F102 (15А) и петля безопасности Orica STOP. Смотри этот пред и кабель вдоль стрелы."
-      };
-      const kb=[
-        {m:["вывоз","обход","сопл","перемыч","эвакуац","задняя часть","закол","взорв"],t:"🚨 АВАРИЙНЫЙ ВЫВОЗ МАШИНЫ ИЗ ЗАБОЯ «ЗДЕСЬ И СЕЙЧАС»",l:["100","102","106","300"],
-         steps:["⚠️ Перемычку ставьте ТОЛЬКО через навесной пред 5А для вывода машины в безопасное место!","1. ЗАДНЯЯ ЧАСТЬ В КЗ / СТОПЫ: Откиньте разъём P10 (или отсоедините прицеп от X3) и подайте +24В с X1 на клемму X3 (пин A1:122).","2. СГОРЕЛ ЗАМОК S6 / F12: Подайте +24В с X1 на нижний контакт клеммы X3-1 (пин A1:123 Ignition +15).","3. ВЫБИВАЕТ F29 (ДВЕРИ / ТОРМОЗ): Откиньте двери от X3 и подайте +24В с X1 на входы A1:176, 194, 170."]},
-        {m:["не едет","нет хода","встала","ход","вперед","назад","педал","b6","тормоз","b3","двер","s5","s10","y10","y11","f43","ручник","черепах"],t:"🚜 МАШИНА НЕ ЕДЕТ / ТОРМОЗ ХОДА (F29, F43, Y10–Y15)",l:["106","112"],
-         steps:["🔧 ШТАТНО: Проверьте F29 (3А), +24В на A1:176 (тормоз B3), 194 (дверь S5), 170 (дверь S10), 151 (ручник). Питание педали B6 (A1:247–227) = +5.0В. Клапаны Y10 (180), Y11 (159), Y15 (156).","🚨 АВАРИЙНЫЙ ОБХОД: Подайте +24В с X1 (через пред 5А) на входы A1:176, 194, 170 или напрямую на катушку тормоза хода Y15 и нужного хода (Y10 / Y11)."]},
-        {m:["не завод","стартер","deutz","двс","двигател","g5","k26","m8","f48","spn","97","100","110","168","190"],t:"🔥 ДВИГАТЕЛЬ DEUTZ EMR-3 (F48 30А, F4 20А, F26 5А, K26)",l:["100","101"],
-         steps:["🔧 ШТАТНО: Проверьте массу S1, АКБ (24В), стоп S100 (A1:122 = +24В), F48 (30А), F4 (20А), F26 (5А), реле K26 и реле стартера K3 (F2 30А, A1:102).","🚨 АВАРИЙНЫЙ ОБХОД: Замкните силовые контакты реле K26 и перемкните силовые клеммы реле стартера K3 (30–87) при включённом зажигании."]},
-        {m:["пропало питание","погас","диспл","a20","нет питан","f13","f5","f6","f12","диод","d6","заряд","таймер"],t:"⚡ ПИТАНИЕ КОНТРОЛЛЕРА A1, ДИОДЫ D1–D6 И ЗАЖИГАНИЕ (F13, F5, F6, F12)",l:["100","102","110"],
-         steps:["🔧 ШТАТНО: Проверьте F1 (3А), F5 (3А, пин A1:120), F6 (30А, пины A1:201–206), F13 (5А) и прозвоните диоды D1–D6 на рейке шкафа (пробитый диод звонится 0 Ом в обе стороны).","🚨 АВАРИЙНЫЙ ОБХОД: Подайте +24В с X1 (через пред 5А) на нижний контакт клеммы X3-1 (пин A1:123) и пин A1:120."]},
-        {m:["корзин","s102","s101","s100","s7","estop","e-stop","аварийн","грибок","кнопк"],t:"🛑 ВСЕ 5 СИТУАЦИЙ ПО АВАРИЙНЫМ КНОПКАМ (S100, S7, S101, S102, ORICA)",l:["100","102","300","306","307","310"],
-         steps:["🔧 1. Кабина S100 -> клемма X3 / пин A1:122. | 2. Корпус тягача S7 -> клемма X3. | 3. Прицеп S101 и разъём P10 (E-STOP A/B).","🔧 4. Корзина S102 (X30/X33) и кабель в гусенице стрелы до X20/X22. | 5. Петля Orica STOP (X32 -> X22).","🚨 АВАРИЙНЫЙ ОБХОД: Откиньте разъём P10 (или проблемную ветвь на X3) и подайте +24В с X1 (через пред 5А) на клемму X3 (пин A1:122)."]},
-        {m:["датчик","бесконтакт","индуктив","концевик","b55","b56","b57","b59","b60","b61","b62","b63","b52","b14","b1\b","b36"],t:"🧲 ВСЕ 4 СИТУАЦИИ ПО БЕСКОНТАКТНЫМ ДАТЧИКАМ (PNP +24В)",l:["112","114","302","303","304","307"],
-         steps:["🔧 Аутригеры: тягач (F44 5А) B55 -> A1:134, B56 -> A1:138; прицеп (F106 20А) B62/B57/B59/B56/B52/B63 -> блок A13.","🔧 Стрела и люлька: B60 -> A14:C3, B61 -> A14:B3, B52 -> A14:E3, люлька B14 (Лист 307).","🚨 АВАРИЙНЫЙ ОБХОД: Откиньте сигнальный провод сбитого датчика на клемме X3 или X22 и подайте +24В с X1/X20 на вход контроллера."]},
-        {m:["джойст","джост","b41","b42","b43","b44","can3","can 3","складывается стрела","перегруз","b15","рул","y74","y75"],t:"🕹️ ДЖОЙСТИКИ CAN 3, СТРЕЛА, ПЕРЕГРУЗ И РУЛЕВОЕ (B41–B44, F100, F44)",l:["07","114","300","307","308"],
-         steps:["🔧 ДЖОЙСТИКИ (CAN 3): B43/B44 (прицеп), A62, B41, B42 (люлька, терминатор R12/R13). Откиньте жгут люльки на X20/X22 для проверки.","🔧 СТРЕЛА И ПЕРЕГРУЗ: Проверьте F100 (7.5А), реле K12 (A14:DO13), реле перегруза K105 и датчик B15. Рулевое (F44 5А): B26 (178/137), Y74/Y75 (155).","🚨 АВАРИЙНЫЙ ОБХОД: Нажмите кнопку аварийного насоса S20 (или замкните реле K2) и используйте ручное дублирование золотников PVG или подайте +24В напрямую на катушки клапанов."]},
-        {m:["can","кан","связ","p10","jb4","f10\b","f20","f32","orica","орика","f102"],t:"🔌 ШИНА CAN, РАЗЪЁМ P10 И ЗАРЯДНЫЙ МОДУЛЬ ORICA (F102 15А)",l:["07","102","300","301","308","310"],
-         steps:["🔧 CAN / P10: На выкл. массе S1 сопротивление на JB4 = 60 Ом. Проверьте F32 (10А), F20 (3А), F10 (3А), разъём P10 и питание блоков A12–A14 (F101–F105).","🔧 ORICA: Проверьте F102 (15А), +24В на Orica 24V+ (X20 -> X30), линию Orica STOP и клапаны Y130 (A14:F1/E1), Y3 (A14:D1/C1)."]}
-      ];
-
-      let hit=kb.find(x=>x.m.some(w=>w.includes("\\b")?new RegExp(w,"i").test(s):norm.includes(w.replace(/\s+/g,""))||s.includes(w)));
-      const card=el("div","card");card.style.borderColor="#f59e0b";
-      if(hit){
-        card.append(el("b","",hit.t));
-        const pKey=Object.keys(plainMap).find(k=>hit.m.some(w=>w.includes(k))||hit.t.toLowerCase().includes(k));
-        const spk=el("button","btn b2","🔊 Озвучить ответ вслух");spk.style.width="100%";spk.style.margin="6px 0";
-spk.onclick=()=>{if(!("speechSynthesis" in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(((pKey?plainMap[pKey]:hit.t)+". "+hit.steps.join(". ")).replace(/[🔧🚨⚠️👴•]/g,""));u.lang="ru-RU";window.speechSynthesis.speak(u)};
-card.appendChild(spk);
-if(pKey){const gp=el("div","desc",plainMap[pKey]);gp.style.background="#1e1b10";gp.style.border="1px solid #f59e0b";gp.style.padding="10px";gp.style.borderRadius="8px";gp.style.color="#fde68a";card.appendChild(gp)}
-hit.steps.forEach(st=>{
-const row=el("div","desc");row.style.background=st.startsWith("🚨")?"#2a1215":"#0f172a";row.style.padding="8px";row.style.borderRadius="8px";row.style.cursor="pointer";row.style.border="1px solid "+(st.startsWith("🚨")?"#ef4444":"#334155");
-let done=false;row.textContent="⬜ "+st;
-row.onclick=()=>{done=!done;row.textContent=(done?"✅ ":"⬜ ")+st;row.style.borderColor=done?"#22c55e":(st.startsWith("🚨")?"#ef4444":"#334155");row.style.color=done?"#86efac":"#cbd5e1"};
-card.appendChild(row);
-});
-const brow=el("div","btns");brow.style.flexWrap="wrap";
-hit.l.forEach(num=>{const obj=S.find(z=>z.a===num);if(obj){const lb=el("button","btn","📐 Лист "+num);lb.onclick=()=>openSvg(obj);brow.appendChild(lb)}});
-card.appendChild(brow);
-}else{
-const found=S.filter(x=>(x.a+x.b+x.c+(x.k||"")+(window.map[x.a]?window.map[x.a].toString():"")).toLowerCase().replace(/\s+/g,"").includes(norm));
-card.append(el("b","","Поиск по всем 27 листам Hencon P1402:"),el("div","desc",found.length?"Элемент найден на следующих чертежах:":"Введите первые 2 буквы проблемы (не едет, вывоз, стрела, руль) или выберите узел выше."));
-const brow=el("div","btns");brow.style.flexWrap="wrap";
-found.slice(0,5).forEach(obj=>{const lb=el("button","btn","📐 Лист "+obj.a);lb.onclick=()=>openSvg(obj);brow.appendChild(lb)});
-card.appendChild(brow);
+    box.append(ztabs,zgrid);
+ztabs.firstChild.click();
+const inpRow=el("div","btns");
+const inp=el("input");
+inp.placeholder="Проблема: не едет, вывоз, руль...";
+inp.style.marginTop="0";
+const micBtn=el("button","btn b2","🎤");
+micBtn.style.flex="none";
+micBtn.style.width="46px";
+micBtn.onclick=()=>{
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert("На iPhone жмите микрофон на клавиатуре!");return}
+  const r=new SR();r.lang="ru-RU";
+  r.onresult=e=>{inp.value=e.results[0][0].transcript;askAI(inp.value)};
+  r.start();
+};
+inpRow.append(inp,micBtn);
+const sugBox=el("div","btns");
+const goBtn=el("button","btn","🔍 Найти решение и обход");
+goBtn.style.width="100%";goBtn.style.marginTop="8px";
+const ans=el("div","");ans.style.marginTop="12px";const hints=[
+  "Сгорел предохранитель / выбивает пред","Не едет (нет хода вперед / назад)",
+  "Не заводится двигатель Deutz",
+  "Пропало питание / погасла панель",
+  "Аварийная кнопка по корзине (S102)",
+  "Задняя часть в КЗ — аварийный вывоз (+24В)",
+  "Не складывается стрела / аутригеры",
+  "Горит перегруз люльки B15",
+  "Не поворачивает руль (Y74/Y75)",
+  "КЗ по джойстикам B41–B44 / CAN 3",
+  "Нет связи CAN с прицепом (P10)",
+  "Отказ бесконтактного датчика",
+  "Не качает модуль Orica (F102)",
+  "Выбивает пред FU13 (5А)"
+];
+inp.oninput=()=>{
+  const v=inp.value.toLowerCase().trim();
+  sugBox.textContent="";
+  if(v.length<2)return;
+  hints.filter(h=>h.toLowerCase().includes(v)).slice(0,4).forEach(h=>{
+    const b=el("button","btn b2","💡 "+h);
+    b.style.flex="none";b.style.fontSize="12px";
+    b.onclick=()=>{inp.value=h;sugBox.textContent="";askAI(h)};
+    sugBox.appendChild(b);
+  });
+};function askAI(txt){
+  const raw=(txt||inp.value).trim();if(!raw)return;
+  inp.value=raw;sugBox.textContent="";ans.textContent="";
+  let s=raw.toLowerCase().replace(/fu\s*(\d+)/g,"f$1").replace(/ф\s*(\d+)/g,"f$1");
+  const slang=[
+    [/корот\w*|коз[ауы]|искр\w*|на масс\w*/g," вывоз пред "],
+    [/сопл\w*|напрям\w*|вытащ\w*|из забо\w*|спаст\w*/g," вывоз обход "],
+    [/умерл\w*|сдохл\w*|потухл\w*|кирпич\w*|ноль реакц\w*|глухо/g," пропало питание "],
+    [/колом|не трога\w*|держит|зажал\w*|не полз\w*|стоит как вкоп\w*/g," не едет "],
+    [/масла\w*|не схватыв\w*|молчит старт\w*|крутит впуст\w*/g," не заводится "],
+    [/рубит стоп|выбило корзин\w*|красн\w* кнопк\w*/g," корзина estop "],
+    [/отвалил\w* хвост|светомузык\w*|глюч\w*|морга\w*/g," can p10 "],
+    [/пизд\w*|ху[йяеи]\w*|бл[яе]\w*|еб[аоуы]\w*|сук\w*|нах\w*|заеб\w*|хрен\w*|дерьм\w*|говн\w*/g," "]
+  ];
+  slang.forEach(pair=>{s=s.replace(pair[0],pair[1])});
+  const norm=s.replace(/\s+/g,"");
+  const kb=[
+    {m:["сгорел","выбивает","пред","предохранит","коротыш"],
+     t:"⚡ СГОРЕЛ / ВЫБИВАЕТ ПРЕДОХРАНИТЕЛЬ (ОБЩИЙ АЛГОРИТМ ПОИСКА КЗ)",l:["100","102","300","301"],
+     gp:"👴 Простыми словами: Если предохранитель перегорает сразу при вставке — провод после него лёг на железную раму (короткое замыкание). Если сгорает только при нажатии кнопки или повороте ключа — виноват тот узел, который в этот момент включается. Нажми на нужный номер предохранителя на жёлтой панели выше — я скажу, за что именно он отвечает!",
+     st:[
+       "🔧 Шаг 1: Нажмите на номер сгоревшего предохранителя на панели выше (F1–F48 для тягача или F100–F111 для прицепа), чтобы увидеть точную цепь.",
+       "🔧 Шаг 2: Отключите нагрузку на клеммнике после этого предохранителя (например, разъём P10, X3-1 или фишку клапана) и вставьте новый пред — так вы поймёте, сидит ли КЗ в шкафу или на шасси.",
+       "🚨 АВАРИЙНЫЙ ОБХОД: Если нужно срочно выехать, откиньте закороченный хвост от клеммы и подайте +24В с исправного преда (через навесной пред 5А) на вход нужной цепи."
+     ]},
+    {m:["вывоз","обход","сопл","перемыч","задняя","закол"],
+     t:"🚨 АВАРИЙНЫЙ ВЫВОЗ МАШИНЫ (+24В)",l:["100","102","106","300"],
+     gp:"👴 Простыми словами: Сзади перетёрся провод и лёг на железо. Отстегни разъём P10, чтобы отрезать коротыш, и кинь проводок с +24В (через пред 5А) на вход кнопки стопа (клемма X3) в переднем шкафу — машина выедет.",
+     st:["1. Откиньте разъём P10 (или жилы прицепа от X3).","2. Подайте +24В с X1 (через пред 5А) на клемму X3 (пин A1:122).","3. Если сгорел замок S6: подайте +24В на низ X3-1 (пин A1:123)."]},
+    {m:["не едет","ход","вперед","назад","педал","тормоз","двер","ручник"],
+     t:"🚜 МАШИНА НЕ ЕДЕТ / ТОРМОЗ ХОДА",l:["106","112"],
+     gp:"👴 Простыми словами: Мозги держат тормоз, потому что думают, что открыта дверь или выжат тормоз. Проверь пред F29 (3А) или кинь +24В с X1 на входы A1:176, 194, 170.",
+     st:["🔧 Проверьте F29 (3А), +24В на A1:176, 194, 170. Педаль B6 = +5.0В.","🚨 ОБХОД: Подайте +24В с X1 на A1:176, 194, 170 или на катушку Y15 и Y10/Y11."]},
+    {m:["не завод","стартер","deutz","двс","двигател","f48","k26"],
+     t:"🔥 ДВИГАТЕЛЬ DEUTZ НЕ ЗАВОДИТСЯ",l:["100","101"],
+     gp:"👴 Простыми словами: Либо стоп S100 не пускает ток на стартер, либо не включился блок двигателя через реле K26 и пред F48 (30А).",
+     st:["🔧 Проверьте массу S1, АКБ 24В, A1:122 (+24В), F48 (30А), F4 (20А), K26 и K3.","🚨 ОБХОД: Замкните силовые контакты реле K26 и стартера K3 (30–87)."]},
+    {m:["пропало","питание","погас","диспл","f13","диод","d6","f5","f6"],
+     t:"⚡ ПИТАНИЕ A1, ДИОДЫ D1–D6 И ЗАЖИГАНИЕ",l:["100","102","110"],
+     gp:"👴 Простыми словами: Смотри массу S1, преды F13 (5А), F5 (3А) и диоды D1–D6 на рейке в шкафу тягача (часто пробивает D6).",
+     st:["🔧 Проверьте F1 (3А), F5 (3А), F6 (30А), F13 (5А) и диоды D1–D6 (0 Ом = пробит).","🚨 ОБХОД: Подайте +24В с X1 на низ X3-1 (A1:123) и пин A1:120."]},
+    {m:["корзин","s102","s101","s100","s7","estop","аварийн","грибок"],
+     t:"🛑 ВСЕ СИТУАЦИИ ПО АВАРИЙНЫМ КНОПКАМ",l:["100","102","300","306","307","310"],
+     gp:"👴 Простыми словами: Кнопка в корзине S102 работает по двум проводам. Проверь грибок, кабель в гусенице стрелы и петлю Orica STOP.",
+     st:["🔧 Проверьте S100 (кабина), S7 (корпус), S101 (прицеп), P10, S102 (люлька) и Orica STOP.","🚨 ОБХОД: Откиньте P10 и подайте +24В с X1 на клемму X3 (пин A1:122)."]},
+    {m:["датчик","бесконтакт","концевик","b55","b56","b60","b61","b52","b14"],
+     t:"🧲 БЕСКОНТАКТНЫЕ ДАТЧИКИ (PNP +24В)",l:["112","114","302","303","304","307"],
+     gp:"👴 Простыми словами: Подносишь металл (2–5 мм) — горит огонёк и идёт +24В в компьютер. Если датчик сбило — откинь провод и подай +24В напрямую.",
+     st:["🔧 Аутригеры: B55/B56 (A1:134/138), B62–B63 (A13). Стрела: B60/B61/B52 (A14).","🚨 ОБХОД: Откиньте провод датчика на X3/X22 и подайте +24В на вход блока."]},
+    {m:["джойст","джост","b41","b42","b43","b44","can3","стрел","перегруз","рул"],
+     t:"🕹️ ДЖОЙСТИКИ CAN 3, СТРЕЛА, ПЕРЕГРУЗ И РУЛЬ",l:["07","114","300","307","308"],
+     gp:"👴 Простыми словами: Отключи разъём люльки в шкафу прицепа (X20/X22) — если пульт на прицепе ожил, коротыш наверху в корзине или стреле.",
+     st:["🔧 Джойстики CAN 3: B41–B44, R12/R13. Стрела: F100, K12, K105. Руль: F44, Y74/Y75.","🚨 ОБХОД: Включите аварийный насос S20 (K2) и нажмите золотники PVG вручную."]},
+    {m:["can","кан","связ","p10","jb4","orica","орика","f102"],
+     t:"🔌 ШИНА CAN, РАЗЪЁМ P10 И ORICA (F102 15А)",l:["07","102","300","301","308","310"],
+     gp:"👴 Простыми словами: На выключенной массе между проводами CAN должно быть 60 Ом. Для Orica смотри пред F102 (15А) и кабель вдоль стрелы.",
+     st:["🔧 CAN: 60 Ом на JB4, F32, F20, F10, разъём P10. Orica: F102 (15А), Orica STOP, Y130, Y3."]}
+  ];
+  const hit=kb.find(x=>x.m.some(w=>norm.includes(w.replace(/\s+/g,""))||s.includes(w)));
+  const card=el("div","card");card.style.borderColor="#f59e0b";
+  if(hit){
+    card.append(el("b","",hit.t));
+    const spk=el("button","btn b2","🔊 Озвучить ответ");
+    spk.style.width="100%";spk.style.margin="6px 0";
+    spk.onclick=()=>{if(!("speechSynthesis" in window))return;if(window.speechSynthesis.speaking){window.speechSynthesis.cancel();spk.textContent="🔊 Озвучить ответ";return}const u=new SpeechSynthesisUtterance(hit.gp.replace(/👴\s*Простыми словами:\s*/g,""));u.lang="ru-RU";u.onend=()=>{spk.textContent="🔊 Озвучить ответ"};spk.textContent="⏹️ Остановить голос";window.speechSynthesis.speak(u)};
+    card.appendChild(spk);
+    const gp=el("div","desc",hit.gp);
+    gp.style.background="#1e1b10";gp.style.border="1px solid #f59e0b";gp.style.padding="8px";gp.style.borderRadius="8px";gp.style.color="#fde68a";
+    card.appendChild(gp);
+    hit.st.forEach(line=>{
+      const r=el("div","desc","⬜ "+line);
+      r.style.background="#0f172a";r.style.padding="8px";r.style.borderRadius="8px";r.style.cursor="pointer";
+      let d=false;r.onclick=()=>{d=!d;r.textContent=(d?"✅ ":"⬜ ")+line;r.style.color=d?"#86efac":"#cbd5e1"};
+      card.appendChild(r);
+    });
+    const brow=el("div","btns");
+    hit.l.forEach(num=>{const o=S.find(z=>z.a===num);if(o){const b=el("button","btn","📐 Лист "+num);b.onclick=()=>openSvg(o);brow.appendChild(b)}});
+    card.appendChild(brow);
+  }else{
+    const found=S.filter(x=>(x.a+x.b+x.c+(x.k||"")).toLowerCase().replace(/\s+/g,"").includes(norm));
+    card.append(el("b","","Найдено по базе 27 листов:"),el("div","desc",found.length?"Откройте нужный чертёж:":"Выберите узел выше или введите: не едет, вывоз, стрела."));
+    const brow=el("div","btns");found.slice(0,5).forEach(o=>{const b=el("button","btn","📐 Лист "+o.a);b.onclick=()=>openSvg(o);brow.appendChild(b)});card.appendChild(brow);
+  }
+  ans.appendChild(card);
 }
-ans.appendChild(card);
-}
-goBtn.onclick=()=>askAI();inp.onkeydown=e=>{if(e.key==="Enter")askAI()};
-box.append(inpRow,sugBox,goBtn,ans);app.appendChild(box);
+goBtn.onclick=()=>askAI();
+inp.onkeydown=e=>{if(e.key==="Enter")askAI()};
+box.append(inpRow,sugBox,goBtn,ans);
+app.appendChild(box);
 }else{
-D.forEach(x=>{if(!q||(x.a+x.b).toLowerCase().replace(/\s+/g,"").includes(q)){const c=el("div","card");c.style.display="flex";c.style.justifyContent="space-between";const k=el("b","",x.a);k.style.color="#f59e0b";c.append(k,el("span","",x.b));app.appendChild(c)}});
+  D.forEach(x=>{if(!q||(x.a+x.b).toLowerCase().replace(/\s+/g,"").includes(q)){const c=el("div","card");c.style.display="flex";c.style.justifyContent="space-between";const k=el("b","",x.a);k.style.color="#f59e0b";c.append(k,el("span","",x.b));app.appendChild(c)}});
 }
 }
 const fl=el("div","");fl.style.cssText="display:none;position:fixed;inset:0;background:#fff;z-index:99;justify-content:center;align-items:flex-end;padding-bottom:40px";
 const flOff=el("button","btn","Выключить свет");flOff.style.cssText="background:#0f172a;color:#fff;padding:14px 28px;font-size:16px";
 flOff.onclick=()=>fl.style.display="none";fl.appendChild(flOff);document.body.appendChild(fl);
 const flBtn=document.getElementById("flbtn");if(flBtn)flBtn.onclick=()=>fl.style.display="flex";
-document.getElementById("up").onchange=e=>{const f=e.target.files.item(0);if(!f)return;const r=new FileReader();r.onload=ev=>{shrink(ev.target.result,u=>{try{localStorage.setItem("hp_img_"+upId,u)}catch(err){alert("Память переполнена")}draw()})};r.readAsDataURL(f)};
+document.getElementById("up").onchange=e=>{const f=e.target.files.item(0);if(!f)return;const r=new FileReader();r.onload=ev=>{shrink(ev.target.result,u=>{try{localStorage.setItem("hp_img_"+upId,u)}catch(err){}draw()})};r.readAsDataURL(f)};
 document.getElementById("cls").onclick=()=>document.getElementById("mod").className="";
 document.getElementById("bs").onclick=()=>go("s","bs");document.getElementById("bp").onclick=()=>go("p","bp");
 document.getElementById("bg").onclick=()=>go("g","bg");document.getElementById("bd").onclick=()=>go("d","bd");
@@ -675,3 +733,4 @@ document.getElementById("bgbtn").onclick=()=>document.getElementById("upbg").cli
 document.getElementById("upbg").onchange=e=>{const f=e.target.files.item(0);if(!f)return;const r=new FileReader();r.onload=ev=>{shrink(ev.target.result,u=>{document.body.style.backgroundImage="linear-gradient(rgba(15,23,42,0.84),rgba(15,23,42,0.92)),url("+u+")";try{localStorage.setItem("hp_bg",u)}catch(err){}})};r.readAsDataURL(f)};
 const savedBg=localStorage.getItem("hp_bg");if(savedBg)document.body.style.backgroundImage="linear-gradient(rgba(15,23,42,0.84),rgba(15,23,42,0.92)),url("+savedBg+")";
 document.getElementById("q").oninput=draw;draw();
+</script></body></html>
