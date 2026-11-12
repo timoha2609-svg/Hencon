@@ -770,8 +770,8 @@ function askAI(txt){
     "r26":{n:"R26 — Резистор датчика поворота стрелы B25",p:"Стоит в цепи потенциометра поворота стрелы.",k:"Передаёт угол поворота B25 на входы блока прицепа A13:D4 / C4 (Лист 304).",o:"Обмануть: при обрыве B25/R26 использовать ручное управление на распределителе PVG."}
   };
   const rkKey=norm.match(/^(k\d+|d\d+|r\d+)/);
-  if(rkKey && rkMap[rkKey]){
-    const rd=rkMap[rkKey];
+  if(rkKey && rkMap[rkKey[0]]){
+    const rd=rkMap[rkKey[0]];
     const card=el("div","card");card.style.borderColor="#f59e0b";
     card.append(el("b","",rd.n));
     const spk=el("button","btn b2","🔊 Озвучить ответ");spk.style.width="100%";spk.style.margin="6px 0";
@@ -786,8 +786,8 @@ function askAI(txt){
     showPop(fd.n,card);return;
   }
   const fKey=norm.match(/^f\d+/);
-  if(fKey && fMap[fKey]){
-    const fd=fMap[fKey];
+  if(fKey && fMap[fKey[0]]){
+    const fd=fMap[fKey[0]];
     const card=el("div","card");card.style.borderColor="#f59e0b";
     card.append(el("b","",fd.n));
     const spk=el("button","btn b2","🔊 Озвучить ответ");spk.style.width="100%";spk.style.margin="6px 0";
@@ -848,5 +848,5 @@ document.getElementById("bi").onclick=()=>go("i","bi");
 document.getElementById("bgbtn").onclick=()=>document.getElementById("upbg").click();
 document.getElementById("upbg").onchange=e=>{const f=e.target.files.item(0);if(!f)return;const r=new FileReader();r.onload=ev=>{shrink(ev.target.result,u=>{document.body.style.backgroundImage="linear-gradient(rgba(15,23,42,0.84),rgba(15,23,42,0.92)),url("+u+")";try{localStorage.setItem("hp_bg",u)}catch(err){}})};r.readAsDataURL(f)};
 const savedBg=localStorage.getItem("hp_bg");if(savedBg)document.body.style.backgroundImage="linear-gradient(rgba(15,23,42,0.84),rgba(15,23,42,0.92)),url("+savedBg+")";
-document.getElementById("q").oninput=draw;draw();
+if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(w=>w.unregister()));}document.getElementById("q").oninput=draw;draw();
 </script></body></html>
