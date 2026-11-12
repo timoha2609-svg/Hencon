@@ -10,7 +10,7 @@ input{width:100%;padding:10px;border-radius:8px;border:1px solid #334155;backgro
 .pin{background:#0284c7;color:#fff;font-family:monospace;font-weight:bold;font-size:13px;padding:2px 7px;border-radius:5px;margin-right:6px}
 .desc{font-size:13px;color:#cbd5e1;line-height:1.4;margin-top:6px;white-space:pre-line}
 .btns{display:flex;gap:6px;margin-top:10px}
-.btn{flex:1;padding:9px;border-radius:8px;border:none;font-weight:bold;font-size:13px;cursor:pointer;background:#f59e0b;color:#000}
+.btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent;flex:1;padding:9px;border-radius:8px;border:none;font-weight:bold;font-size:13px;cursor:pointer;background:#f59e0b;color:#000}
 .b2{background:#334155;color:#fff}
 nav{position:fixed;bottom:0;left:0;right:0;background:#1e293b;display:flex;border-top:1px solid #334155;padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;background:none;color:#94a3b8;border:none;padding:12px 4px;font-weight:bold;cursor:pointer}
@@ -73,7 +73,7 @@ const G=JSON.parse(localStorage.getItem("hp_g2"))||[
 ];
 const D=[{a:"Head / Chassis",b:"Тягач / Шасси"},{a:"Trailer",b:"Прицеп"},{a:"Basket",b:"Люлька (корзина)"},{a:"Boom",b:"Стрела"},{a:"Outrigger",b:"Аутригер"},{a:"Supply / Fuse",b:"Питание / Предохранитель"},{a:"Emergency stop",b:"Аварийный стоп"},{a:"Overload alarm",b:"Перегруз"},{a:"Pressure sensor",b:"Датчик давления"},{a:"Drive",b:"Ход"}];let tab="s",upId=null,db=null;
 try{const req=indexedDB.open("H1402",1);req.onupgradeneeded=e=>e.target.result.createObjectStore("p");req.onsuccess=e=>{db=e.target.result;draw()}}catch(e){}
-function el(t,c,txt){const e=document.createElement(t);if(c)e.className=c;if(txt)e.textContent=txt;return e}
+function el(t,c,txt){const e=document.createElement(t);if(t==="button")e.type="button";if(c)e.className=c;if(txt)e.textContent=txt;return e}
 function sv(tg,at,txt){const e=document.createElementNS("http://w3.org",tg);for(let k in at)e.setAttribute(k,at[k]);if(txt)e.textContent=txt;return e}
 function go(t,id){tab=t;["bs","bp","bg","bd","bi"].forEach(i=>document.getElementById(i).className="");document.getElementById(id).className="act";draw()}
 
