@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
 <meta name="apple-mobile-web-app-capable" content="yes"><title>Hencon P1402 (27/27)</title>
 <style>
@@ -53,7 +53,7 @@ svg{width:100%;max-width:860px;height:auto;background:#0b1120;border:1px solid #
 {a:"308",b:"Прицеп: Клапаны стрелы и Orica (ЧЕРТЁЖ)",c:"Реле K12 (F100 7.5А, A14:DO13), клапаны PVG стрелы Y57 (D2), Y58 (H2), Y59 (G2), Y60 (F2), клапаны Orica Y130 (F1/E1), Y3 (D1/C1)."},
 {a:"309",b:"Прицеп: Клапаны аутригеров (ЧЕРТЁЖ)",c:"Блок A14 (M2, B1, C1), блок A13 (F1, E1, K1, J1, H1, G1, D1, C1), клапаны Y68, Y63, Y95, Y96, Y61, Y62, X20-X22."},
 {a:"310",b:"Прицеп: Зарядный модуль Orica (ЧЕРТЁЖ)",c:"Питание Orica 24V+ (F102 15А), Orica 24V-, Orica STOP, Orica LS, резервные линии Orica Res. 1–11 (X20-X22 -> X30-X32)."}
-];const P=JSON.parse(localStorage.getItem("hp_p2"))||[{a:"D1 - D6 (Диоды шкафа)",b:"Лист 100, 102",c:"Диодная сборка на клеммах шкафа тягача (D4, D2, D3, D1, D6): развязка питания логики контроллера A1 (F13 5А) и защита от обратного тока катушек реле."},{a:"R1 - R12 (Резисторы шкафа)",b:"Лист 100, 105, 108, 112, 113",c:"Резисторы на рейке шкафа: R1 (470 Ом 2Вт возбуждение генератора D+ на A1:115); R3 (1k2 зуммер H48 A1:156); R5/R6/R7 (пожарка FSS A1:133, 134, 160); R10 (B5 A1:116); R12 (B10 A1:153)."},
+];const P=JSON.parse(localStorage.getItem("hp_p2"))||[{a:"X5-1 / X5-2 (Клеммы шкафа)",b:"Лист 100, 102, 112",c:"Клеммная рейка X5 в главном шкафу тягача: соединение с диодами развязки D2, D3 и выход на клапаны хода Y10–Y15."},{a:"D1 - D6 (Диоды шкафа)",b:"Лист 100, 102",c:"Диодная сборка на клеммах шкафа тягача (D4, D2, D3, D1, D6): развязка питания логики контроллера A1 (F13 5А) и защита от обратного тока катушек реле."},{a:"R1 - R12 (Резисторы шкафа)",b:"Лист 100, 105, 108, 112, 113",c:"Резисторы на рейке шкафа: R1 (470 Ом 2Вт возбуждение генератора D+ на A1:115); R3 (1k2 зуммер H48 A1:156); R5/R6/R7 (пожарка FSS A1:133, 134, 160); R10 (B5 A1:116); R12 (B10 A1:153)."},
 {a:"X3-1 / X3",b:"Лист 100, 106, 112",c:"Шкаф тягача: зажигание +15 от замка S6 (через F12 10А) на пин A1:123 и питание +24В датчиков."},
 {a:"A1:180-156 (Ход)",b:"Лист 112",c:"Клапаны хода: 180 (Y10 вперёд), 159 (Y11 назад), 183 (Y12 скорость), 153 (Y13 насос F), 177 (Y14 насос R), 156 (Y15 разблокировка)."},
 {a:"A1:131 / 107 / 130 / 119",b:"Лист 112",c:"Датчики хода (F43): 131 (давление B2), 107 (давление B11), 130 (подпитка B7), 119 (скорость B1)."},
@@ -71,7 +71,40 @@ const G=JSON.parse(localStorage.getItem("hp_g2"))||[
 {a:"Не работает стрела или люлька",b:"Лист 305, 306, 307, 308",c:"1. Прозвонить стопы S100, S101, S102.\n2. Проверить предохранитель F100 (7.5А), реле K12 (A14:DO13) и датчик перегруза B15."},
 {a:"Не работает зарядный модуль Orica",b:"Лист 308, 310",c:"1. Проверить F102 (15А) и наличие +24В на линии Orica 24V+ в коробке люльки.\n2. Прозвонить линию Orica STOP и клапаны Y130 / Y3."}
 ];
-const D=[{a:"Head / Chassis",b:"Тягач / Шасси"},{a:"Trailer",b:"Прицеп"},{a:"Basket",b:"Люлька (корзина)"},{a:"Boom",b:"Стрела"},{a:"Outrigger",b:"Аутригер"},{a:"Supply / Fuse",b:"Питание / Предохранитель"},{a:"Emergency stop",b:"Аварийный стоп"},{a:"Overload alarm",b:"Перегруз"},{a:"Pressure sensor",b:"Датчик давления"},{a:"Drive",b:"Ход"}];let tab="s",upId=null,db=null;
+const D=JSON.parse(localStorage.getItem("hp_d2"))||[
+{a:"Head / Chassis",b:"Тягач / Передняя полурама"},{a:"Trailer",b:"Прицеп / Задняя полурама"},
+{a:"Basket / Platform",b:"Люлька / Рабочая корзина"},{a:"Boom",b:"Телескопическая стрела"},
+{a:"Outrigger / Stabilizer",b:"Аутригер / Выносная опора"},{a:"Supply / Power",b:"Питание / Электропитание"},
+{a:"Fuse",b:"Предохранитель"},{a:"Relay",b:"Реле"},{a:"Diode",b:"Диод"},{a:"Resistor",b:"Резистор"},
+{a:"Terminal / Connector",b:"Клеммная колодка / Разъём"},{a:"Ground / GND / Earth",b:"Масса / Минус / Заземление"},
+{a:"Battery / Main switch",b:"Аккумулятор (АКБ) / Выключатель массы"},{a:"Ignition (+15)",b:"Зажигание (+15 после ключа)"},
+{a:"Constant power (+30)",b:"Постоянное питание (+30 от АКБ)"},{a:"Starter",b:"Стартер"},
+{a:"Alternator / Charging",b:"Генератор / Зарядка АКБ"},{a:"Emergency stop / E-STOP",b:"Аварийный стоп (красный грибок)"},
+{a:"Emergency pump",b:"Аварийный электронасос (M1)"},{a:"Overload alarm",b:"Сигнал перегруза люльки"},
+{a:"Pressure sensor / switch",b:"Датчик / Реле давления"},{a:"Proximity sensor",b:"Бесконтактный индуктивный датчик"},
+{a:"Level sensor",b:"Датчик уровня (топлива / воды / масла)"},{a:"Temp / Temperature",b:"Температура"},
+{a:"Speed sensor / Odometer",b:"Датчик скорости / Одометр"},{a:"Angle sensor",b:"Датчик угла (поворота / наклона)"},
+{a:"Inclination sensor",b:"Датчик наклона шасси (B40)"},{a:"Drive / Traction",b:"Ход / Трансмиссия"},
+{a:"Forward / Reverse / Neutral",b:"Вперёд / Назад / Нейтраль"},{a:"Brake / Parking brake",b:"Рабочий тормоз / Стояночный ручник"},
+{a:"Brake release",b:"Растормаживание (снятие тормоза хода)"},{a:"Charge pressure",b:"Давление подпитки гидростатического хода"},
+{a:"High / Low speed (Turtle)",b:"Повышенная / Пониженная (черепашья) скорость"},{a:"Steering",b:"Рулевое управление"},
+{a:"Door switch (LH / RH)",b:"Концевик двери (левый / правый)"},{a:"Throttle / Gas pedal",b:"Педаль газа / Акселератор"},
+{a:"Joystick",b:"Джойстик управления"},{a:"Control panel / Keypad",b:"Клавишный пульт управления"},
+{a:"Display / Monitor",b:"Дисплей (DCUM A20) / Монитор камер"},{a:"Camera / Rear view",b:"Камера заднего или рабочего обзора"},
+{a:"Wiper / Washer",b:"Стеклоочиститель (дворник) / Омыватель"},{a:"Heater / Air conditioning",b:"Отопитель (печка) / Кондиционер"},
+{a:"Headlight / Work light",b:"Фара головного света / Рабочий свет"},{a:"Beacon / Strobe",b:"Проблесковый маяк / Стробоскоп"},
+{a:"Horn / Buzzer / Siren",b:"Звуковой сигнал / Зуммер / Сирена"},{a:"Fire suppression (FSS)",b:"Система пожаротушения"},
+{a:"Low pressure / Fire alarm",b:"Низкое давление баллона / Пожарная тревога"},{a:"Central lubrication",b:"Центральная автоматическая смазка"},
+{a:"Compressor",b:"Воздушный компрессор"},{a:"Proportional valve (PVG)",b:"Пропорциональный гидрораспределитель"},
+{a:"Solenoid / Coil",b:"Электромагнитный клапан / Катушка"},{a:"Boom lift / lower",b:"Подъём / Опускание стрелы"},
+{a:"Boom telescope / extend / retract",b:"Телескоп стрелы / Выдвижение / Втягивание"},{a:"Boom slew / swing / turn",b:"Поворот стрелы влево-вправо"},
+{a:"Basket tilt / level",b:"Наклон / Выравнивание люльки"},{a:"Boom stowed / transport",b:"Стрела сложена в транспортном положении"},
+{a:"Outrigger extend / retract",b:"Выдвижение / Втягивание аутригеров"},{a:"Outrigger up / down",b:"Подъём / Опускание опор"},
+{a:"Charging unit / Orica",b:"Зарядный модуль ВВ (Orica)"},{a:"Interlock / Enable",b:"Блокировка / Разрешение работы"},
+{a:"Input (DI / AI)",b:"Вход контроллера (цифровой / аналоговый)"},{a:"Output (DO / PWM)",b:"Выход контроллера (дискретный / ШИМ)"},
+{a:"Open circuit / Short circuit",b:"Обрыв цепи / Короткое замыкание (КЗ)"},{a:"Fault / Warning / Error",b:"Неисправность / Предупреждение / Ошибка"}
+];
+let tab="s",upId=null,db=null;
 try{const req=indexedDB.open("H1402",1);req.onupgradeneeded=e=>e.target.result.createObjectStore("p");req.onsuccess=e=>{db=e.target.result;draw()}}catch(e){}
 function el(t,c,txt){const e=document.createElement(t);if(t==="button")e.type="button";if(c)e.className=c;if(txt)e.textContent=txt;return e}
 function sv(tg,at,txt){const e=document.createElementNS("http://w3.org",tg);for(let k in at)e.setAttribute(k,at[k]);if(txt)e.textContent=txt;return e}
@@ -493,10 +526,37 @@ function openSvg(x){
 
 window.map={"07":draw07,"100":draw100,"101":draw101,"102":draw102,"103":draw103,"104":draw104,"105":draw105,"106":draw106,"107":draw107,"108":draw108,"109":draw109,"110":draw110,"111":draw111,"112":draw112,"113":draw113,"114":draw114,"300":draw300,"301":draw301,"302":draw302,"303":draw303,"304":draw304,"305":draw305,"306":draw306,"307":draw307,"308":draw308,"309":draw309,"310":draw310};
 function shrink(u,cb){const im=new Image();im.onload=()=>{const c=document.createElement("canvas"),m=900,s=im.width>m?m/im.width:1;c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",0.7))};im.src=u}
+function toLat(s){const m={"а":"a","в":"b","е":"e","ё":"e","к":"k","м":"m","н":"h","о":"o","р":"p","с":"c","т":"t","у":"y","х":"x","ф":"f"};return String(s||"").toLowerCase().replace(/[авеёкмнорстухф]/g,c=>m[c]||c).replace(/[\s\-–—_./]+/g,"").replace(/^fu(\d)/,"f$1")}
 function draw(){
-  const q=document.getElementById("q").value.toLowerCase().replace(/\s+/g,"").replace(/^fu(\d)/,"f$1"),app=document.getElementById("app");
+  const q=toLat(document.getElementById("q").value),app=document.getElementById("app");
   app.textContent="";
   if(tab==="s"){
+    const wm=q.match(/^x(1|2|3|4|5|6|20|21|22|30|32|33)(\d*)$/);
+    if(wm){
+      const grp=wm[1],num=wm[2]||"";
+      const xInfo={
+        "1":{t:"Клеммник X1 (Шкаф тягача — Постоянный плюс +24В / +30)",d:"Силовая плюсовая рейка шкафа тягача. Отсюда раздаётся +24В на предохранители F1–F48, фары, замок S6 и перемычки аварийного обхода.",l:["100","102","103","104"]},
+        "2":{t:"Клеммник X2 (Шкаф тягача — Общая масса GND / Минус)",d:"Минусовая клеммная рейка шкафа тягача. Сюда сходятся минусы катушек реле K1–K35, датчиков и контроллера A1. При потере массы здесь начинаются глюки.",l:["100","102","108","109"]},
+        "3":{t:"Клеммник X3 (Шкаф тягача — Зажигание +15, Стопы E-STOP и Датчики)",d:"Главная сигнальная рейка тягача: X3-1 (+15 от замка S6 на A1:123), контур стопов (A1:122), двери S5/S10, тормоз B3 и датчики опор B55/B56.",l:["100","106","112","114"]},
+        "4":{t:"Клеммник X4 (Шкаф тягача — Двигатель Deutz EMR-3 и Отопитель)",d:"Промежуточная рейка жгута двигателя Deutz (блок G5 на фото справа), реле K26 и системы отопления/кондиционера.",l:["101","107"]},
+        "5":{t:"Клеммник X5 (Шкаф тягача — Клапаны гидравлики, Диоды D1–D6 и Исполнители)",d:"Выходная рейка на гидроклапаны хода Y10–Y15, рулевого Y74/Y75, рабочей гидравлики, стеклоочистители и диодную сборку D1–D6.",l:["100","109","112","113","114"]},
+        "6":{t:"Клеммник X6 (Шкаф тягача — Приборная панель, Пульты A57/A58 и Дисплей A20)",d:"Рейка питания и сигналов приборной панели (F38 5А), зуммера H48 и дисплея DCUM A20.",l:["108","110"]},
+        "20":{t:"Клеммник X20 (Шкаф прицепа — Питание +24В / +15 Trailer)",d:"Плюсовая рейка шкафа прицепа (приходит через разъём P10 от F32 10А / F20 3А). Питает блоки A12–A14, датчики и линию Orica 24V+.",l:["301","303","306","310"]},
+        "21":{t:"Клеммник X21 (Шкаф прицепа — Общая масса GND прицепа)",d:"Минусовая шина шкафа прицепа. Соединена с тягачом через разъём P10 и плетёнки массы Z5–Z8.",l:["300","301","305","309"]},
+        "22":{t:"Клеммник X22 (Шкаф прицепа — Сигналы датчиков, Клапанов и Стрелы)",d:"Сигнальная рейка шкафа прицепа: входы датчиков стрелы и опор (B52–B65), E-STOP прицепа и транзитные жилы в люльку.",l:["303","305","309","310"]},
+        "30":{t:"Клеммник X30 (Коробка в люльке — Питание и CAN 3 корзины)",d:"Распределительная коробка в рабочей корзине (люльке): питание +24В, джойстики B41/B42, пульт A62 и стоп S102.",l:["307","310"]},
+        "32":{t:"Клеммник X32 (Коробка в люльке — Линии модуля Orica)",d:"Клеммник зарядного модуля Orica в люльке: Orica STOP, Orica LS и резервные жилы.",l:["310"]},
+        "33":{t:"Клеммник X33 (Коробка в люльке — Датчики и свет корзины)",d:"Клеммник датчика перегруза B15, положения люльки B14, камеры Z1, маяка H59 и фар люльки.",l:["307"]}
+      };
+      const xi=xInfo[grp];
+      if(xi){
+        const wc=el("div","card");wc.style.borderColor="#38bdf8";
+        wc.append(el("span","pin",document.getElementById("q").value.toUpperCase()),el("b","",xi.t),el("div","desc",xi.d));
+        const br=el("div","btns");
+        xi.l.forEach(num=>{const o=S.find(z=>z.a===num);if(o){const b=el("button","btn","📐 Лист "+num);b.onclick=()=>openSvg(o);br.appendChild(b)}});
+        wc.appendChild(br);app.appendChild(wc);
+      }
+    }
     S.forEach(x=>{
       const full=(x.a+x.b+x.c+(x.k||"")+(window.map[x.a]?window.map[x.a].toString():"")).toLowerCase().replace(/\s+/g,"");
       if(q&&!full.includes(q))return;
@@ -525,12 +585,12 @@ function draw(){
     const b=el("button","btn","+ Добавить пин");b.style.width="100%";b.style.marginBottom="10px";
     b.onclick=()=>{const a=prompt("Пин (X3-1):"),s=prompt("Лист:"),d=prompt("Описание:");if(a&&d){P.unshift({a:a,b:s||"Общее",c:d});localStorage.setItem("hp_p2",JSON.stringify(P));draw()}};
     app.appendChild(b);
-    P.forEach(x=>{if(!q||(x.a+x.b+x.c).toLowerCase().replace(/\s+/g,"").includes(q)){const c=el("div","card");c.append(el("span","pin",x.a),el("span","tag",x.b),el("div","desc",x.c));app.appendChild(c)}});
+    P.forEach(x=>{if(!q||toLat(x.a+x.b+x.c).replace(/[\s\-_]+/g,"").includes(q)){const c=el("div","card");c.append(el("span","pin",x.a),el("span","tag",x.b),el("div","desc",x.c));app.appendChild(c)}});
   }else if(tab==="g"){
     const b=el("button","btn","+ Добавить ошибку");b.style.width="100%";b.style.marginBottom="10px";
     b.onclick=()=>{const a=prompt("Проблема:"),s=prompt("Лист:"),d=prompt("Решение:");if(a&&d){G.unshift({a:a,b:s||"Общее",c:d});localStorage.setItem("hp_g2",JSON.stringify(G));draw()}};
     app.appendChild(b);
-    G.forEach(x=>{if(!q||(x.a+x.b+x.c).toLowerCase().replace(/\s+/g,"").includes(q)){const c=el("div","card");c.append(el("b","",x.a+" "),el("span","tag",x.b),el("div","desc",x.c));app.appendChild(c)}});
+    G.forEach(x=>{if(!q||toLat(x.a+x.b+x.c).replace(/[\s\-_]+/g,"").includes(q)){const c=el("div","card");c.append(el("b","",x.a+" "),el("span","tag",x.b),el("div","desc",x.c));app.appendChild(c)}});
   }else if(tab==="i"){
     const box=el("div","card");
     box.append(el("b","","🤖 Супер-ИИ Диагност Hencon P1402"),el("div","desc","Выберите узел в шкафу, введите первые буквы проблемы или код SPN:"));
@@ -566,7 +626,7 @@ function draw(){
     };
 
     const qrow=el("div","btns");qrow.style.flexWrap="wrap";
-    ["🛑 E-STOP корзины","🕹️ Джойстики","🧲 Датчики","🚨 Вывоз / Обход КЗ","Не заводится","Не едет","Нет CAN","Orica"].forEach(sym=>{
+    ["📋 Порядок в шкафу","🛑 E-STOP корзины","🕹️ Джойстики","🧲 Датчики","🚨 Вывоз / Обход КЗ","Не заводится","Не едет","Нет CAN","Orica"].forEach(sym=>{
       const sb=el("button","btn b2",sym);sb.style.flex="none";sb.style.marginTop="4px";sb.onclick=()=>askAI(sym);qrow.appendChild(sb);
     });
     box.appendChild(qrow);
@@ -604,7 +664,7 @@ const sugBox=el("div","btns");
 const goBtn=el("button","btn","🔍 Найти решение и обход");
 goBtn.style.width="100%";goBtn.style.marginTop="8px";
 const ans=el("div","");ans.style.marginTop="12px";const hints=[
-  "Сгорел предохранитель / выбивает пред","Не едет (нет хода вперед / назад)",
+  "Порядок предов, реле и клемм в шкафу","Сгорел предохранитель / выбивает пред","Уничтожен шкаф на прицепе (отпалка / взрыв) — выгнать машину","Оторван домкрат (аутригер) — обход датчиков и выезд","Разбита стрела / отбивает рычаги — сложить и уехать","Не едет (нет хода вперед / назад)",
   "Не заводится двигатель Deutz",
   "Пропало питание / погасла панель",
   "Аварийная кнопка по корзине (S102)",
@@ -650,8 +710,34 @@ function askAI(txt){
     [/пизд\w*|ху[йяеи]\w*|бл[яе]\w*|еб[аоуы]\w*|сук\w*|нах\w*|заеб\w*|хрен\w*|дерьм\w*|говн\w*/g," "]
   ];
   slang.forEach(pair=>{s=s.replace(pair[0],pair[1])});
-  const norm=s.replace(/\s+/g,"");
+  const norm=toLat(s);
   const kb=[
+    {m:["уничтож","взрыв","отпал","разбит\w* шкаф","развороч","на жоп","задний шкаф","хвост"],
+     t:"💥 УНИЧТОЖЕН ШКАФ НА ПРИЦЕПЕ (ОТПАЛКА / ЗАКОЛ) — ВЫГНАТЬ НА БАЗУ ЗА 2 МИНУТЫ",l:["100","102","300","301"],
+     gp:"👴 Простыми словами: Задний шкаф разворотило, и все провода там лежат в коротыше на раму — поэтому передний компьютер заблокировал ход. Не лезь в разбитый задний шкаф! Выдерни разъём P10 на сочленении, вытащи преды прицепа F32 и F20 в переднем шкафу и кинь перемычку +24В на клемму X3 (пин A1:122) — машина сразу поедет на базу!",
+     st:[
+       "🚨 Шаг 1 (Отрезать разбитый хвост): Расстыкуй межсекционный разъём P10 между тягачом и прицепом, чтобы коротыш из разбитого шкафа не шёл вперёд.",
+       "🚨 Шаг 2 (Обесточить линии прицепа): В шкафу тягача выдерни преды F32 (10А), F20 (3А) и F10 (3А).",
+       "🚨 Шаг 3 (Разблокировать ход тягача): Возьми +24В с клеммы X1 (или верх F8/F12) через навесной пред 5А и подай на клемму X3 (пин A1:122 — возврат E-STOP).",
+       "🚨 Шаг 4 (Если не даёт скорость): Убедись, что стрела подвязана/сложена, и гони тягач с прицепом в ремонтную камеру!"
+     ]},
+    {m:["домкрат","оторва","аутригер","лап","опор","пород"],
+     t:"🦾 ОТОРВАН ДОМКРАТ (АУТРИГЕР) — ОБХОД ДАТЧИКОВ И ВЫЕЗД НА БАЗУ",l:["114","303","309"],
+     gp:"👴 Простыми словами: Домкрат оторвало или загнуло, его датчик разбит и не даёт сигнал «опора поднята» — компьютер не пускает машину. Выдерни пред датчиков (F106 на прицепе или F44 на тягаче), сдерни фишку с катушки разбитого домкрата на распределителе, подвяжи оторванную лапу цепью и кинь +24В на вход датчика в шкафу — машина поедет!",
+     st:[
+       "🚨 Шаг 1 (Отключить КЗ сбитого датчика): Выдерни F106 (20А в шкафу прицепа) или F44 (5А в шкафу тягача, если передняя опора) и откинь провода разбитого датчика на клемме X20/X22 (или X3).",
+       "🚨 Шаг 2 (Отключить клапан разбитой опоры): На распределителе аутригеров (Лист 309: Y61–Y68, Y95–Y96 или Лист 114: Y51, Y54) сдерни электрическую фишку с катушки оторванного цилиндра, чтобы масло не било в порванные РВД (при необходимости заглуши РВД).",
+       "🚨 Шаг 3 (Подвязать железо и обмануть комп): Подвяжи оторванный домкрат цепью/стропой. Подай +24В с X1 на A1:134/138 (тягач) или с X20 на входы блока A13 (прицеп) и выезжай на базу!"
+     ]},
+    {m:["отбива","отдач","медленно","не поднима","сложить корзин","сложить машин","выгнать","катушек","фишки"],
+     t:"🚨 ЭКСТРЕННО СЛОЖИТЬ КОРЗИНУ И ВЫГНАТЬ МАШИНУ (КЗ ЛЮЛЬКИ / ОТДАЧА В РЫЧАГИ)",l:["307","308","309","300"],
+     gp:"👴 Простыми словами: Из-за коротыша по CAN на люльку блок A14 сошёл с ума и держит клапаны запертыми — поэтому масло бьёт отдачей в рычаги, а корзина не идёт. Не ищи коротыш в горе! Отключи питание люльки, сдерни фишки с катушек клапанов стрелы (Y57–Y60), сложи стрелу ручными дублёрами на распределителе (или +24В напрямую на катушку) и гони машину на базу!",
+     st:[
+       "🚨 Шаг 1 (Отсечь КЗ люльки): В шкафу прицепа выдерни пред F111 (5А, питание корзины) и F102 (15А Orica), чтобы КЗ наверху не вешало блок A14.",
+       "🚨 Шаг 2 (Снять фишки с катушек): На распределителе стрелы (Лист 308) сдерни электрические фишки с катушек Y57 (подъём), Y58 (телескоп), Y59 (поворот) и Y60 (наклон люльки), чтобы электрика не запирала золотники и не било в рычаги.",
+       "🚨 Шаг 3 (Сложить вручную / напрямую): Нажимай механические дублёры золотников на распределителе PVG (либо подай +24В с X20 напрямую на снятую катушку втягивания/опускания), чтобы уложить корзину в транспорт.",
+       "🚨 Шаг 4 (Выгнать на базу): Если после укладки комп режет ход — кинь +24В с X20 на вход датчика сложенной стрелы (A14:B3 / E3) или откинь P10 и подай +24В с X1 на X3 (A1:122) и выезжай в рембазу!"
+     ]},
     {m:["сгорел","выбивает","пред","предохранит","коротыш"],
      t:"⚡ СГОРЕЛ / ВЫБИВАЕТ ПРЕДОХРАНИТЕЛЬ (ОБЩИЙ АЛГОРИТМ ПОИСКА КЗ)",l:["100","102","300","301"],
      gp:"👴 Простыми словами: Если предохранитель перегорает сразу при вставке — провод после него лёг на железную раму (короткое замыкание). Если сгорает только при нажатии кнопки или повороте ключа — виноват тот узел, который в этот момент включается. Нажми на нужный номер предохранителя на жёлтой панели выше — я скажу, за что именно он отвечает!",
@@ -769,7 +855,7 @@ function askAI(txt){
     "r25":{n:"R25 (2.2 кОм) — Резистор датчика уровня воды B65",p:"Стоит в цепи датчика уровня воды на прицепе.",k:"Передаёт сигнал уровня воды B65 на вход A14:A3 (Лист 303).",o:"Обмануть: при обрыве просто не показывает уровень воды."},
     "r26":{n:"R26 — Резистор датчика поворота стрелы B25",p:"Стоит в цепи потенциометра поворота стрелы.",k:"Передаёт угол поворота B25 на входы блока прицепа A13:D4 / C4 (Лист 304).",o:"Обмануть: при обрыве B25/R26 использовать ручное управление на распределителе PVG."}
   };
-  const rkKey=norm.match(/^(k\d+|d\d+|r\d+)/);
+  const rkKey=toLat(norm).match(/(k\d+|d\d+|r\d+)/);
   if(rkKey && rkMap[rkKey[0]]){
     const rd=rkMap[rkKey[0]];
     const card=el("div","card");card.style.borderColor="#f59e0b";
@@ -785,7 +871,98 @@ function askAI(txt){
     });
     showPop(fd.n,card);return;
   }
-  const fKey=norm.match(/^f\d+/);
+          if(/(порядок|перепутал|подоставал|где\s*что|как\s*стоят|номинал|расположен|таблиц\w* пред)/i.test(raw)){
+    const oTxt="📋 ПОЛНЫЙ ПОРЯДОК ЭЛЕМЕНТОВ В ШКАФУ ТЯГАЧА (СЛЕВА НАПРАВО):\n\n1️⃣ ВЕРХНИЙ РЯД — РЕЛЕ:\n• Слева направо: K10 (печка) ➔ K13 (конд.) ➔ K14 (дворн.1) ➔ K15 (дворн.2) ➔ K16 (омыват.) ➔ K17 (гидр.Y1) ➔ K18 (смазка) ➔ K23 (пер.свет) ➔ K24 (зад.свет) ➔ K25 (ближн.) ➔ K26 (Deutz) ➔ K30–K35 (сигнал/дальн.).\n• Справа у блока EMR: K1 (пуск), K2 (насос M1), K3 (стартер), K22/K27/K29 (логика).\n\n2️⃣ СРЕДНИЙ РЯД — ТОЧНЫЕ НОМИНАЛЫ ПРЕДОХРАНИТЕЛЕЙ:\n• F1: 3А | F2: 30А | F3: 30А | F4: 20А | F5: 3А | F6: 30А\n• F7: 10А | F8: 10А | F9: 10А | F10: 3А | F12: 10А | F13: 5А\n• F14: 3А | F15: 3А | F17: 3А | F18: 10А | F19: 20А | F20: 3А\n• F25: 3А | F26: 5А | F27: 3А | F28: 3А | F29: 3А | F30: 3А\n• F32: 10А | F37: 25А | F38: 5А | F40: 3А | F44: 5А | F46: 3А\n• F48: 30А | F50: 5А | F51: 7.5А\n\n3️⃣ НИЖНИЙ РЯД — КЛЕММНЫЕ РЕЙКИ И ДИОДЫ:\n• Слева направо: X1 (+24В пост.) ➔ X2 (масса GND) ➔ X3 (+15 на X3-1, стопы и датчики) ➔ X4 (Deutz / печка) ➔ X5 (клапаны и диоды D1–D6, резистор R1 470 Ом) ➔ X6 (приборка).\n\n4️⃣ ШКАФ ПРИЦЕПА (НОМИНАЛЫ ПРЕДОВ):\n• F100: 7.5А | F101: 5А | F102: 15А (Orica) | F105: 5А | F106: 20А | F108: 5А | F109: 3А | F111: 5А.\n• Клеммы прицепа: X20 (+24В / Orica 24V+) ➔ X21 (масса GND) ➔ X22 (сигналы датчиков, клапанов и Orica STOP/LS).\n• Реле прицепа: K12 (клапаны PVG), K101 (фары), K102 (маяк), K103/K104 (сигн. стрелы), K105 (перегруз B15), K106 (сирена).";    const card=el("div","card");card.style.borderColor="#f59e0b";
+    card.append(el("b","","📋 Шпаргалка: Порядок реле, предов и клемм в шкафу"));
+    const spk=el("button","btn b2","🔊 Озвучить порядок");spk.style.width="100%";spk.style.margin="6px 0";
+    spk.onclick=()=>{if(!("speechSynthesis" in window))return;if(window.speechSynthesis.speaking){window.speechSynthesis.cancel();spk.textContent="🔊 Озвучить порядок";return}const u=new SpeechSynthesisUtterance("Верхний ряд слева направо: реле К10, К13, К14, К15, К16, К17, К18, К23, К24, К25, К26. Справа у блока двигателя: К1, К2, К3 стартер. Нижний ряд клеммников слева направо: Икс-1 плюс 24 вольта, Икс-2 масса, Икс-3 зажигание и стопы, Икс-4 двигатель, Икс-5 клапаны и диоды Д1–Д6, Икс-6 приборка.");u.lang="ru-RU";u.onend=()=>{spk.textContent="🔊 Озвучить порядок"};spk.textContent="⏹️ Остановить голос";window.speechSynthesis.speak(u)};
+    card.appendChild(spk);
+    const boxD=el("div","desc",oTxt);
+    boxD.style.background="#0f172a";boxD.style.padding="10px";boxD.style.borderRadius="8px";boxD.style.border="1px solid #334155";boxD.style.color="#e2e8f0";
+    card.appendChild(boxD);
+    showPop("📋 Порядок в шкафу Hencon P1402",card);return;
+  }
+  if(/(реле|донор|забер|постав|вместо|сгорел\w* к|греет\w* к|окисл\w* к)/i.test(raw) && /(k\d+|к\d+|реле|донор|вместо)/i.test(raw)){
+    const lat=toLat(raw);
+    const badDonor=/(k22|k26|k27|k29|k3(?!0|1|3|5)|k17)/.test(lat);
+    const goodDonor=/(k10(?!1|2|3|4|5|6)|k13|k14|k15|k16|k18|k24|k31|k33|k35|k101|k102|k106)/.test(lat);
+    let ok=true,dTxt="";
+    if(badDonor){
+      ok=false;
+      dTxt="❌ НЕТ! ЭТО РЕЛЕ СНИМАТЬ НЕЛЬЗЯ — МАШИНА ВСТАНЕТ!\n\n• Реле K26, K3, K22, K27, K29 и K17 отвечают за запуск Deutz, удержание питания контроллера A1 и рабочую гидравлику.\n\n✅ ОТКУДА СНЯТЬ БЕЗОПАСНОГО ДОНОРА В ШКАФУ ТЯГАЧА:\n1. K10 (печка, Лист 107) или K13 (кондиционер, Лист 107) — идеальные доноры, на езду вообще не влияют!\n2. K18 (центральная смазка, Лист 113) или K16 (омыватель, Лист 109).\n3. K24 (задний свет) или K35 (дальний свет) — если передние фары K23/K25 остаются.\n\n✅ ЕСЛИ НУЖНО РЕЛЕ В ШКАФУ ПРИЦЕПА (вместо K12 на стрелу):\n• Снимай K101 (фары прицепа), K102 (маяк) или K106 (сирена).";
+    }else if(goodDonor){
+      ok=true;
+      dTxt="✅ ДА, ОТЛИЧНЫЙ ВЫБОР! СМЕЛО ЗАБИРАЙ ЭТО РЕЛЕ!\n\n• Выбранное тобой реле (K10, K13, K14–K16, K18, K24, K35 или K101/K102/K106) — стандартное 24VDC и вообще не влияет на двигатель и гидравлику хода.\n• Снимай его и ставь вместо сгоревшего K1 / K26 / K3 / K12 — машина заведётся и спокойно доедет до камеры ремонта!";
+    }else{
+      ok=true;
+      dTxt="✅ ПОДБОР РЕЛЕ-ДОНОРА ДЛЯ ВЫЕЗДА ИЗ ЗАБОЯ (24VDC):\n\n1. В ШКАФУ ТЯГАЧА (вместо сгоревшего K1, K26, K3, K2):\n• Смело забирай K10 (печка), K13 (кондиционер), K18 (смазка) или K16 (омыватель) — на езду никак не влияют!\n• Также можно взять K24 (задний рабочий свет) или K35 (дальний свет).\n\n2. В ШКАФУ ПРИЦЕПА (вместо K12 на клапаны стрелы):\n• Смело забирай K101 (фары прицепа), K102 (стробоскоп) или K106 (сирена).\n\n⚠️ НЕ ТРОГАЙ: K22, K27, K29 (удержание питания A1) и K17 (рабочая гидравлика).";
+    }    const card=el("div","card");card.style.borderColor=ok?"#22c55e":"#ef4444";
+    card.append(el("b","",ok?"✅ Подбор реле-донора":"❌ Опасный донор"));
+    const spk=el("button","btn b2","🔊 Озвучить ответ");spk.style.width="100%";spk.style.margin="6px 0";
+    spk.onclick=()=>{if(!("speechSynthesis" in window))return;if(window.speechSynthesis.speaking){window.speechSynthesis.cancel();spk.textContent="🔊 Озвучить ответ";return}const u=new SpeechSynthesisUtterance(dTxt.replace(/[✅❌⚠️•]/g,""));u.lang="ru-RU";u.onend=()=>{spk.textContent="🔊 Озвучить ответ"};spk.textContent="⏹️ Остановить голос";window.speechSynthesis.speak(u)};
+    card.appendChild(spk);
+    const boxD=el("div","desc",dTxt);
+    boxD.style.background=ok?"#052e16":"#2a1215";boxD.style.padding="10px";boxD.style.borderRadius="8px";boxD.style.border="1px solid "+(ok?"#22c55e":"#ef4444");boxD.style.color=ok?"#86efac":"#fca5a5";
+    card.appendChild(boxD);
+    showPop("🔌 Замена сгоревшего реле",card);return;
+  }
+  if(/(замкн|замыка|перемк|соедин|доста|кину|обманет|поедет\s*если|сработает|подключ)/i.test(raw)){
+    const lat=toLat(raw);
+    const hasX1=/(x1|f8|f12|постоян)/.test(lat);
+    const hasX3=/(x3(?!1)|122|стоп|estop|кнопк)/.test(lat);
+    const hasX31=/(x31|123|зажиг)/.test(lat);
+    const hasDoor=/(176|194|170|f29|двер|тормоз)/.test(lat);
+    const hasRel=/(k2|k3|k12|k26)/.test(lat);
+    const badX5=/(x5|x4|x6|x2(?!0|1|2))/.test(lat);
+    let ok=false,ansTxt="";
+    if(badX5){
+      ansTxt="❌ НЕТ, ТАК НЕ ОБМАНЕШЬ (И ОПАСНО ДЛЯ КОНТРОЛЛЕРА A1)!\n\n• Почему нельзя: Клеммник X5 — это выходы контроллера на клапаны гидравлики и диоды D1–D6 (а X2 — это вообще масса GND, будет КЗ!). Замыкание контактов на X5 не обманет стоповые кнопки и может спалить выходной каскад блока A1.\n\n✅ КАК СДЕЛАТЬ ПРАВИЛЬНО ПО СХЕМЕ:\n1. Для обхода стоповых кнопок (E-STOP): возьми +24В с клеммы X1 (или верх F8/F12) через пред 5А и подай на клемму X3 (пин A1:122) — предварительно откинув разъём P10, если КЗ сзади.\n2. Для обхода замка зажигания: подай +24В с X1 на нижний контакт X3-1 (пин A1:123).";
+    }else if(hasX1 && hasX3){
+      ok=true;ansTxt="✅ ДА, ТАК СРАБОТАЕТ! МАШИНА ОБМАНЕТСЯ И ПОЕДЕТ!\n\n• Подав +24В с X1 на клемму X3 (цепь пина A1:122), ты замкнёшь контур аварийных стопов.\n• ⚠️ Обязательно: 1) Ставь перемычку через навесной пред 5А; 2) Если КЗ сидит в прицепе/стреле — сначала отстегни разъём P10, иначе перемычка сгорит.";
+    }else if(hasX1 && hasX31){
+      ok=true;ansTxt="✅ ДА, ЗАЖИГАНИЕ ВКЛЮЧИТСЯ!\n\n• Подав +24В с X1 на нижний контакт клеммы X3-1 (пин A1:123 Ignition +15), ты полностью обманешь замок зажигания S6 и запитаешь логику Deutz и контроллера A1.";
+    }else if(hasX1 && hasDoor){
+      ok=true;ansTxt="✅ ДА, БЛОКИРОВКА ХОДА СНИМЕТСЯ, МАШИНА ПОЕДЕТ!\n\n• Подав +24В с X1 (через пред 5А) на входы дверей и тормоза (A1:176, 194, 170), ты обойдёшь сгоревший F29 или перебитый концевик двери.";
+    }else if(hasRel){
+      ok=true;ansTxt="✅ ДА, ЭТО ПРАВИЛЬНАЯ СИЛОВАЯ ПЕРЕМЫЧКА!\n\n• Замыкание силовых контактов 30–87 колодки реле (K2 — насос, K3 — стартер, K26 — Deutz, K12 — клапаны стрелы) подаст питание напрямую в обход управления.";
+    }else{
+      ansTxt="❌ НЕТ, В ЭТОМ МЕСТЕ МАШИНА НЕ ОБМАНЕТСЯ!\n\n• Чтобы обмануть машину по электрике Hencon P1402, нужно подавать +24В с постоянной шины X1 (через пред 5А) строго в контрольные точки:\n1. Обход аварийных стопов (E-STOP) ➔ на клемму X3 (пин A1:122) после отключения P10.\n2. Обход замка зажигания ➔ на нижний контакт клеммы X3-1 (пин A1:123).\n3. Обход дверей и тормоза ➔ на пины A1:176, A1:194, A1:170.";
+    }    const card=el("div","card");card.style.borderColor=ok?"#22c55e":"#ef4444";
+    card.append(el("b","",ok?"✅ Проверка перемычки: ВЕРНО":"❌ Проверка перемычки: ОШИБКА"));
+    const spk=el("button","btn b2","🔊 Озвучить ответ");spk.style.width="100%";spk.style.margin="6px 0";
+    spk.onclick=()=>{if(!("speechSynthesis" in window))return;if(window.speechSynthesis.speaking){window.speechSynthesis.cancel();spk.textContent="🔊 Озвучить ответ";return}const u=new SpeechSynthesisUtterance(ansTxt.replace(/[✅❌⚠️•]/g,""));u.lang="ru-RU";u.onend=()=>{spk.textContent="🔊 Озвучить ответ"};spk.textContent="⏹️ Остановить голос";window.speechSynthesis.speak(u)};
+    card.appendChild(spk);
+    const boxD=el("div","desc",ansTxt);
+    boxD.style.background=ok?"#052e16":"#2a1215";boxD.style.padding="10px";boxD.style.borderRadius="8px";boxD.style.border="1px solid "+(ok?"#22c55e":"#ef4444");boxD.style.color=ok?"#86efac":"#fca5a5";
+    card.appendChild(boxD);
+    showPop("🧠 Проверка твоей идеи обхода",card);return;
+  }
+  const wm2=toLat(norm).match(/^x(1|2|3|4|5|6|20|21|22|30|32|33)(\d*)$/);
+  if(wm2){
+    const g=wm2[1];
+    const xMap={
+      "1":{t:"Клеммник X1 (Шкаф тягача — Постоянный плюс +24В / +30)",d:"Силовая плюсовая рейка шкафа тягача. Отсюда раздаётся +24В на предохранители F1–F48, фары, замок S6 и перемычки аварийного обхода.",l:["100","102","103","104"]},
+      "2":{t:"Клеммник X2 (Шкаф тягача — Общая масса GND / Минус)",d:"Минусовая клеммная рейка шкафа тягача. Сюда сходятся минусы катушек реле K1–K35, датчиков и контроллера A1.",l:["100","102","108","109"]},
+      "3":{t:"Клеммник X3 (Шкаф тягача — Зажигание +15, Стопы E-STOP и Датчики)",d:"Главная сигнальная рейка тягача: X3-1 (+15 от замка S6 на A1:123), контур стопов (A1:122), двери S5/S10, тормоз B3 и датчики опор B55/B56.",l:["100","106","112","114"]},
+      "4":{t:"Клеммник X4 (Шкаф тягача — Двигатель Deutz EMR-3 и Отопитель)",d:"Промежуточная рейка жгута двигателя Deutz (блок G5), реле K26 и системы отопления/кондиционера.",l:["101","107"]},
+      "5":{t:"Клеммник X5 (Шкаф тягача — Клапаны гидравлики, Диоды D1–D6 и Исполнители)",d:"Выходная рейка на гидроклапаны хода Y10–Y15, рулевого Y74/Y75, рабочей гидравлики, дворники и диодную сборку D1–D6.",l:["100","109","112","113","114"]},
+      "6":{t:"Клеммник X6 (Шкаф тягача — Приборная панель, Пульты A57/A58 и Дисплей A20)",d:"Рейка питания и сигналов приборной панели (F38 5А), зуммера H48 и дисплея DCUM A20.",l:["108","110"]},
+      "20":{t:"Клеммник X20 (Шкаф прицепа — Питание +24В / +15 Trailer)",d:"Плюсовая рейка шкафа прицепа (через разъём P10 от F32 10А / F20 3А). Питает блоки A12–A14, датчики и Orica 24V+.",l:["301","303","306","310"]},
+      "21":{t:"Клеммник X21 (Шкаф прицепа — Общая масса GND прицепа)",d:"Минусовая шина шкафа прицепа. Соединена с тягачом через разъём P10 и плетёнки массы Z5–Z8.",l:["300","301","305","309"]},
+      "22":{t:"Клеммник X22 (Шкаф прицепа — Сигналы датчиков, Клапанов и Стрелы)",d:"Сигнальная рейка шкафа прицепа: входы датчиков стрелы и опор (B52–B65), E-STOP прицепа и жилы в люльку.",l:["303","305","309","310"]},
+      "30":{t:"Клеммник X30 (Коробка в люльке — Питание и CAN 3 корзины)",d:"Распределительная коробка в рабочей корзине (люльке): питание +24В, джойстики B41/B42, пульт A62 и стоп S102.",l:["307","310"]},
+      "32":{t:"Клеммник X32 (Коробка в люльке — Линии модуля Orica)",d:"Клеммник зарядного модуля Orica в люльке: Orica STOP, Orica LS и резервные жилы.",l:["310"]},
+      "33":{t:"Клеммник X33 (Коробка в люльке — Датчики и свет корзины)",d:"Клеммник датчика перегруза B15, положения люльки B14, камеры Z1, маяка H59 и фар люльки.",l:["307"]}
+    };
+    const xi=xMap[g];
+    if(xi){
+      const card=el("div","card");card.style.borderColor="#38bdf8";
+      card.append(el("span","pin",raw.toUpperCase()),el("b","",xi.t),el("div","desc",xi.d));
+      const br=el("div","btns");xi.l.forEach(num=>{const o=S.find(z=>z.a===num);if(o){const b=el("button","btn","📐 Лист "+num);b.onclick=()=>openSvg(o);br.appendChild(b)}});
+      card.appendChild(br);showPop("🔌 Расшифровка провода "+raw.toUpperCase(),card);return;
+    }
+  }
+  const fKey=toLat(norm).match(/f\d+/);
   if(fKey && fMap[fKey[0]]){
     const fd=fMap[fKey[0]];
     const card=el("div","card");card.style.borderColor="#f59e0b";
@@ -833,7 +1010,7 @@ inp.onkeydown=e=>{if(e.key==="Enter")askAI()};
 box.append(inpRow,sugBox,goBtn,ans);
 app.appendChild(box);
 }else{
-  D.forEach(x=>{if(!q||(x.a+x.b).toLowerCase().replace(/\s+/g,"").includes(q)){const c=el("div","card");c.style.display="flex";c.style.justifyContent="space-between";const k=el("b","",x.a);k.style.color="#f59e0b";c.append(k,el("span","",x.b));app.appendChild(c)}});
+  D.forEach(x=>{if(!q||toLat(x.a+x.b).replace(/\s+/g,"").includes(q)){const c=el("div","card");c.style.display="flex";c.style.justifyContent="space-between";const k=el("b","",x.a);k.style.color="#f59e0b";c.append(k,el("span","",x.b));app.appendChild(c)}});
 }
 }
 const fl=el("div","");fl.style.cssText="display:none;position:fixed;inset:0;background:#fff;z-index:99;justify-content:center;align-items:flex-end;padding-bottom:40px";
@@ -848,5 +1025,108 @@ document.getElementById("bi").onclick=()=>go("i","bi");
 document.getElementById("bgbtn").onclick=()=>document.getElementById("upbg").click();
 document.getElementById("upbg").onchange=e=>{const f=e.target.files.item(0);if(!f)return;const r=new FileReader();r.onload=ev=>{shrink(ev.target.result,u=>{document.body.style.backgroundImage="linear-gradient(rgba(15,23,42,0.84),rgba(15,23,42,0.92)),url("+u+")";try{localStorage.setItem("hp_bg",u)}catch(err){}})};r.readAsDataURL(f)};
 const savedBg=localStorage.getItem("hp_bg");if(savedBg)document.body.style.backgroundImage="linear-gradient(rgba(15,23,42,0.84),rgba(15,23,42,0.92)),url("+savedBg+")";
-if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(w=>w.unregister()));}document.getElementById("q").oninput=draw;draw();
+if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(w=>w.unregister()));}document.getElementById("q").oninput=()=>{if(tab==="i"){tab="s";["bs","bp","bg","bd","bi"].forEach(i=>document.getElementById(i).className="");document.getElementById("bs").className="act"}draw()};draw();
 </script></body></html>
+<script>
+window.FLEET = { hencon1402: {
+  name: "Hencon P1402 (27/27)",
+  keep: "F1-F3, F12-F13, F25",
+  pull: "F15-F20, F30-F35, F40+",
+  can: "CAN0 (A1,A57,A58), CAN1 (G5,A20,J84) ~2.5V",
+  jmp: "Massa OFF -> sniat F15+ -> +24V (5A) na starter (N!)",
+  bars: new Array(
+    {n:"Podpitka", v:"22-30 bar"}, {n:"Hod", v:"350-420 bar"},
+    {n:"Ruchnik SAHR", v:"18-28 bar"}, {n:"Tormoz/Rul", v:"140/190 bar"},
+    {n:"Strela", v:"210-250 bar"}, {n:"Pilot", v:"25-35 bar"},
+    {n:"Maslo Deutz", v:"1.5/4.5 bar"}
+  )
+}};
+window.curMach = "hencon1402";
+window.SPN_DB = new Array(
+  {c:"SPN 852069", n:"KCUT3 Treyler net na CAN", s:"Otozhmi E-Stop treylera/korziny! Prover F19-F29."},
+  {c:"SPN 852067/68", n:"KCUT1/2 net na CAN", s:"Prover +24V na pult i CAN_H/L (~2.5V)."},
+  {c:"SPN 639", n:"Oshibka CAN J1939", s:"Zalit kabel CAN1 (G5,A20,J84)."},
+  {c:"SPN 100/110/111", n:"Maslo/Peregrev/OZh", s:"Na uklone poplavok OZh glushit DVS!"},
+  {c:"SPN 94/97/157", n:"Toplivo/Separator", s:"Sley vodu, prover F12/F13, +24V na MPROP."}
+);
+window.STPS = new Array(
+  {pt:"1.AKB", q:"V na AKB/masse:", pin:"(+) na vyhod massy; (-) na ramu.", fn:v=>v<21?"STOP: Net pitaniya AKB ili massa.":1},
+  {pt:"2.Shkaf", q:"V na vhode v shkaf:", pin:"(+) na shinu +24V; (-) na GND.", fn:v=>v<21?"STOP: Silovaya vstavka AKB.":1},
+  {pt:"3.Zamok", q:"V posle zamka/gl.rele:", pin:"(+) na 87 gl.rele; (-) na GND.", fn:v=>v<18?"STOP: Zamok ili gl.rele.":1},
+  {pt:"4.Predy", q:"V na F1-F3, F12, F13, F25:", pin:"(+) v tochki preda; (-) na GND.", fn:v=>v<18?"STOP: Sgorel pred EBU/topliva.":1},
+  {pt:"5.E-Stop", q:"V posle E-Stop shassi:", pin:"Klemmniki X1-X6; (-) na GND.", fn:v=>v<18?"STOP: Nazhat E-Stop shassi!":1},
+  {pt:"6.Treyler", q:"V na razyome shassi->treyler:", pin:"Razyom na rame (F/K); (-) na ramu.", fn:v=>v<18?"STOP: Perebit zhgut na rame.":1},
+  {pt:"7.Korzina", q:"V posle E-Stop korziny:", pin:"(+) POSLE gribka na KCUT; (-) na minus.", fn:v=>v<18?"STOP: E-Stop korziny rubit KCUT!":1},
+  {pt:"8.KCUT", q:"V na razyome KCUT1/2/3:", pin:"Piny Vbb/+24V pulta; (-) na GND.", fn:v=>v<18?"STOP: Net pitaniya KCUT.":1},
+  {pt:"9.Obratka", q:"V vozvrata petli v shkaf:", pin:"Klemmnik X1-X6 na A1; (-) na GND.", fn:v=>v<18?"STOP: OBRYV OBRATKI! Kin +24V (5A)!":1},
+  {pt:"10.CAN", q:"V na CAN_H/L (~2.5V):", pin:"Razyom A1/A57/A20; (-) na GND.", fn:v=>(v<1.5||v>3.5)?"STOP: ZALIT CAN!":1},
+  {pt:"11.Konceviki", q:"V N KPP, dveri, opor:", pin:"Klemmniki X20-X33; (-) na GND.", fn:v<18?"STOP: Net N/dveri/opor.":1},
+  {pt:"12.Klapan", q:"V na fishke klapana/rele:", pin:"Fishka solenoida; (-) na ramu.", fn:v<18?"STOP: Net vyhoda s bloka.":1},
+  {pt:"13.Massa kat.", q:"Magnit (24=da, 0=net):", pin:"Ommetr: minus na ramu (0 Om!).", fn:v<10?"STOP: Obryv massy katushki!":1},
+  {pt:"14.Bar", q:"Davlenie (bar) ili 25:", pin:"Port MiniMess na bloke SAHR.", fn:v<16?"STOP: Nizkie bar (<16)!":"OK: Vsyo v norme!"}
+);
+</script>
+<script>
+window.openStepUI = box => {
+  const steps = window.STPS; let i = 0;
+  const draw = () => {
+    const s = steps.slice(i, i+1).pop();
+    const map = steps.map((x,k) => `<span data-k="${k}" style="cursor:pointer;color:${k<i?'#7ee787':k===i?'#d2a8ff':'#8b949e'}">${k<i?'[OK]':k===i?'>>':'*'}${x.pt}</span>`).join(" -> ");
+    box.innerHTML = `<div class="card"><b style="color:#d2a8ff">TRASSIROVKA (${i+1}/${steps.length})</b><div style="font-size:11px;margin:4px 0">${map}</div><b>${s.q}</b><div style="color:#7ee787;font-size:12px;margin:4px 0">${s.pin}</div><input id="sv" type="number" step="0.1" placeholder="Cifra" style="width:90px;padding:4px"> <button id="sb" class="btn b2">Dalee</button> <button id="so" class="btn b2">Norma</button><div id="sr" style="color:#ffa657;font-weight:bold;margin-top:4px"></div></div>`;
+    box.querySelectorAll("span").forEach(p => p.onclick = () => { i = +p.dataset.k; draw(); });
+    box.querySelector("#so").onclick = () => { if (i < steps.length - 1) { i++; draw(); } };
+    box.querySelector("#sb").onclick = () => { const v = parseFloat(box.querySelector("#sv").value); if (isNaN(v)) return; const r = s.fn(v); if (r === 1 && i < steps.length - 1) { i++; draw(); } else if (r !== 1) box.querySelector("#sr").textContent = r; };
+  }; draw();
+};
+window.openBarUI = box => {
+  const m = Reflect.get(FLEET, curMach);
+  box.innerHTML = `<div class="card"><b style="color:#79c0ff">BAR (${m.name})</b>` + m.bars.map(r => `<div><b>${r.n}:</b> <span style="color:#7ee787">${r.v}</span></div>`).join("") + `</div>`;
+};
+window.openWatUI = box => {
+  const m = Reflect.get(FLEET, curMach);
+  box.innerHTML = `<div class="card"><b style="color:#ff7b72">VODA / KZ (${m.name})</b><div style="color:#7ee787">OSTAVIT: ${m.keep}</div><div style="color:#ffa657">VYDERNUT: ${m.pull}</div><div>${m.can}<br>${m.jmp}</div></div>`;
+};
+window.openSpnUI = box => {
+  box.innerHTML = `<div class="card"><b style="color:#79c0ff">SPN</b><input id="sq" placeholder="Kod (852069)..." style="width:100%;padding:4px;margin:4px 0"><div id="sl" style="max-height:200px;overflow:auto;font-size:12px"></div></div>`;
+  const dr = q => { box.querySelector("#sl").innerHTML = SPN_DB.filter(x => !q || x.c.toLowerCase().includes(q) || x.n.toLowerCase().includes(q)).map(x => `<div style="border-top:1px solid #30363d;padding:3px 0"><b style="color:#ff7b72">${x.c}</b> ${x.n}<br><span style="color:#7ee787">${x.s}</span></div>`).join(""); };
+  dr(""); box.querySelector("#sq").oninput = e => dr(e.target.value.toLowerCase());
+};
+setInterval(() => {
+  const lb = Array.from(document.querySelectorAll("button")).find(b => b.textContent.indexOf("4-20") >= 0);
+  if (!lb || lb.parentElement.dataset.pro) return;
+  const r = lb.parentElement; r.dataset.pro = "1";
+  const box = document.createElement("div"); box.style.marginTop = "6px"; r.parentElement.insertBefore(box, r.nextSibling);
+  const sel = document.createElement("select"); sel.style.cssText = "background:#0d1117;color:#58a6ff;font-weight:bold;border:1px solid #30363d;border-radius:6px;padding:4px";
+  Object.keys(FLEET).forEach(k => { const o = document.createElement("option"); o.value = k; o.textContent = Reflect.get(FLEET, k).name; sel.appendChild(o); });
+  sel.onchange = () => { window.curMach = sel.value; box.innerHTML = ""; }; r.insertBefore(sel, r.firstChild);
+  const add = (t, fn) => { const b = document.createElement("button"); b.className = "btn b2"; b.textContent = t; b.onclick = () => fn(box); r.insertBefore(b, lb); };
+  add("Poshagovo", openStepUI); add("Bar", openBarUI); add("Voda/KZ", openWatUI); add("SPN", openSpnUI);
+}, 400);
+</script>
+<script>
+window.calcHSF=(hex,isFac)=>{const c=hex.trim().toUpperCase().split(" ").join("");if(!c)return"ERR";const rev=c.split("").reverse().join("");const v=BigInt("0x"+rev);const bStr=v.toString(2).padStart(36,"0").split("").reverse().join("");const map=(isFac?"3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12,19,18,17,16,23,22,21,20,27,26,25,24,31,30,29,28":"7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8,23,22,21,20,19,18,17,16,31,30,29,28,27,26,25,24").split(",");let out="";for(let i=0;i<32;i++){const idx=Number(map.slice(i,i+1).pop());out+=bStr.slice(idx,idx+1);}const num=parseInt(out,2)^Number(isFac?0x5C383913:0x38382293);return(num>>>0).toString(16).toUpperCase().padStart(8,"0")};window.openKeyUI = box => {
+  box.innerHTML = `<div class="card" style="border-color:#f0883e">` +
+    `<b style="color:#ffa657">KEYGEN SERVICE / FACTORY (HSF)</b>` +
+    `<div style="margin:6px 0;display:flex;gap:10px">` +
+    `<label><input type="radio" name="klvl" value="0" checked> Service (Slesar)</label>` +
+    `<label><input type="radio" name="klvl" value="1"> Factory (Inzhener)</label></div>` +
+    `<input id="kinp" placeholder="Kod s mashiny (HEX 0-9, A-F)" style="width:180px;padding:6px;text-transform:uppercase"> ` +
+    `<button id="kbtn" class="btn b2">Get Code</button>` +
+    `<div id="kout" style="margin-top:8px;font-size:18px;font-weight:bold;color:#7ee787;letter-spacing:2px"></div></div>`;
+  box.querySelector("#kbtn").onclick = () => {
+    const isFac = box.querySelector("input:checked").value === "1";
+    const ans = window.calcHSF(box.querySelector("#kinp").value, isFac);
+    box.querySelector("#kout").textContent = ans;
+  };
+};
+setInterval(() => {
+  const b = Array.from(document.querySelectorAll("button")).find(x => x.className === "btn b2");
+  if (!b || b.parentElement.dataset.kg) return;
+  b.parentElement.dataset.kg = 1;
+  const box = document.createElement("div"); box.style.marginTop = "6px";
+  b.parentElement.parentElement.insertBefore(box, b.parentElement.nextSibling);
+  const k = document.createElement("button"); k.className = "btn b2"; k.textContent = "KeyGen";
+  k.onclick = () => window.openKeyUI(box);
+  b.parentElement.insertBefore(k, b);
+}, 400);
+</script>
