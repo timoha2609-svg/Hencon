@@ -628,7 +628,14 @@ inp.oninput=()=>{
     b.onclick=()=>{inp.value=h;sugBox.textContent="";askAI(h)};
     sugBox.appendChild(b);
   });
-};function askAI(txt){
+};  function showPop(title,node){
+    document.getElementById("mt").textContent=title;
+    const mb=document.getElementById("mb");mb.textContent="";
+    node.style.width="100%";node.style.maxWidth="640px";node.style.boxSizing="border-box";
+    mb.appendChild(node);
+    document.getElementById("mod").className="open";
+  }
+function askAI(txt){
   const raw=(txt||inp.value).trim();if(!raw)return;
   inp.value=raw;sugBox.textContent="";ans.textContent="";
   let s=raw.toLowerCase().replace(/fu\s*(\d+)/g,"f$1").replace(/ф\s*(\d+)/g,"f$1");
@@ -776,7 +783,7 @@ inp.oninput=()=>{
       if(idx===2)r.style.color="#fca5a5";
       card.appendChild(r);
     });
-    ans.appendChild(card);return;
+    showPop(fd.n,card);return;
   }
   const fKey=norm.match(/^f\d+/);
   if(fKey && fMap[fKey]){
@@ -792,7 +799,7 @@ inp.oninput=()=>{
       if(idx===2)r.style.color="#fca5a5";
       card.appendChild(r);
     });
-    ans.appendChild(card);return;
+    showPop(fd.n,card);return;
   }
   const hit=kb.find(x=>x.m.some(w=>norm.includes(w.replace(/\s+/g,""))||s.includes(w)));
   const card=el("div","card");card.style.borderColor="#f59e0b";
@@ -819,7 +826,7 @@ inp.oninput=()=>{
     card.append(el("b","","Найдено по базе 27 листов:"),el("div","desc",found.length?"Откройте нужный чертёж:":"Выберите узел выше или введите: не едет, вывоз, стрела."));
     const brow=el("div","btns");found.slice(0,5).forEach(o=>{const b=el("button","btn","📐 Лист "+o.a);b.onclick=()=>openSvg(o);brow.appendChild(b)});card.appendChild(brow);
   }
-  ans.appendChild(card);
+  showPop("🤖 Диагностика",card);
 }
 goBtn.onclick=()=>askAI();
 inp.onkeydown=e=>{if(e.key==="Enter")askAI()};
@@ -834,7 +841,7 @@ const flOff=el("button","btn","Выключить свет");flOff.style.cssText
 flOff.onclick=()=>fl.style.display="none";fl.appendChild(flOff);document.body.appendChild(fl);
 const flBtn=document.getElementById("flbtn");if(flBtn)flBtn.onclick=()=>fl.style.display="flex";
 document.getElementById("up").onchange=e=>{const f=e.target.files.item(0);if(!f)return;const r=new FileReader();r.onload=ev=>{shrink(ev.target.result,u=>{try{localStorage.setItem("hp_img_"+upId,u)}catch(err){}draw()})};r.readAsDataURL(f)};
-document.getElementById("cls").onclick=()=>document.getElementById("mod").className="";
+document.getElementById("cls").onclick=()=>{if("speechSynthesis" in window)window.speechSynthesis.cancel();document.getElementById("mod").className=""};
 document.getElementById("bs").onclick=()=>go("s","bs");document.getElementById("bp").onclick=()=>go("p","bp");
 document.getElementById("bg").onclick=()=>go("g","bg");document.getElementById("bd").onclick=()=>go("d","bd");
 document.getElementById("bi").onclick=()=>go("i","bi");
