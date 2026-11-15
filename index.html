@@ -3361,5 +3361,50 @@ window.renderHartingTable = function(q) {
   if (typeof draw === "function") draw();
 })();
 </script>
+<style>
+@media (max-width: 768px) {
+  .hdr-sub, header > div:nth-child(2) { display: none !important; }
+  #nav, .nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow: hidden !important;
+    justify-content: space-between !important;
+    padding: 4px 2px calc(6px + env(safe-area-inset-bottom)) 2px !important;
+    gap: 2px !important;
+  }
+  .nb {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    padding: 5px 1px !important;
+    font-size: 9px !important;
+    text-align: center !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+</style>
+<script>
+(function(){
+  var kg = document.querySelector('button[onclick*="openKeyGen"]');
+  if (kg && !document.getElementById("fs-btn")) {
+    var b = document.createElement("button");
+    b.id = "fs-btn";
+    b.className = "btn";
+    b.textContent = "⛶ Экран";
+    b.style.cssText = "border-color:#38bdf8;color:#38bdf8;margin-left:6px";
+    b.onclick = function() {
+      if (typeof window.toggleFullScr === "function") window.toggleFullScr();
+    };
+    kg.parentNode.insertBefore(b, kg.nextSibling);
+  }
+  if (window.innerWidth <= 768) {
+    var map = {"tab-s":"⚡Схемы","tab-p":"🔌Пины","tab-d":"⚠️Ошибки","tab-w":"📖Словарь","tab-e":"🚨Эвак","tab-a":"🤖ИИ","tab-c":"⚡Щит"};
+    Object.keys(map).forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.textContent = map[id];
+    });
+  }
+})();
+</script>
 </body>
 </html>
