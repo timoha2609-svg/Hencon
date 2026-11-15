@@ -75,6 +75,48 @@
   animation: none !important;
 }
 </style>
+<style>
+@media (max-width: 768px) {
+  header, .hdr { padding: 6px 8px !important; gap: 6px !important; }
+  header img, .hdr img { max-height: 22px !important; }
+  #hdr-rig-box { padding: 3px 6px !important; gap: 6px !important; flex: 1 1 auto; }
+  #hdr-rig-box svg { width: 92px !important; height: 32px !important; }
+  #funt-logo { padding: 3px 7px !important; margin-left: 0 !important; }
+  #funt-logo svg { width: 20px !important; height: 20px !important; }
+  #funt-logo div div:first-child { font-size: 13px !important; }
+
+  #nav, .nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    padding: 4px !important;
+    gap: 3px !important;
+  }
+  .nb {
+    flex: 1 0 auto !important;
+    padding: 6px 5px !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+  }
+
+  .sch-svg-box { padding: 6px !important; }
+  .sch-svg-box svg { min-width: 100% !important; width: 100% !important; }
+  .sch-svg-box .btn { padding: 4px 6px !important; font-size: 11px !important; }
+
+  #sch-el-info, #pin-insp {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 58px !important;
+    z-index: 9999 !important;
+    background: #0b1220 !important;
+    border: 2px solid #38bdf8 !important;
+    box-shadow: 0 -8px 25px rgba(0,0,0,0.92) !important;
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+}
+</style>
 </head>
 <body>
 <div class="top">
