@@ -77,45 +77,16 @@
 </style>
 <style>
 @media (max-width: 768px) {
-  header, .hdr { padding: 6px 8px !important; gap: 6px !important; }
-  header img, .hdr img { max-height: 22px !important; }
-  #hdr-rig-box { padding: 3px 6px !important; gap: 6px !important; flex: 1 1 auto; }
-  #hdr-rig-box svg { width: 92px !important; height: 32px !important; }
-  #funt-logo { padding: 3px 7px !important; margin-left: 0 !important; }
-  #funt-logo svg { width: 20px !important; height: 20px !important; }
-  #funt-logo div div:first-child { font-size: 13px !important; }
-
-  #nav, .nav {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    padding: 4px !important;
-    gap: 3px !important;
-  }
-  .nb {
-    flex: 1 0 auto !important;
-    padding: 6px 5px !important;
-    font-size: 10px !important;
-    white-space: nowrap !important;
-  }
-
-  .sch-svg-box { padding: 6px !important; }
-  .sch-svg-box svg { min-width: 100% !important; width: 100% !important; }
-  .sch-svg-box .btn { padding: 4px 6px !important; font-size: 11px !important; }
-
-  #sch-el-info, #pin-insp {
-    position: fixed !important;
-    left: 8px !important;
-    right: 8px !important;
-    bottom: 58px !important;
-    z-index: 9999 !important;
-    background: #0b1220 !important;
-    border: 2px solid #38bdf8 !important;
-    box-shadow: 0 -8px 25px rgba(0,0,0,0.92) !important;
-    max-height: 45vh;
-    overflow-y: auto;
-  }
+  input, select, textarea { font-size: 16px !important; min-height: 44px !important; }
+  button, .btn, .tab-btn { min-height: 42px !important; padding: 8px 12px !important; font-size: 13px !important; }
+  .sch-svg-box, .cab-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
+  .sch-svg-box svg, .cab-wrap svg { min-width: 740px !important; }
+  body { padding-bottom: calc(74px + env(safe-area-inset-bottom)) !important; }
+  nav, .bottom-nav, .tabs-bar { padding-bottom: calc(6px + env(safe-area-inset-bottom)) !important; }
 }
+</style>
+<style>
+button, .btn, .tab-btn, svg, .rel-box, .fuse-box, .term-box { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
 </style>
 </head>
 <body>
@@ -453,11 +424,11 @@ function draw() {
         return '\u003cdiv style="margin-bottom:8px;padding:8px;background:#0f172a;border-left:3px solid #34d399;border-radius:6px"\u003e\u003cdiv style="font-weight:700;color:#f8fafc;font-size:13px;margin-bottom:4px"\u003e' + tr.t + '\u003c/div\u003e\u003cdiv style="font-size:12px;color:#cbd5e1;line-height:1.45"\u003e' + tr.path + '\u003c/div\u003e\u003c/div\u003e';
       }).join('') + '\u003c/div\u003e';
   }
-    m.sheets.filter(s => !q || (s.n + s.b + s.t + s.c).toLowerCase().includes(q)).forEach(s => {
+    m.sheets.filter(s => !q || window.smartMatch(s.n+' '+s.b+' '+s.t+' '+s.c, q)).forEach(s => {
       app.innerHTML += `<div class="card"><span class="badge">Лист ${s.n} • ${s.b}</span><b>${s.t}</b><div class="desc">${s.c}</div><button class="btn" style="margin-top:8px;" onclick="openSheet('${s.n}')">Чертёж</button></div>`;
     });
   } else if (curTab === "p") { if (typeof window.renderA1Pinout === "function") app.innerHTML += window.renderA1Pinout(q); if (typeof window.renderHartingTable === "function") app.innerHTML += window.renderHartingTable(q);
-    m.pins.filter(p => !q || (p.p + p.b + p.c).toLowerCase().includes(q)).forEach(p => {
+    m.pins.filter(p => !q || window.smartMatch(p.p+' '+p.b+' '+p.c, q)).forEach(p => {
       app.innerHTML += `<div class="card" style="border-color:#38bdf844;"><span class="badge">${p.b}</span><b>${p.p}</b><div class="desc">${p.c}</div></div>`;
     });
   } else if (curTab === "d") { if (typeof window.renderDiagWizard === "function") app.innerHTML += window.renderDiagWizard();
@@ -1385,7 +1356,7 @@ function openCab() {
   var k3 = getIt(tpl.right.find(function(x){ return x.id === "K3"; }));
   var noteTxt = ov.notes ? ' • ' + ov.notes : '';
 
-  app.innerHTML = '<div class="cab-wrap">' +
+  if (typeof updateTabCounts === "function") updateTabCounts(); app.innerHTML = '<div class="cab-wrap">' +
     '<div><div style="font-weight:700;color:#38bdf8;font-size:15px">⚡ ' + tpl.title + '</div><div style="font-size:12px;color:#94a3b8">' + (m.name || curPlat) + noteTxt + '</div></div>' +
     '<div id="cab-inspector" class="cab-insp"><div style="color:#94a3b8;font-size:13px;padding-top:18px;text-align:center">👆 Наведите курсор или нажмите на любое <b>реле</b>, <b>предохранитель</b>, блок <b>BOSCH EMR</b> или <b>клемму</b>, чтобы увидеть номинал и цепь «Откуда ➔ Куда».</div></div>' +
     '<div class="cab-grid"><div class="cab-left">' +
@@ -1530,8 +1501,8 @@ window.openCab = function() {
   var plat = (typeof curPlat !== "undefined") ? curPlat : "P1402";
   var m = (typeof DB !== "undefined" && DB[plat]) ? DB[plat] : {name: plat};
   var hasTr = !!(window.TRAILER_TEMPLATES && window.TRAILER_TEMPLATES[plat]);
-  if (!hasTr) window.CAB_ZONE = "TUG";
-  var tpl = (window.CAB_ZONE === "TR" && hasTr) ? window.TRAILER_TEMPLATES[plat] : window.CABINET_TEMPLATES["HENCON_TUG_EMR3"];
+  if (!hasTr && window.CAB_ZONE === "TR") window.CAB_ZONE = "TUG";
+  var zones = window.getAllCabZones(plat); var curZ = zones.find(function(x){ return x.z === window.CAB_ZONE; }) || zones.at(0); var tpl = (curZ && curZ.tpl) ? curZ.tpl : window.CABINET_TEMPLATES["HENCON_TUG_EMR3"];
   var ov = (window.BOARD_CABINET_OVERRIDES && window.BOARD_CABINET_OVERRIDES[plat]) || {};
 
   function match(it) { return !q || [it.id, it.amp, it.name, it.from, it.to, it.note].join(" ").toLowerCase().indexOf(q) !== -1; }
@@ -1726,7 +1697,7 @@ window.CABINET_TEMPLATES["S105_TUG"] = {
     var plat = (typeof curPlat !== "undefined") ? curPlat : "P1402";
     var m = (typeof DB !== "undefined" && DB[plat]) ? DB[plat] : {name: plat};
     var hasTr = !!(window.TRAILER_TEMPLATES && window.TRAILER_TEMPLATES[plat]);
-    if (!hasTr) window.CAB_ZONE = "TUG";
+    if (!hasTr && window.CAB_ZONE === "TR") window.CAB_ZONE = "TUG";
     var tpl = window.getCabTpl(plat);
     var ov = (window.BOARD_CABINET_OVERRIDES && window.BOARD_CABINET_OVERRIDES[plat]) || {};
 
@@ -2315,7 +2286,7 @@ window.getAllCabZones = function(plat) {
 window.selCab = function(id) {
   var plat = (typeof curPlat !== "undefined") ? curPlat : "P1402";
   var zones = window.getAllCabZones(plat);
-  var curZ = zones.find(function(x){ return x.z === window.CAB_ZONE; }) || zones;
+  var curZ = zones.find(function(x){ return x.z === window.CAB_ZONE; }) || zones.at(0);
   var tpl = curZ.tpl;
   var ov = (window.BOARD_CABINET_OVERRIDES && window.BOARD_CABINET_OVERRIDES[plat]) || {};
   var all = tpl.relays.concat(tpl.fuses, tpl.right, tpl.terms, tpl.mega || []);
@@ -3265,146 +3236,1317 @@ window.renderHartingTable = function(q) {
 };
 </script>
 <script>
-(function(){
-  if (typeof DB === "undefined") return;
-
-  if (DB["P5033"]) {
-    DB["P5033"].errors = [
-      {b:"Стрела • Л. 119, 121", e:"Не работает стрела зарядника (нет реакции на джойстики)", c:"Проверить питание блока стрелы A12: преды F18 (5A, пин L1) и F60 (5A, пин K4), силовое питание выходов F19 (10A), реле PVG K40 (упр. пин A1 A12) и силовой пред F63 (5A)."},
-      {b:"AUTEC • Л. 101, 120", e:"Блокировка E-STOP или потеря связи с радиопультом AUTEC", c:"Если пульт выключен, разряжен или потерял связь с приёмником A77 (ID 100, пред F62 5A), реле K7 разрывает линию WEMR\\1–2 в общем шлейфе E-STOP на клеммнике X3."},
-      {b:"Orica • Л. 122, 123", e:"Не запускается зарядка или подача шланга Orica", c:"Проверить пред F32 (10A) и F14 (7.5A) на Orica Front Box в кабине, целостность 24-пинового разъёма Harting JT3/PT3 и приход сигналов Start (G1), Stop (F1), LS Line (D4) на блок A12."},
-      {b:"Прицеп • Л. 118, 126", e:"Нет связи с контроллером прицепа A11 (Node ID 11)", c:"Проверить преды F45 (15A) и F17 (20A) в шкафу тягача, 16-пиновый разъём Harting JT1 (пины 1–8), а также преды F70 (5A) и F80 (5A) в шкафу прицепа Encl. 3."},
-      {b:"E-STOP • Л. 101", e:"Не включается зажигание KL15 (не щёлкает реле K2)", c:"Проверить +24В на клемме X3-10 (пин 140 A1 MCUM). Шлейф идёт последовательно через 5 узлов: S100 (кабина) ➔ Orica Front Box ➔ K7 (AUTEC) ➔ JT1 (W11\\1–2, стоп прицепа S102) ➔ S104/S105 (шасси)."},
-      {b:"ДВС EMR-3 • Л. 102", e:"Двигатель Deutz не заводится или глохнет под нагрузкой", c:"Проверить реле K26 (преды F6 25A и F26 5A), шину CAN1 (J1939) до BOSCH EMR-3, наличие топлива и отсутствие активного сигнала пожаротушения FSS (пред F29 7.5A)."},
-      {b:"Ход • Л. 112", e:"Двигатель работает, но машина не едет (стоит на тормозе)", c:"Убедиться, что закрыты двери кабины, с реверса S5 приходит один сигнал (Вперёд/Назад) на A1 MCUM, снимается стояночный тормоз Y9 (пин 189) и исправна педаль газа B6."}
-    ];
+window.normTech = function(s) {
+  var m = {"\u0430":"a","\u0432":"b","\u0441":"c","\u0435":"e","\u043a":"k","\u043c":"m","\u043d":"h","\u043e":"o","\u0440":"p","\u0442":"t","\u0443":"y","\u0445":"x"};
+  return String(s||"").toLowerCase().replace(/[\u0430\u0432\u0441\u0435\u043a\u043c\u043d\u043e\u0440\u0442\u0443\u0445]/g, function(c){ return m[c]||c; });
+};
+window.smartMatch = function(hay, q) {
+  var qn = window.normTech(q).trim();
+  if (!qn) return true;
+  var hn = window.normTech(hay);
+  var hc = hn.replace(/[\s\-:./_\u2013\u2014]+/g, "");
+  var qc = qn.replace(/[\s\-:./_\u2013\u2014]+/g, "");
+  if (/^[x]\d+[-:.\s]\d+$/i.test(qn)) return hc.indexOf(qc) >= 0;
+  if (hc.indexOf(qc) >= 0) return true;
+  return qn.split(/\s+/).filter(Boolean).every(function(w){
+    var wc = w.replace(/[\s\-:./_\u2013\u2014]+/g, "");
+    return hn.indexOf(w) >= 0 || (wc && hc.indexOf(wc) >= 0);
+  });
+};
+window.addEventListener("load", function() {
+  if (typeof window.getAllCabZones === "function") {
+    var origZ = window.getAllCabZones;
+    window.getAllCabZones = function(plat) {
+      var zs = origZ(plat);
+      var m = (typeof DB === "object" && DB[plat]) ? DB[plat] : null;
+      if (m && Array.isArray(m.pins) && Array.isArray(zs) && zs.length) {
+        var extra = m.pins.filter(function(p){ return /^(X\d|JT|PT)/i.test(String(p.p||"").trim()); });
+        extra.forEach(function(p) {
+          var isTrl = /^(X1\d|X2\d|X3[1-9]|PT)/i.test(String(p.p||"").trim());
+          var z = (isTrl && zs.length > 1) ? zs[1] : zs[0];
+          if (z && Array.isArray(z.tpl.terms) && !z.tpl.terms.some(function(x){ return x.id === p.p; })) {
+            var parts = String(p.c||"").split("|");
+            z.tpl.terms.push({ id: p.p, name: p.b||"", from: parts[0]||"", to: parts[1]||"", note: p.c||"" });
+          }
+        });
+      }
+      return zs;
+    };
   }
+});
+</script>
+<script>
+(function(){
+  var pins1277 = [
+    { p: "X3-1 / X3-2", b: "Шлейф E-STOP кабины S100 (Л. 100)", c: "Верх: От F13 (5A) / S100 (W2\\4) | Низ: На S101 (W2\\5) — Цепь аварийного останова кабины" },
+    { p: "X3-3", b: "Шлейф E-STOP шасси S101 (Л. 100)", c: "Верх: От S101 | Низ: На S102 (W24\\Red) — Переход аварийного стопа к S102" },
+    { p: "X3-4 / X3-5", b: "Возврат E-STOP на A1 MCUM и реле K2 (Л. 100)", c: "Верх: От S102 (W24\\Red) | Низ: A1 пин 140 (Emergency stop active) + реле K2 (+15) — Перемычка +24В с X5-57 (F13) на X3-4 обходит E-STOP" },
+    { p: "X5-1", b: "Аварийный гидронасос M1 (Л. 100)", c: "Верх: От F1 (3A) / реле K1 | Низ: На насос M1 24VDC (WA1\\1) — Питание электронасоса эвакуации" },
+    { p: "X5-2", b: "Втягивающее стартера M8 (Л. 100)", c: "Верх: От реле стартера K1 пин 87 (F2 30A) | Низ: На стартер M8 DEUTZ (WB16\\Grey) — Управление пуском ДВС" },
+    { p: "X5-3", b: "Возбуждение генератора D+ (Л. 100)", c: "Верх: От A1 пин 102 (DOUT) и пин 115 (32V) | Низ: На генератор G3 клемма D+ (WB16\\Violet) — Контроль зарядки 28В" },
+    { p: "X5-5", b: "Силовое питание A1 MCUM (Л. 102)", c: "Верх: От предохранителя F6 (30A) | Низ: На A1 пины 201–206 (BAT+) и пин 246 (CPU) — Основное питание главного контроллера" },
+    { p: "X5-57", b: "Питание замка S8 и цепи E-STOP (+30) (Л. 100)", c: "Верх: От предохранителя F13 (5A) | Низ: На замок зажигания S8 пин 1 (W2\\1) и S100 — Источник +24В для аварийной перемычки на X3-4" },
+    { p: "X5-58 / X5-59", b: "Зажигание IGN ON (+15) и Glow (Л. 100)", c: "Верх: От замка S8 пины 3 и 2 | Низ: A1 пин 122 (IGN, X5-58) и пин 123 (Glow, X5-59)" },
+    { p: "X4-1..X4-9", b: "ЭБУ Deutz EMR-3 G5 и датчики B16, B18, B20 (Л. 101)", c: "Верх: F4 (25A), F26 (5A) и EMR-3 | Низ: X4-1 G5, X4-2/3 фильтр B20 (EMR 77), X4-4/5 вода B18 (EMR 63/64), X4-6..9 уровень ОЖ B16" },
+    { p: "X5-25..X5-33", b: "Педаль хода B6 и подрулевой реверс S5 (Л. 106)", c: "Верх: A1 пины 247/104/217/179 (B6) и 147/148/124 (S5) | Низ: Разъёмы JB6 и J5 — Без сигнала нейтрали X5-31 нет стартера" },
+    { p: "X5-80 / X5-81 / X5-82", b: "Клапаны хода заднего моста Y10, Y11, Y12 (Л. 112)", c: "Верх: A1 пины 180 (X5-80 Y10), 159 (X5-81 Y11), 183 (X5-82 Y12) | Низ: На катушки Y10, Y11, Y12 (WY11)" },
+    { p: "X5-83 / X5-84 / X5-85", b: "Клапаны хода переднего моста Y14, Y13, Y15 (Л. 112)", c: "Верх: A1 пины 153 (X5-83 Y14), 177 (X5-84 Y13), 156 (X5-85 Y15) | Низ: На катушки Y14 (WY14\\1), Y13 (WY14\\3), Y15 (WY14\\5)" },
+    { p: "X5-100..X5-111", b: "Тормоз SAHR Y9, разгрузка Y1, дифф. Y28/29 и датчик B7 (Л. 112)", c: "Верх: A1 пины 162 (Y1 X5-100), 165 (Y28/29 X5-101), 189 (Y9 X5-102), 155 (B7 X5-111) | Низ: На катушки Y1, Y28/29, Y9 и датчик B7" },
+    { p: "X6-2..X6-9", b: "Шины CAN0 (500k), CAN1 J1939 (250k) и CAN2 (125k) (Л. 07/101/102)", c: "Верх: Контроллер A1 MCUM | Низ: X6-2/3 (CAN0), X6-6/7 (CAN2), X6-8/9 (CAN1)" },
+    { p: "X18-2..X18-9", b: "Ввод E-STOP и CAN0 в шкаф прицепа от разъёма P10 (Л. 300/301)", c: "Верх: Разъём прицепа P10 пины 2, 3, 11, 12 | Низ: X20-47/48 (E-STOP) и пины C2/B2 блоков A12, A13, A14" },
+    { p: "X20-10..X20-19", b: "Питание контроллеров прицепа A12, A13, A14 (Л. 301)", c: "Верх: Преды F101 (5A), F125 (5A), F102-F104 (10A) | Низ: X20-10 (KL15), X20-16 (CPU), X20-15/18/19 (Supply IO)" },
+    { p: "X20-94", b: "Линия аварийного электронасоса прицепа/люльки (Л. 307 / 300)", c: "Верх: Переключатели S20/S22 (прицеп) и S21 (люлька, W25\\7) | Низ: Через P10 пин 1 (W11B\\1) на насос M1 в кабине" },
+    { p: "X20-150..X20-169", b: "Пропорциональные клапаны стрелы PVG Y57..Y60, Y68, Y100 (Л. 310/311)", c: "Верх: Блок A14 (Node +4) и реле K12 (F130 7.5A) | Низ: Через X25-25..31 на секции стрелы и люльки" },
+    { p: "X33-1..X33-30", b: "Клеммник люльки (3 - basket) и джойстики A69/A70 (Л. 308/309)", c: "Верх: Кабель стрелы W27 от X25 | Низ: S102 E-STOP (X33-1/2), S21 (X33-3/6), B35 (X33-7), пульт A64 (CAN0 X33-9/10), джойстики A69/A70 (X33-21..30)" },
+    { p: "X31 / X23", b: "Линия блока Oreca в люльке (Л. 312)", c: "Верх: Автомат F23 (CH1 8A, CH2-4 по 4A) -> X31-1..14 | Низ: Через X25-43..56 на клеммы люльки X23-1..14" }
+  ];
 
-  ["P1402", "P1277"].forEach(function(id){
-    if (DB[id] && Array.isArray(DB[id].errors)) {
-      var extra = [
-        {b:"CAN0 / CAN1 • Л. 05", e:"Ошибка связи по шине CAN (прочерки на дисплее A20)", c:"Выключить массу S1 и замерить сопротивление между CAN_H (пин 222) и CAN_L (пин 209): норма 60 Ом (два терминатора по 120 Ом). Проверить разъёмы дисплея A20 и ЭБУ BOSCH EMR-3."},
-        {b:"ДВС EMR-3 • SPN 100/110", e:"Аварийная остановка или ограничение мощности Deutz TCD2013", c:"Проверить уровень ОЖ (датчик B16 на пин 141 A1), температуру ОЖ (пин 127 A1), давление масла ДВС и питание ЭБУ через реле K26 (F4 25A / F26 5A)."},
-        {b:"Пожар FSS • Л. 105", e:"Ошибка системы пожаротушения A52 (обрыв или сработка)", c:"Проверить пред F30 (3A), питание блока A52 и эталонные резисторы контроля шлейфа R5–R7 (1 кОм) на пинах 110, 111 и 134 блока A1 MCUM."},
-        {b:"Зарядка АКБ • Л. 101", e:"Нет зарядки от генератора G3 (горит лампа АКБ)", c:"Проверить натяжение ремня, силовой провод B+ до мега-преда FuM (400A) и целостность резистора начального возбуждения R2 (471 Ом) на клемму D+ генератора."}
-      ];
-      extra.forEach(function(x){
-        if (!DB[id].errors.some(function(e){ return e.e === x.e; })) DB[id].errors.push(x);
+  var err1277 = [
+    {
+      b: "SOS ЭВАКУАЦИЯ • Выбивает F13 (5A) — КЗ в петле E-STOP (P1277 Л. 100)",
+      e: "Сценарий 1 (MCEF 170): Закорочен шлейф E-STOP — нет зажигания и хода",
+      c: "1) Скинь клемму с салонной кнопки S100 (или вытащи нижний провод W24\\Red из X3-4), чтобы отсечь КЗ на массу. 2) Поставь целый F13 (5A) — он питает замок S8 через X5-57. 3) Кинь перемычку +24В с X5-57 на верхнюю колодку X3-4 (пин 140 A1 + реле +15 K2). Заводи и выезжай."
+    },
+    {
+      b: "SOS ЭВАКУАЦИЯ • Выбивает F20 (20A) или F32 (10A) — комплексный обрыв жгута прицепа (Л. 102)",
+      e: "Сценарий 2 (MCEF 170): Перебит кабель прицепа P10 (Сила + CAN0 + E-STOP)",
+      c: "1) Не меняй сгоревшие F20/F32 — расстыкуй разъём прицепа P10 (или откинь CAN0 на X6-2/3), чтобы перебитый жгут не вешал шину CAN0 тягача. 2) Подай +24В с X5-57 в верхнюю колодку X3-4 (пин 140 A1 + реле K2). После этого заводи и выгоняй тягач."
+    }
+  ];
+
+  if (typeof DB === "object") {
+    Object.keys(DB).forEach(function(k) {
+      var nm = DB[k].name || "";
+      if (k === "170" || k === "P1277" || /170|1277/i.test(nm)) {
+        if (Array.isArray(DB[k].pins)) {
+          pins1277.forEach(function(item){ if (!DB[k].pins.some(function(x){ return x.p === item.p; })) DB[k].pins.unshift(item); });
+        }
+        if (Array.isArray(DB[k].errors)) {
+          DB[k].errors = err1277.concat(DB[k].errors);
+        }
+      }
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var pins5033 = [
+    { p: "X3-1 / X3-2", b: "Кнопка E-STOP кабины S100 (P5033 Л. 101)", c: "Верх: От X5-9 (F4 10A) | Низ: На кнопку S100 (W7\\4-5) -> X3-2 — Аварийный стоп в кабине" },
+    { p: "X3-3 / X3-4", b: "Петля E-STOP прицепа JT1 (P5033 Л. 101 / 118)", c: "Верх: От X3-2 -> JT1 пин 1 (W11\\1) | Низ: Возврат JT1 пин 2 (W11\\2) -> X3-4 — Перемычка X3-3—X3-4 обходит стоп прицепа" },
+    { p: "X3-5 / X3-6", b: "Петля E-STOP пульта ДУ AUTEC A77 (P5033 Л. 101 / 120)", c: "Верх: От X3-4 -> WEMR\\1 на A77 / K7 | Низ: Возврат WEMR\\2 -> X3-6 — Перемычка X3-5—X3-6 обходит контур ДУ" },
+    { p: "X3-7 / X3-8", b: "Петля E-STOP модуля Orica Front Box (P5033 Л. 101 / 122)", c: "Верх: От X3-6 -> WO1\\23 (X5-56) | Низ: Возврат WO1\\24 (X5-57) -> X3-8 — Перемычка X3-7—X3-8 обходит Orica" },
+    { p: "X3-9 / X3-10", b: "Передние кнопки E-STOP S104/S105 -> пин 140 A1 (P5033 Л. 101)", c: "Верх: От X3-8 -> S104/S105 | Низ: Возврат на X3-10 -> пин 140 A1 MCUM + реле K2 — Перемычка с X5-9 на X3-10 обходит все грибки" },
+    { p: "X5-9", b: "Питание шлейфа E-STOP +15 (P5033 Л. 100 / 101)", c: "Верх: От предохранителя F4 (10A) | Низ: На клемму X3-1 (вход S100) — Источник +24В для перемычки на X3-10" },
+    { p: "X5-27..X5-35", b: "Педаль B6 и подрулевой реверс B5 (P5033 Л. 107)", c: "Верх: A1 пины 247/104/217/179 (B6) и 124/148/116 (B5) | Низ: На педаль B6 и реверс B5 — Без нейтрали X5-33 нет стартера" },
+    { p: "X5-77..X5-84", b: "Датчики тормоза B7, хода B10/11 и темп. масла B9 (P5033 Л. 114)", c: "Верх: A1 пины 130 (B7), 131 (B11), 107 (B10), 117 (B34), 146 (B8), 103 (B9) | Низ: X5-83 = сигнал температуры гидромасла B9" },
+    { p: "X5-93 / X5-94 / X5-95", b: "Клапаны хода заднего моста Y10, Y11, Y12 (P5033 Л. 115)", c: "Верх: A1 пины 180 (X5-93 Y10), 159 (X5-94 Y11), 183 (X5-95 Y12) | Низ: На соленоиды хода заднего моста — X5-94 = реверс Y11" },
+    { p: "X5-96..X5-103", b: "Ход переднего моста Y13-15, тормоз SAHR Y9 и дифф. Y28/29 (Л. 115)", c: "Верх: A1 пины 153/177/156 (перед), 189 (X5-99 Y9 тормоз), 162 (Y1), 165 (Y28/29) | Низ: При обрыве X5-99 машина не растормаживается" },
+    { p: "X5-133..X5-138", b: "Секции зарядной стрелы Y108, Y57..Y61 (P5033 Л. 121)", c: "Верх: Блок TCU2 A12 пины K2, J2, H2, G2, E2, F2 и реле K40 (F63 5A) | Низ: На клапаны поворотa, подъёма, телескопа и сопла стрелы" },
+    { p: "X5-142..X5-161", b: "Интерфейс зарядного модуля Orica Front Box (P5033 Л. 122)", c: "Верх: Блок TCU2 A12 и A1 пины 123/147 (импульсы шланга) | Низ: На Orica Front Box (WO1\\1..24) — X5-156/157 = петля E-STOP Orica" },
+    { p: "JT1 / PT1 (16P Harting)", b: "Межсекционный разъём прицепа JT1 / PT1 (P5033 Л. 118 / 125)", c: "Верх: Пины 1-2 E-STOP (X3-3/4), 3-4 +30 (F45 15A), 5-6 +15 (F17 20A) | Низ: Пины 7-10 GND (X22), 11-12 CAN0_H/L на блок прицепа TCU1 A11" },
+    { p: "X25-1..X25-22 / X26", b: "Шкаф прицепа Encl. 3: TCU1 A11, свет и датчики (Л. 126–128)", c: "Верх: Преды F70 (5A CPU), F80 (5A KL15), F71 (10A IO), K100/K101 | Низ: X25-1..11 свет/стробы/зуммер H5, X25-12..18 скорость B36/вода B66/Y36, X26-1/2 CAN0" }
+  ];
+
+  var err5033 = [
+    {
+      b: "SOS ЭВАКУАЦИЯ • Выбивает F4 (10A) — КЗ в петле E-STOP (P5033 Л. 101)",
+      e: "Сценарий 1 (Заправщик 55–66): Закорочен шлейф E-STOP — нет зажигания и хода",
+      c: "1) Скинь клемму с салонной кнопки S100 (или вытащи нижний провод из X3-10), чтобы отсечь КЗ на массу. 2) Поставь целый F4 (10A) -> +24В появится на X5-9. 3) Кинь перемычку с X5-9 в верхнюю колодку X3-10 (пин 140 A1 + реле K2). Заводи и выезжай."
+    },
+    {
+      b: "SOS ЭВАКУАЦИЯ • Выбивает F17 (20A), F45 (15A), F62 (5A) или F32 (10A) (Л. 118–122)",
+      e: "Сценарий 2 (Заправщик 55–66): Перебит кабель прицепа JT1, пульта AUTEC или блока Orica",
+      c: "1) Не меняй сгоревшие силовые F17/F45 — расстыкуй разъём прицепа JT1 (или откинь CAN0 на X6-7/8), чтобы перебитый жгут не вешал шину CAN0 тягача. 2) Подай +24В с X5-9 в верхнюю колодку X3-10 (либо перемкни X3-3—X3-4 / X3-5—X3-6 / X3-7—X3-8) для пина 140 A1 и реле K2."
+    }
+  ];
+
+  if (typeof DB === "object") {
+    Object.keys(DB).forEach(function(k) {
+      var nm = DB[k].name || "";
+      if (k === "P5053" || k === "P5033" || /5053|5033|заправщик|55, 56/i.test(nm)) {
+        if (Array.isArray(DB[k].pins)) {
+          pins5033.forEach(function(item){ if (!DB[k].pins.some(function(x){ return x.p === item.p; })) DB[k].pins.unshift(item); });
+        }
+        if (Array.isArray(DB[k].errors)) {
+          DB[k].errors = err5033.concat(DB[k].errors);
+        }
+      }
+    });
+  }
+})();
+</script>
+<script>
+window.addEventListener("load", function() {
+  if (typeof window.getAllCabZones === "function") {
+    var origZ = window.getAllCabZones;
+    window.getAllCabZones = function(plat) {
+      var zs = origZ(plat);
+      var m = (typeof DB === "object" && DB[plat]) ? DB[plat] : null;
+      if (m && Array.isArray(m.pins) && Array.isArray(zs) && zs.length > 0) {
+        m.pins.forEach(function(p) {
+          var id = String(p.p || "").trim();
+          if (/^(X\d|JT|PT)/i.test(id)) {
+            var isTrl = /^(X1\d|X2\d|X3[1-9]|PT)/i.test(id);
+            var z = (isTrl && zs.length > 1) ? zs[1] : zs[0];
+            if (z && Array.isArray(z.tpl.terms) && !z.tpl.terms.some(function(x){ return x.id === id; })) {
+              var a = String(p.c || "").split("|");
+              z.tpl.terms.push({ id: id, name: p.b || "", from: a[0] || "", to: a[1] || "", note: p.c || "" });
+            }
+          }
+        });
+      }
+      return zs;
+    };
+  }
+});
+</script>
+<script>
+window.addEventListener("load", function() {
+  if (typeof window.getAllCabZones === "function") {
+    var prevZ = window.getAllCabZones;
+    window.getAllCabZones = function(plat) {
+      var zs = prevZ(plat);
+      var m = (typeof DB === "object" && DB[plat]) ? DB[plat] : null;
+      if (m && Array.isArray(m.pins) && Array.isArray(zs) && zs.length > 0) {
+        m.pins.forEach(function(p) {
+          var id = String(p.p || "").trim();
+          if (/^(X\d|JT|PT)/i.test(id)) {
+            var isTrl = /^(X1\d|X2\d|X3[1-9]|PT)/i.test(id);
+            if (isTrl && zs.length === 1) { zs.push({ z: "TRL", btn: "\u0428\u043a\u0430\u0444 \u043f\u0440\u0438\u0446\u0435\u043f\u0430 / \u043b\u044e\u043b\u044c\u043a\u0438", tpl: { title: "Trailer / Boom Encl.", relays: [], fuses: [], right: [], mega: [], terms: [] } }); } var z = (isTrl && zs.length > 1) ? zs.at(1) : zs.at(0);
+            if (z && Array.isArray(z.tpl.terms) && !z.tpl.terms.some(function(x){ return x.id === id; })) {
+              var a = String(p.c || "").split("|");
+              z.tpl.terms.push({ id: id, name: p.b || "", from: a.at(0) || "", to: a.at(1) || "", note: p.c || "" });
+            }
+          }
+        });
+      }
+      return zs;
+    };
+  }
+});
+</script>
+<script>
+(function(){
+  var s1 = [
+    { n: "07", b: "Общий", t: "Overview CAN bus", c: "CAN0 (500k): A1 MCUM, A20 DCUM, A57-A59 (ID 20-22), A12 TCU1 (+2), A13 TCU2 (+3), A14 TCU3 (+4), A60-A62. CAN1 J1939 (250k): A1, G5 Deutz EMR-3, JB4. CAN2 (125k): A1, B40 (ID 10), B41 (ID 11), B42 (ID 12), резистор R15." },
+    { n: "100", b: "Питание", t: "Supply (АКБ, масса S1, стартер M8, генератор G3, E-STOP)", c: "АКБ G1/G2, масса S1, FuC 200A. F1 (3A) -> M1 аварийный насос (X5-1). F2 (30A) -> K1 стартер -> M8 (X5-2). A1 пины 102/115 -> D+ G3 (X5-3). F13 (5A) -> X5-57 -> замок S8 (X5-58 пин 122, X5-59 пин 123) и шлейф E-STOP S100 (X3-1/2) -> S101 (X3-3) -> S102 -> X3-4/5 -> A1 пин 140 и K2 (+15). F12 (10A) -> A50 Trolex." },
+    { n: "101", b: "Двигатель", t: "Engine Deutz TCD2013 EMR-3 (G5, B8, B16, B18, B20)", c: "FuB (50A) -> K3 -> G7 свечи (X1-3). F26 (5A) -> K26 Deutz Main Relay, B16 ОЖ (X4-6/8/9, пины 141/127). F4 (25A) -> G5 EMR-3 пины 1,3,5 (X4-1). B20 фильтр (X4-2/3 -> EMR 77), B18 вода (X4-4/5 -> EMR 63/64). Топливо B8 (X6-10..13). CAN1 через X6-8/9 (пины 223/210)." },
+    { n: "102", b: "Контроллер", t: "Controller supply A1 MCUM, таймеры K20/K22/K27, Ethernet", c: "F5 (3A) -> S7 Emergency override (A1 пин 139). F6 (30A) -> X5-5 -> A1 пины 201-206 (BAT+) и 246 (CPU). Масса A1 (X22-1). F27 (3A) -> K22 -> K20 Timer -> K27 Timer Relay 20A GND (X0-1). F32 (10A) и F20 (20A) -> J10 (прицеп)." },
+    { n: "103", b: "Свет 1", t: "Lights/signalling-1 (Фары, повороты, стробоскопы, сигнал)", c: "F7 (10A) -> K25 ближний свет H10/H11 (пин 238, X5-11). F21 (10A) -> K35 дальний H12/H13 (пин 252, X5-12). Повороты H18/H19 (пины 101/125, X5-10/15). Стробоскопы H35 (163, X5-14). Маяк H1 (178, X5-8). F8 (10A) -> K30 сигнал H9 (240, X5-16)." },
+    { n: "104", b: "Свет 2", t: "Lights/Signalling-2 (Рабочий свет, габариты, плафон)", c: "F9 (10A) -> K23 передний рабочий свет H45/H46 (пин 253, X5-17) и K24 задний H43/H44 (пин 239, X5-18). Габариты H29/H30 (пин 174, X5-19). F28 (3A) -> плафон H8 (241, X5-20/21)." },
+    { n: "105", b: "Пожарка FSS", t: "Fire Suppression System A100 и MURT", c: "F30 (3A) -> A100 блок FSS (JF1/JF2): датчики S9, кнопка, пиропатрон, термокабели. Сигналы в A1: пин 111 (Fire, X5-38), пин 134 (Fault, X5-39), пин 110 (Bat, X5-40). F31 (3A) -> входы MURT: пин 135 (Park brake, X5-41), пин 112 (Creep, X5-43), пин 136 (Alarm, X5-44)." },
+    { n: "106", b: "Кабина 1", t: "Cabin-1 Controls & Safety (Педаль B6, реверс S5, двери, сиденье)", c: "Педаль B6 (JB6): пин 247 (5V, X5-25), 104 (RAT, X5-26), 217 (GND, X5-27), 179 (Safety, X5-28). Реверс S5 (J5): пин 147 (FWD, X5-30), 148 (NEU, X5-31), 124 (REV, X5-33). F29 (3A) -> стоп B3 (176), двери S6/S10 (194/170), ремень (191), сиденье (167, X5-50)." },
+    { n: "107", b: "Климат", t: "Cabin-2 AC / Heater (Печка и кондиционер A44)", c: "F19 (30A) -> K10 печка (пин 158) и K13 кондиционер (пин 195). Переключатель S50 (X5-45..49) -> блок A44. Датчик фреона B12 (X5-53, X5-112)." }
+  ];
+  if (typeof DB === "object") {
+    Object.keys(DB).forEach(function(k) {
+      if (k === "P1277" || k === "170" || /P1277|170/i.test(DB[k].name || "")) DB[k].sheets = s1;
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var s2 = [
+    { n: "108", b: "Панель", t: "Cabin-3 Dashboard (Клавиатуры A57-A59 и зуммер H48)", c: "F36 (5A) -> +15 Dashboard (X5-63). Клавиатуры A57 (ID 20), A58 (ID 21), A59 (ID 22) на CAN0 (X6-1..5, X42). Зуммер H48 от A1 пин 166 через R3 (1.2кОм) и X5-60." },
+    { n: "109", b: "Дворники", t: "Cabin-4 Wipers (Дворники M2/M3 и омыватель M6)", c: "F37 (20A) -> реле K14 (левый дворник M3, пин 151), K15 (правый M2, пин 151), K16 (омыватель M6, пин 175). Клеммы X5-65..70." },
+    { n: "110", b: "Дисплеи", t: "Cabin-5 Displays & Camera (A20 DCUM, регистратор A18, монитор A19)", c: "F14 (3A) -> A20 DCUM пин 26 (Ubat, X5-73) и пин 18 (K15, X5-72). CAN0 на пинах 13/5. F38 (3A) -> ETH1 (X6-16..19 -> A20 пины 28/20/29/21). Регистратор A18 и монитор A19 (F42, X5-134/62)." },
+    { n: "111", b: "Телеметрия", t: "Data - Telemetry & interface (A5, A7 MURT, DC/DC A15)", c: "F41 (3A) и F16 (3A) -> телеметрия A5 (антенна A32, J1939 X6-14/15). Вход Driver logged in A1 пин 146. F35 (7.5A) -> DC/DC A15 -> F50 (5A). Система MURT A7." },
+    { n: "112", b: "Гидроход", t: "Hydraulics - Drive (Ход Y10-Y15, тормоз SAHR Y9, датчики)", c: "Зад: Y10 (180, X5-80), Y11 (159, X5-81), Y12 (183, X5-82). Перед: Y14 (153, X5-83), Y13 (177, X5-84), Y15 (156, X5-85). Тормоз SAHR Y9 (189, X5-102), разгрузка Y1 (162, X5-100), дифф. Y28/Y29 (165, X5-101). F42 (10A) -> датчики B2, B11, B34, B7 SAHR (155, X5-111), уровень B5, темп. B9." },
+    { n: "113", b: "Гидравлика", t: "Hydraulics - Function (Реле PVG K17, смазка A26, осушитель K37)", c: "F17 (5A) -> K17 PVG supply (пин 254). Сварка (171, X5-118), мойка (154, X5-119), кран (157, X5-120), ретардер Y50 (161/185). F43 (7.5A) -> K37 осушитель (190, X5-126). F18 (5A) -> K18 смазка A26 (126, X5-127)." },
+    { n: "114", b: "Аутригеры П", t: "Hydraulics - Outriggers (Передние опоры Y53/Y54, угол рамы B24)", c: "F44 (5A) -> датчики передних опор B55/B56, B13/B14 (пины 114, 138, 108, 132). Клапаны Y53 левый (181/160, X5-128/129), Y54 правый (184/187, X5-130/131). Угол рамы B24 (JB24, пины 133/128, X5-146/147)." },
+    { n: "300", b: "Прицеп P10", t: "Trailer Connections (Разъём P10, инклинометры B40/B41/B42)", c: "Разъём P10: пин 1 (насос W11B\\1), пин 2 (E-STOP B -> X18-2), пин 3 (E-STOP A -> X18-3), пины 4-7 (+30/+15), пины 11-12 (CAN0), пины 13-14 (CAN2). F128 (3A) -> инклинометры CAN2 (125k): B40 (ID 10), B42 (ID 11), B41 (ID 12), терм. R15." },
+    { n: "301", b: "Блоки TCU", t: "Trailer - Controller supply (A12 TCU1, A13 TCU2, A14 TCU3)", c: "F101 (5A) -> CPU (пин L1, X20-16) блоков A12/A13/A14. F125 (5A) -> KL15 (пин K4, X20-10). F102 (10A) -> IO A12 (+2, X20-15). F103 (10A) -> IO A13 (+3, X20-18). F104 (10A) -> IO A14 (+4, X20-19). CAN0 через X18-4..9." },
+    { n: "302", b: "Свет приц.", t: "Trailer - Drive functions (Фонари H4/H16, стробы H33/H34, скорость B36)", c: "F105 (15A) -> K101 свет H14/H15 (A12 пин B1, X20-17). K102 стробоскопы H33/H34 (пин H1, X20-8/9). Фонари H4/H16 (пины K1/F1/D1/G1/E1, X20-3..7) и зуммер H5 (J1, X20-11). Клапан Y36 (C1, X20-13). Скорость B36 (E3/D3)." },
+    { n: "303", b: "Датчики пр.", t: "Trailer - Sensors (Задние опоры B52/B53, уровень воды B66)", c: "F126 (7.5A) -> датчики задних опор B52/B53 (A13 E4/D4, X20-66/67), концевики B57/B58/B82/B83 (J2/G2/K2/H2, X20-57..60), замки B60/B61, вода B66 (A14 A3, X20-53). F106 (20A) -> K6 насос воды (A14 B1, X20-90/91)." },
+    { n: "304", b: "Датчики стр.", t: "Trailer - Boom sensors (Давление B54, углы B25/B26, перегруз)", c: "Давление стрелы B54 (A13 C4, X20-51). Поворот стрелы B25 (JB25 -> A13 J4, X20-63/64). Подъём стрелы B26 (JB26 -> A14 J4, X20-170). Транспортное положение B62 (A13 E2, X20-70). Перегруз люльки A13 F2 (X20-75/76)." }
+  ];
+  if (typeof DB === "object") {
+    Object.keys(DB).forEach(function(k) {
+      if ((k === "P1277" || k === "170" || /P1277|170/i.test(DB[k].name || "")) && Array.isArray(DB[k].sheets)) DB[k].sheets = DB[k].sheets.concat(s2);
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var s3 = [
+    { n: "305", b: "Сигнал. стр.", t: "Trailer - Boom signalling (Фары стрелы H40, реле K103-K105)", c: "F127 (15A) -> K103 (фары люльки, A13 A1, X20-68) и K104 (фары стрелы H40, A13 B1, X25-1). K105 авария люльки (A14 K1, X20-71). Индикатор центра стрелы H61 (A14 J1, X20-36)." },
+    { n: "306", b: "Джойстики 1", t: "Trailer - Joysticks (Пульт прицепа A67 и A68)", c: "F132 (5A) -> джойстики A67 и A68 (JB6-X/Y, X20-131..140). Опорное 5В с A13 пин H3. Сигналы на A12 (J4/H4/E4/D4) и A13 (G4/F4/E3/D3)." },
+    { n: "307", b: "Пульты пр.", t: "Trailer - Controls (Клавиатуры A60/A61, E-STOP S103, насос S20/S22)", c: "F134 (5A) -> клавиатуры A60/A61 на CAN0 (X18-10..13) и E-STOP S103 (X20-46..48). F129 (5A -> X20-69) и F131 (5A -> X20-87) -> в люльку. Переключатели S20 (A14 пин C3) и S22 (аварийный насос -> X20-94)." },
+    { n: "308", b: "Люлька 1", t: "Trailer - Basket (Пульт A64, E-STOP S102, давление B35, камеры Z1/Z2)", c: "Клеммник люльки X33-1..18 (W27 от X25-2..12): S102 E-STOP (X33-1/2), S21 насос (X33-3/6), S23 разрешение (X33-3/18), давление B35 (X33-7/13), козырёк B84 (X33-8/13), сирена H59 (X33-4/5), пульт A64 (CAN0 X33-9/10), камеры Z1/Z2." },
+    { n: "309", b: "Люлька 2", t: "Trailer - Basket 2 (Джойстики люльки A69 и A70)", c: "Джойстики люльки A69 и A70 (JA69/JA70) через X33-21..30 -> W27 -> X25-14..23 -> X20-139..149 -> входы A12 (C4, B4, A4, A3, G4, F4, C3, B3)." },
+    { n: "310", b: "Гидр. стр.", t: "Trailer - Hydraulics 2 (PVG стрелы Y57-Y60, козырёк Y100, реле K12)", c: "F130 (7.5A) -> K12 PVG Supply (A14 пин A1). Клапаны PVG (X20-150..169, X25-25..31): Y57 наклон стрелы (A14 J2), Y58 подъём (G2), Y59 телескоп (H2), Y60 люлька (F2), Y100 козырёк (F1/E1). Диоды D7-D10 + R14 (10кОм) -> A14 пин E4." },
+    { n: "311", b: "Гидр. опоры", t: "Trailer - Hydraulics 1 (Поворот стрелы Y68, задние опоры Y55/Y56/Y81/Y82)", c: "Поворот стрелы Y68 (A14 пин K2, X20-150/151/167, диод D5). Замок качания Y63 (A13 H1/G1, X20-95/96). Задние опоры (A13): Y55 L (F1/E1, X20-97/98), Y56 R (K1/J1, X20-99/100), Y81 выдвиж. L (H1/G1, X20-101/102), Y82 выдвиж. R (D1/C1, X20-103/104)." },
+    { n: "312", b: "Oreca", t: "Trailer - Oreca unit (Автомат F23, клеммники X31 и X23)", c: "Автомат F23 (CH1 8A, CH2-4 по 4A) -> клеммник X31-1..14 (Oreca 24V+, LS, STOP, Res. 1-11) -> X25-43..56 -> клеммник люльки X23-1..14." }
+  ];
+  if (typeof DB === "object") {
+    Object.keys(DB).forEach(function(k) {
+      if ((k === "P1277" || k === "170" || /P1277|170/i.test(DB[k].name || "")) && Array.isArray(DB[k].sheets)) DB[k].sheets = DB[k].sheets.concat(s3);
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var s1 = [
+    { n: "05", b: "Общий", t: "CAN - schematic (Карта шин CAN0 / CAN1 / CAN2)", c: "CAN0 (500k): A20 DCUM (ID 127, R), A1 MCUM (ID 105), A14 Keypad_1 (ID 20), A77 RCUM AUTEC (ID 100), A12 TCU2 (ID 12), A11 TCU1 (ID 11, R). CAN1 J1939 (250k): A1 MCUM (R), G5 ECU Deutz, A5 Telematics, A20 DCUM (R). CAN2 Inclino (125k): A1 MCUM (R), B40 (ID 10, R)." },
+    { n: "100", b: "Питание", t: "Supply (АКБ, масса S1, FuM 400A, стартер M8, генератор G3)", c: "АКБ G1/G2, масса S1, NATO J1, FuM 400A, FuC 200A. F1 (3A) -> K20 -> S29 -> M1 аварийный насос (X5-1). F2 (30A) -> K1 стартер -> M8 (X5-2). A1 пины 102/115 -> D+ G3 (X5-3). F3 (5A) -> замок S8 (X5-4/5/6 -> A1 пин 129 Glow, пин 122 IGN ON). F4 (10A) -> петля E-STOP (X5-9)." },
+    { n: "101", b: "E-STOP", t: "Signal supply (Сквозной шлейф E-STOP, реле K2 и K1)", c: "F4 (10A, X5-9) -> X3-1/2 (S100 кабина) -> X3-3/4 (JT1 прицеп) -> X3-5/6 (AUTEC ДУ) -> X3-7/8 (Orica) -> X3-9/10 (S104/S105 передние) -> A1 пин 140 (Emergency stop) и реле K2 (+15, F5 30A). F25 (3A) -> катушка K1 (A1 пин 251)." },
+    { n: "102", b: "Двигатель", t: "Engine Deutz TCD2013 EMR-3 (G5, B4, B16, B18, B20)", c: "FuB (50A) -> K3 -> G7 свечи (X1-3). F26 (5A) -> K26 Deutz Main Relay, ОЖ B16 (X4-6/8/9, пины 141/127). F6 (25A) -> G5 EMR-3 пины 1,3,5 (X4-1). Фильтр B20 (X4-2/3 -> EMR 77), вода B18 (X4-4/5 -> EMR 63/64). Топливо B4 (X6-10..13). CAN1 через X6-3..6 (пины 223/210)." },
+    { n: "103", b: "Контроллер", t: "Supply MCUM (Питание A1, таймеры K21/K20/K27, Ethernet)", c: "F7 (3A) -> S7 Emergency mode -> A1 пин 139. F8 (30A) -> X5-22 -> A1 пины 201-206 (UBAT) и 246 (CPU). Масса A1 (X22). F27 (3A) -> K21 -> K20 Timer -> K27 Timer Relay 20A GND (X0-1)." },
+    { n: "104", b: "Свет 1", t: "Lights/signalling-1 (Фары, повороты, стробоскопы, сигнал)", c: "F9 (10A) -> K25 ближний свет H10/H12 (пин 238, X5-11). F10 (10A) -> K35 дальний H11/H13 (пин 252, X5-14). Повороты H18/H19 (пины 101/125, X5-10/13). Синие стробоскопы H31/H32 (150, X5-15). Маяк H1 (178, X5-19). F11 (7.5A) -> K30 сигнал H9 (240, X5-16)." },
+    { n: "105", b: "Свет 2", t: "Lights/Signalling-2 (Рабочий свет, габариты, плафон)", c: "F12 (10A) -> K23 передний рабочий свет H45/H46 (пин 253, X5-18) и K24 задний H43/H44 (пин 239, X5-17). Габариты H29/H30 (пин 174, X5-19). F28 (3A) -> плафон H8 (X5-20) и зуммер (пин 166, X5-22)." },
+    { n: "106", b: "Пожарка FSS", t: "Fire Suppression System A52", c: "F29 (7.5A) -> блок пожаротушения A52 (JF1/JF2): датчики огня B2, кнопка B21, клапан B23, термокабели B25. Сигналы в A1: пин 110 (BAT, X5-23), пин 134 (FAULT, X5-24), пин 111 (FIRE, X5-25)." },
+    { n: "107", b: "Кабина 1", t: "Cabin 1 Controls & Safety (Педаль B6, подрулевой B5, двери)", c: "Педаль B6 (JB6): пин 247 (5V, X5-27), 104 (RAT, X5-28), 217 (GND, X5-29), 179 (Safety, X5-30). Подрулевой B5: пины 124 (REV, X5-32), 148 (NEU, X5-33), 116 (FWD, X5-34). F30 (5A) -> стоп B3 (176), двери S2 (194/170), ремень (191), сиденье (167, X5-45)." }
+  ];
+  if (typeof DB === "object") {
+    Object.keys(DB).forEach(function(k) {
+      if (k === "P5053" || k === "P5033" || /5053|5033|заправщик|55, 56/i.test(DB[k].name || "")) DB[k].sheets = s1;
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var s2 = [
+    { n: "108", b: "Климат", t: "Cabin - 2 - AC (Отопитель и кондиционер A44)", c: "F31 (30A) -> K10 реле печки (пин 158) и K5 реле кондиционера (пин 195). Переключатель S50 (X5-46..50) -> блок A44. Датчик фреона B12 (X5-53, X5-120)." },
+    { n: "109", b: "Панель", t: "Cabin 3 - Dashboard (Клавиатуры A14 и A7 Emergency)", c: "F33 (5A) -> X5-55 -> клавиатуры A14 (ID 20, JA14) и A7 Emergency control (JA9) на шине CAN0 (X6-9..12, X42)." },
+    { n: "110", b: "Дворники", t: "Cabin - 4 - Wipers (Дворник M2 и омыватель M6)", c: "F34 (15A) -> K14 дворник M2 (пин 151, X5-57..59) и K16 омыватель M6 (пин 175, X5-62)." },
+    { n: "111", b: "Дисплей", t: "Cabin - 5 - DCUM (Дисплей A20 и реле пробуждения K4)", c: "F15 (7.5A) -> A20 DCUM пин 26 (BAT+, X5-63) и пин 18 (KL15, X5-121). F22 (2A) -> S3 -> K4 Wakeup relay (пин 241, X5-21 -> A20 пин 10). CAN0/CAN1." },
+    { n: "112", b: "Камеры", t: "Cabin - 6 - Camera's (Камера заднего вида JA25)", c: "Триггеры камер A1 пины 169, 196, 172 (X5-65..67) и камера заднего вида JA25 на A20 DCUM." },
+    { n: "113", b: "Телеметрия", t: "Data - Telemetry & interface (A5, инклинометр B40, УТИС A70)", c: "F38 (3A) -> телеметрия A5 (антенна A32, J1939, пин 105 Driver logged in, X5-70..74) и инклинометр B40 на CAN2 (X6-15/16, X5-75). F43 (7.5A) -> УТИС A70 (JA51A, X5-52)." },
+    { n: "114", b: "Датчики", t: "Sensors - Vehicle (Тормоз B7, ход B10/11, скорость B34, угол B24)", c: "F40 (5A) -> давление тормоза B7 (пин 130, X5-77), ход задний B11 (131, X5-78), передний B10 (107, X5-79), скорость B34 (117, X5-80), уровень масла B8 (146, X5-82), темп. масла B9 (103/243, X5-83/84). F41 (5A) -> передние опоры B50/51/55/56, угол B24 (128, X5-90/91), компрессор B78 (109, X5-92)." },
+    { n: "115", b: "Гидроход", t: "Hydraulics - Drive (Клапаны хода Y10-Y15, тормоз SAHR Y9, дифф.)", c: "Зад: Y10 (пин 180, X5-93), Y11 (159, X5-94), Y12 (183, X5-95). Перед: Y13 (153, X5-96), Y14 (177, X5-97), Y15 (156, X5-98). Тормоз SAHR Y9 (189, X5-99), Y26 (186, X5-100), разгрузка Y1 (162, X5-101), дифф. Y28/29 (165, X5-102), руль Y74 (193, X5-103)." },
+    { n: "116", b: "Клапаны", t: "Hydraulics - Valvebank (Реле PVG K17, ретардер Y50, опоры Y53/54)", c: "F42 (5A) -> K17 PVG supply (пин 254). Клапаны: Y50 ретардер (161, X5-104/105), Y53 передняя опора L (181/160, X5-106/107), Y54 R (184/187, X5-108/109), Y109 гидроаккумулятор (168, X5-110)." },
+    { n: "117", b: "Доп. гидр.", t: "Hydraulics - Extra (Осушитель K37, центральная смазка A49 / K18)", c: "Прямолинейность руля (137, X5-112), сварка (171, X5-113), мойка (154, X5-114), кран (157, X5-115), маслоохладитель (185, X5-116). F13 (15A) -> K37 осушитель (190, X5-117). F44 (5A) -> K18 смазка A49 (126, X5-118)." },
+    { n: "118", b: "Прицеп JT1", t: "Main Trailer Connection (Разъём JT1 Harting 16P)", c: "Разъём прицепа JT1 (16P): пины 1-2 E-STOP (W11\\1/2), пины 3-4 +30 Trailer (F45 15A), пины 5-6 +15 Trailer (F17 20A), пины 7-10 GND, пины 11-12 CAN0_H / CAN0_L." }
+  ];
+  if (typeof DB === "object") {
+    Object.keys(DB).forEach(function(k) {
+      if ((k === "P5053" || k === "P5033" || /5053|5033|заправщик|55, 56/i.test(DB[k].name || "")) && Array.isArray(DB[k].sheets)) DB[k].sheets = DB[k].sheets.concat(s2);
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var s3 = [
+    { n: "119", b: "Блок TCU2", t: "TCU2 - Supply (Контроллер стрелы A12 Node ID 12)", c: "F18 (5A) -> CPU A12 пин L1 (X5-141). F60 (5A) -> KL15 A12 пин K4 (X5-126). F19 (10A) -> Supply I/O пины M1/M2/L2 (X5-125). CAN0 через X6-13/14 (пины B2/C2)." },
+    { n: "120", b: "Пульт ДУ", t: "Remote control AUTEC A77 и реле обхода K7", c: "F62 (5A) -> приёмник ДУ AUTEC A77 (J7 пин 1, X5-127) и реле обхода K7 (A12 пины H1/E4). Сигнал EmerStopRCU в A1 пин 106 (X5-129..131). CAN0 на J7 пины 6/12 (X6-17/18). F37 (7.5A) -> DC/DC A76 -> F65 (7.5A) -> зарядка АКБ пульта (J7 пин 5)." },
+    { n: "121", b: "Стрела", t: "Hydraulics/Lights (Секции стрелы Y108, Y57-Y61, фары H20/H21)", c: "F63 (5A) -> K40 PVG Supply (A12 пин A1). Секции PVG стрелы (X5-132..138): Y108 поворот (K2), Y57 подъём (J2), Y58 складывание (H2), Y59 телескоп (G2), Y60 наклон сопла (E2), Y61 вращение сопла (F2). F54 (10A) -> K41 фары H20/H21 (B1, X5-139). Датчик B88 (C4)." },
+    { n: "122", b: "Orica 1", t: "Orica - Signals (Интерфейс зарядного блока Orica Front Box)", c: "F32 (10A) и F14 (7.5A) -> питание 24В Orica Front Box (X5-55/158). Импульсы шланга на A1 пины 123 и 147 (X5-160/61). Сигналы на TCU2 A12 (X5-142..150): D4 (LS), B4 (RPM), G1 (Start), F1 (Stop), E1 (Extend), D1 (Retract), C1 (LS Load), K1 (Reset), J1 (Remote). E-STOP X5-156/157." },
+    { n: "123", b: "Orica 2", t: "Orica - Communication (Разъём JT3 Harting 24P)", c: "Кабель связи от переднего блока Orica Front Box к прицепному блоку Orica через 24-пиновый разъём Harting JT3 (жилы WJT3\\1..24)." },
+    { n: "124", b: "Orica 3", t: "Connection Orica Communication (Ответный разъём PT3 Harting 24P)", c: "Ответная часть 24-пинового разъёма Harting PT3 на прицепном модуле Orica Unit Trailer (жилы WPT3\\1..24)." },
+    { n: "125", b: "Прицеп PT1", t: "Connections (Шкаф прицепа Encl. 3, разъём PT1, E-STOP S102)", c: "Разъём PT1 (16P) на прицепе: пины 1-2 -> X23-1/2 -> кнопка E-STOP прицепа S102; пины 3-4 -> X25-3/4 (+30); пины 5-6 -> X25-5/6 (+15); пины 7-10 -> X22 (GND); пины 11-12 -> CAN0 в Encl. 3; камера заднего вида A25." },
+    { n: "126", b: "Блок TCU1", t: "TCU1 - Supply (Шкаф прицепа Encl. 3, контроллер A11 Node ID 11)", c: "F70 (5A) -> CPU A11 пин L1 (X25-19). F80 (5A) -> KL15 A11 пин K4 (X25-20). F71 (10A) -> Supply I/O пины M1/M2/L2 (X25-21). Опорное 5В пин H3 (X25-22). CAN0 через X26-1/2 (пины D2/C2/B2/A2)." },
+    { n: "127", b: "Свет приц.", t: "Lights/Signaling (Задние фонари H16/H17, стробы H35/H36, зуммер H5)", c: "F72 (7.5A) -> K100 стробоскопы H35/H36 (A11 пин H1, X25-1/2). F73 (7.5A) -> K101 рабочий свет прицепа H14/H15 (B1, X25-3/5). Фонари H16/H17 (пины K1, D1, G1, F1, E1, X25-4..10) и зуммер H5 (J1, X25-11)." },
+    { n: "128", b: "Гидр. приц.", t: "Sensors/Hydraulics (Скорость B36, уровень воды B66, клапан Y36)", c: "F81 (5A) -> датчик скорости прицепа B36 (A11 пины D3/E3, X25-12/13), уровень воды B66 (A11 пин C3, X25-14/15), клапан Y36 Max disp rear (пин C1, X25-16), кнопка и светодиод H2 насоса мойки (пины A1/G4, X25-17/18)." }
+  ];
+  if (typeof DB === "object") {
+    Object.keys(DB).forEach(function(k) {
+      if ((k === "P5053" || k === "P5033" || /5053|5033|заправщик|55, 56/i.test(DB[k].name || "")) && Array.isArray(DB[k].sheets)) DB[k].sheets = DB[k].sheets.concat(s3);
+    });
+  }
+})();
+</script>
+<script>
+window.getSvg1277 = function(mode) {
+  function box(x,y,w,h,col,t1,t2,t3,desc) {
+    return '<g style="cursor:pointer" onclick="showCustomSchNode(\''+t1+' ('+t2+')\',\''+desc+'\')"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="#0f172a" stroke="'+col+'" stroke-width="2"/><text x="'+(x+w/2)+'" y="'+(y+20)+'" fill="'+col+'" font-size="11" font-weight="bold" text-anchor="middle">'+t1+'</text><text x="'+(x+w/2)+'" y="'+(y+37)+'" fill="#e2e8f0" font-size="10" text-anchor="middle">'+t2+'</text><text x="'+(x+w/2)+'" y="'+(y+53)+'" fill="#94a3b8" font-size="9" text-anchor="middle">'+t3+'</text></g>';
+  }
+  var base = '<svg viewBox="0 0 820 190" style="width:100%;height:auto;background:#070d19;border:1px solid #1e293b;border-radius:10px"><line x1="20" y1="22" x2="800" y2="22" stroke="#ef4444" stroke-width="2"/><text x="25" y="16" fill="#f87171" font-size="10" font-weight="bold">+24V / +30V (P1277 • Ser. 3125)</text><line x1="20" y1="172" x2="800" y2="172" stroke="#64748b" stroke-width="2"/><text x="25" y="185" fill="#94a3b8" font-size="10">GND (Шина X2 / X21 / X22)</text>';
+  if (mode === "ESTOP") return base +
+    box(25,55,170,68,"#f59e0b","F13 (5A) -> X5-57","Замок S8 / S100","Л. 100 Supply","Питание +30 от F13 (5A) через X5-57 на замок S8 и кнопку E-STOP кабины S100.") +
+    box(230,55,170,68,"#38bdf8","X3-1 / X3-2 -> X3-3","Стоп S100 -> S101","Л. 100 Шасси","Последовательный шлейф аварийного останова S100 и S101.") +
+    box(435,55,170,68,"#38bdf8","S102 -> X3-4 / X3-5","Возврат E-STOP","W24\\Red","Возврат петли аварийного стопа в шкаф Encl. 1 на клеммы X3-4 и X3-5.") +
+    box(640,55,160,68,"#10b981","A1 пин 140 + K2","Emergency stop","Реле +15 (F3 30A)","Пин 140 A1 MCUM и реле K2. Перемычка с X5-57 на X3-4 обходит E-STOP.") + '</svg>';
+  if (mode === "CAN") return base +
+    box(25,55,180,68,"#38bdf8","A1 MCUM (Центр)","CAN0 / CAN1 / CAN2","Л. 07 / 101 / 102","CAN0 (500k): X6-3/2. CAN1 J1939 (250k): X6-8/9. CAN2 (125k): X6-6/7.") +
+    box(245,55,190,68,"#10b981","Кабина (CAN0 / CAN1)","A20 DCUM, A57-59, G5","Л. 101 / 108 / 110","Дисплей A20, клавиатуры A57-A59 (ID 20-22), ЭБУ Deutz G5.") +
+    box(475,55,160,68,"#a855f7","Разъём P10 -> X18","TCU1 A12 / TCU2 A13","Л. 300 / 301","Переход CAN0 через P10 (пины 11-12) и X18 на блоки A12 (+2), A13 (+3), A14 (+4).") +
+    box(665,55,135,68,"#f59e0b","CAN2 (125k)","B40 / B41 / B42","R15 Терминатор","Инклинометры шасси B40 (ID 10), люльки B42 (ID 11), стрелы B41 (ID 12).") + '</svg>';
+  if (mode === "DRIVE") return base +
+    box(25,55,180,68,"#38bdf8","Педаль B6 / Реверс S5","X5-25..33 -> A1","Л. 106 Кабина","Педаль B6 и подрулевой S5 (147 FWD, 148 NEU, 124 REV) + сиденье (167).") +
+    box(245,55,180,68,"#10b981","Задний мост (Y10-Y12)","X5-80 / 81 / 82","Л. 112 Гидроход","Y10 вперёд (X5-80), Y11 назад (X5-81), Y12 разрешение (X5-82).") +
+    box(465,55,170,68,"#10b981","Передний мост (Y13-Y15)","X5-83 / 84 / 85","Л. 112 Гидроход","Y14 вперёд (X5-83), Y13 назад (X5-84), Y15 разрешение (X5-85).") +
+    box(665,55,135,68,"#ef4444","Тормоз SAHR Y9","X5-102 + B7 (X5-111)","Y1 / Y28 / Y29","Y9 тормоз SAHR (X5-102), датчик B7 (X5-111), разгрузка Y1, дифф. Y28/29.") + '</svg>';
+  return base +
+    box(25,55,180,68,"#38bdf8","Блоки A12 / A13 / A14","F101-F104 -> X20","Л. 301 Прицеп","F101 (5A CPU X20-16), F125 (5A KL15 X20-10), F102-F104 (10A IO) для TCU1/2/3.") +
+    box(245,55,180,68,"#10b981","PVG Стрелы (Y57-Y68)","K12 (F130) -> X20/X25","Л. 310 / 311","Y57 наклон, Y58 подъём, Y59 телескоп, Y60 люлька, Y68 поворот, Y100 козырёк.") +
+    box(465,55,170,68,"#a855f7","Люлька X33 (S102/A64)","X25 -> W27 -> X33","Л. 308 / 309","E-STOP S102 (X33-1/2), насос S21 (X33-3/6 -> X20-94), B35, пульт A64, A69/70.") +
+    box(665,55,135,68,"#f59e0b","Модуль Oreca","Автомат F23 -> X31","Л. 312 Oreca","F23 (8A/4A) -> X31-1..14 -> X25-43..56 -> X23-1..14 в корзине.") + '</svg>';
+};
+</script>
+<script>
+window.getSvg5033 = function(mode) {
+  function box(x,y,w,h,col,t1,t2,t3,desc) {
+    return '<g style="cursor:pointer" onclick="showCustomSchNode(\''+t1+' ('+t2+')\',\''+desc+'\')"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="#0f172a" stroke="'+col+'" stroke-width="2"/><text x="'+(x+w/2)+'" y="'+(y+20)+'" fill="'+col+'" font-size="11" font-weight="bold" text-anchor="middle">'+t1+'</text><text x="'+(x+w/2)+'" y="'+(y+37)+'" fill="#e2e8f0" font-size="10" text-anchor="middle">'+t2+'</text><text x="'+(x+w/2)+'" y="'+(y+53)+'" fill="#94a3b8" font-size="9" text-anchor="middle">'+t3+'</text></g>';
+  }
+  var base = '<svg viewBox="0 0 820 190" style="width:100%;height:auto;background:#070d19;border:1px solid #1e293b;border-radius:10px"><line x1="20" y1="22" x2="800" y2="22" stroke="#ef4444" stroke-width="2"/><text x="25" y="16" fill="#f87171" font-size="10" font-weight="bold">+24V / +30V (P5033 • Ser. 13357–13360)</text><line x1="20" y1="172" x2="800" y2="172" stroke="#64748b" stroke-width="2"/><text x="25" y="185" fill="#94a3b8" font-size="10">GND (Шина X2 / X22)</text>';
+  if (mode === "ESTOP") return base +
+    box(20,55,170,68,"#f59e0b","F4 (10A) -> X5-9","X3-1/2 (S100 Кабина)","Л. 100 / 101","Питание +15 от F4 (10A) через X5-9 на клеммы X3-1/2 (кнопка E-STOP S100).") +
+    box(220,55,175,68,"#38bdf8","X3-3/4 (Прицеп JT1)","X3-5/6 (Пульт AUTEC)","Л. 101 / 118 / 120","Петля прицепа JT1 пины 1-2 (перемычка X3-3/4) и ДУ AUTEC A77/K7 (перемычка X3-5/6).") +
+    box(425,55,175,68,"#38bdf8","X3-7/8 (Orica)","X3-9/10 (S104/S105)","Л. 101 / 122","Петля блока Orica (X5-156/157 -> X3-7/8) и передние кнопки S104/S105 (X3-9/10).") +
+    box(630,55,170,68,"#10b981","A1 пин 140 + K2","Emergency stop","Реле +15 (F5 30A)","Возврат с X3-10 на пин 140 A1 MCUM и реле K2. Подача +24В с X5-9 на X3-10 обходит весь контур.") + '</svg>';
+  if (mode === "CAN") return base +
+    box(25,55,180,68,"#38bdf8","A1 MCUM (ID 105)","CAN0 / CAN1 / CAN2","Л. 05 / 102 / 113","CAN0 (500k): X6-7/8. CAN1 J1939 (250k): X6-3..6. CAN2 (125k): X6-15/16.") +
+    box(245,55,190,68,"#10b981","Кабина + Шкаф Encl.1","A20, A14, A77, A12","Л. 109 / 111 / 119 / 120","Дисплей A20, пульт A14, приёмник ДУ AUTEC A77 (ID 100), TCU2 A12 (ID 12).") +
+    box(475,55,160,68,"#a855f7","JT1/PT1 -> X26","TCU1 A11 (ID 11)","Л. 118 / 125 / 126","Переход CAN0 через JT1/PT1 (пины 11-12) и X26-1/2 на блок прицепа A11.") +
+    box(665,55,135,68,"#f59e0b","CAN1 / CAN2","G5 Deutz / B40 / A5","Л. 102 / 113","CAN1: ЭБУ Deutz G5 и телеметрия A5. CAN2 (125k): инклинометр шасси B40 (ID 10).") + '</svg>';
+  if (mode === "DRIVE") return base +
+    box(25,55,180,68,"#38bdf8","Педаль B6 / Реверс B5","X5-27..35 -> A1","Л. 107 Кабина","Педаль B6 и подрулевой B5 (124 REV, 148 NEU, 116 FWD) + двери/сиденье (F30).") +
+    box(245,55,180,68,"#10b981","Задний мост (Y10-Y12)","X5-93 / 94 / 95","Л. 115 Гидроход","Y10 вперёд (X5-93), Y11 назад (X5-94), Y12 разрешение (X5-95).") +
+    box(465,55,170,68,"#10b981","Передний мост (Y13-Y15)","X5-96 / 97 / 98","Л. 115 Гидроход","Y13 вперёд (X5-96), Y14 назад (X5-97), Y15 разрешение (X5-98).") +
+    box(665,55,135,68,"#ef4444","Тормоз SAHR Y9","X5-99 + B7 (X5-77)","Y1 / Y28 / Y29","Y9 тормоз SAHR (X5-99), датчик B7 (X5-77), разгрузка Y1, дифф. Y28/29.") + '</svg>';
+  return base +
+    box(25,55,180,68,"#38bdf8","Стрела TCU2 A12","Y108 / Y57-Y61","Л. 119 / 121","F18/F60/F19 -> A12. Реле K40 (F63) -> Y108, Y57..Y61 через X5-133..138.") +
+    box(245,55,180,68,"#10b981","Пульт ДУ AUTEC A77","Реле K7 (F62 5A)","Л. 120 Remote","Приёмник A77 (J7, X5-127..131), реле обхода K7 (A12 H1/E4), зарядка A76.") +
+    box(465,55,170,68,"#a855f7","Модуль Orica","JT3 / PT3 (24P)","Л. 122 / 123 / 124","Питание F32/F14, сигналы A12 (X5-142..150), импульсы шланга, связь JT3/PT3.") +
+    box(665,55,135,68,"#f59e0b","Прицеп TCU1 A11","Encl. 3 (X25)","Л. 125–128","F70/F80/F71 -> A11, свет/маяки K100/101 (X25-1..11), B36, B66, Y36.") + '</svg>';
+};
+
+(function(){
+  var origR = window.renderSchDraw;
+  window.renderSchDraw = function() {
+    var mKey = (typeof curPlat !== "undefined" && DB[curPlat]) ? curPlat : "";
+    var mName = (DB[mKey] && DB[mKey].name) ? DB[mKey].name : "";
+    var is1277 = (mKey === "P1277" || mKey === "170" || /P1277|170/i.test(mName));
+    var is5033 = (mKey === "P5053" || mKey === "P5033" || /5053|5033|заправщик|55, 56/i.test(mName));
+    if (is1277 || is5033) {
+      var mode = window.SCH_CUR_MODE || "ESTOP";
+      function bSt(k) { return (mode === k) ? "border-color:#38bdf8;background:#0c4a6e;color:#fff;" : ""; }
+      var svg = is1277 ? window.getSvg1277(mode) : window.getSvg5033(mode);
+      var lbl4 = is1277 ? "⚡ Л. 301–312 (Прицеп / Люлька)" : "⚡ Л. 119–128 (Стрела / AUTEC / Orica)";
+      return '<div class="sch-svg-box"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:#38bdf8;font-size:13px">📐 Принципиальные чертежи: ' + mName + ' (нажмите на любой узел)</span><div style="display:flex;flex-wrap:wrap;gap:5px"><button class="btn" style="' + bSt("ESTOP") + '" onclick="setSchMode(\'ESTOP\')">⚡ Л. 100/101 (E-STOP / Питание)</button><button class="btn" style="' + bSt("CAN") + '" onclick="setSchMode(\'CAN\')">⚡ Л. 05/07 (Шины CAN0/1/2)</button><button class="btn" style="' + bSt("DRIVE") + '" onclick="setSchMode(\'DRIVE\')">⚡ Л. 112/115 (Гидроход / SAHR)</button><button class="btn" style="' + bSt("TRL") + '" onclick="setSchMode(\'TRL\')">' + lbl4 + '</button></div></div><div id="sch-el-info" style="display:none;background:#0f172a;border:1px solid #38bdf8;border-radius:8px;padding:8px 10px;margin-bottom:8px"></div>' + svg + '</div>';
+    }
+    return origR ? origR() : "";
+  };
+})();
+</script>
+
+<script>
+window.addEventListener("load", function() {
+  window.EXT_CABINETS = window.EXT_CABINETS || {};
+  var bObj = {
+    z: "BASKET",
+    btn: "\uD83E\uDDFA 4. \u041A\u043E\u0440\u0437\u0438\u043D\u0430 / \u041B\u044E\u043B\u044C\u043A\u0430 (X33 / A64 / A69-70)",
+    title: "Распределительный щиток и пульт в корзине (3 - basket, Л. 308–309, 312)",
+    sub: "Кабель стрелы W27 от X25 -> клеммники X33-1..30 и X23-1..14 (Oreca)",
+    ctrl: "Пульт люльки A64 (CAN0 ID 23, JA64) + Джойстики A69 и A70 (JA69 / JA70)",
+    aux: "Кнопка E-STOP S102, насос S21, разрешение S23, сирена H59, камеры Z1/Z2",
+    relays: [
+      { id: "A64", amp: "CAN0", name: "Мембранный пульт управления в корзине (JA64, Л. 308)", from: "Питание F129 (5A, X33-3/11) и CAN0 (X33-9/10)", to: "Управление режимами стрелы, света и аутригеров из люльки", note: "При обрыве X33-9/10 пульт люльки отпадает из CAN0" },
+      { id: "A69_70", amp: "5V / Analog", name: "Два пропорциональных джойстика в корзине (JA69 / JA70, Л. 309)", from: "Опорное 5В и GND от A13 пин H3 через W27 (X33-21..30)", to: "Сигналы X/Y на входы A12 (C4, B4, A4, A3, G4, F4, C3, B3)", note: "Подъём, наклон, телескоп, поворот стрелы и наклон люльки" },
+      { id: "ORECA", amp: "24V / LS", name: "Зарядный блок Oreca в корзине (Л. 312)", from: "Автомат F23 (CH1 8A, CH2-4 по 4A) -> X31 -> X25 -> X23-1..14", to: "Питание 24В+, сигнал LS и кнопка STOP модуля Oreca", note: "При срабатывании автомата F23 блок Oreca обесточивается" }
+    ],
+    fuses: [
+      { id: "F129_B", amp: "5A", cls: "f-5a", name: "Питание +15 пульта A64 и кнопки насоса S21 (X33-3, Л. 307/308)" },
+      { id: "F131_B", amp: "5A", cls: "f-5a", name: "Питание +15 Basket датчиков B35 / B84 (X33-11, Л. 307/308)" },
+      { id: "F132_B", amp: "5A", cls: "f-5a", name: "Питание джойстиков A69 / A70 (X33-21/26, Л. 306/309)" },
+      { id: "F23_B", amp: "8A/4A", cls: "f-20a", name: "4-канальный автомат защиты блока Oreca (X23-1, Л. 312)" }
+    ],
+    right: [],
+    mega: [],
+    terms: [
+      { id: "X33-1 / X33-2", name: "Кнопка E-STOP люльки S102 (Л. 308)", from: "От кнопки E-STOP прицепа S103 (W27\\1)", to: "Возврат в шкаф прицепа X20-48 (W27\\2)", note: "Нажатие или обрыв глушит всю машину" },
+      { id: "X33-3 / X33-6", name: "Кнопка аварийного электронасоса S21 в корзине (Л. 308)", from: "От F129 (5A, X33-3)", to: "Через W27\\6 -> X20-94 -> P10 пин 1 на насос M1", note: "Позволяет сложить стрелу и опустить люльку при заглохшем ДВС" },
+      { id: "X33-3 / X33-18", name: "Педаль/кнопка разрешения стрелы S23 (Deadman, Л. 308)", from: "От +15 Basket (X33-3)", to: "Через W27\\18 на вход разрешения блока A12/A14", note: "Без нажатия S23 джойстики A69/A70 заблокированы" },
+      { id: "X33-4 / X33-5", name: "Звуковая сирена перегруза люльки H59 (Л. 308)", from: "От реле перегруза K105 (X20-71)", to: "На сирену H59 в корзине", note: "Срабатывает при превышении давления в датчике B35" },
+      { id: "X33-7 / X33-8", name: "Датчик давления люльки B35 и концевик козырька B84 (Л. 308)", from: "От F131 (5A, X33-11/13)", to: "Сигналы B35 (X33-7) и B84 (X33-8) через W27 в A13/A14", note: "Контроль перегруза корзины и положения защитного козырька" },
+      { id: "X33-9 / X33-10", name: "Шина CAN0 пульта люльки A64 (Л. 308)", from: "От шкафа прицепа X18 (W27\\9-10)", to: "На разъём JA64 пульта A64 (CAN0_H / CAN0_L)", note: "Витая пара связи с контроллерами" },
+      { id: "X33-21..X33-30", name: "Клеммы джойстиков A69 (левый) и A70 (правый) (Л. 309)", from: "От JA69 и JA70 в корзине", to: "Через кабель W27 -> X25-14..23 -> X20-139..149 на входы A12", note: "По 2 оси (X/Y) на каждый джойстик" },
+      { id: "X23-1..X23-14", name: "Клеммник зарядного модуля Oreca в корзине (Л. 312)", from: "От автомата F23 и X31-1..14 через X25-43..56", to: "На блок Oreca basket unit (24V+, LS, STOP, Res. 1-11)", note: "Отдельная клеммная коробка Oreca в корзине" }
+    ]
+  };
+  window.EXT_CABINETS["P1277"] = (window.EXT_CABINETS["P1277"] || []).concat([bObj]);
+  window.EXT_CABINETS["170"] = (window.EXT_CABINETS["170"] || []).concat([bObj]);
+});
+</script>
+<script>
+window.addEventListener("load", function() {
+  var origSet = window.setCabZone;
+  window.setCabZone = function(z) {
+    window.CAB_ZONE = z;
+    if (z === "BASKET" && typeof window.openCab === "function") {
+      window.openCab();
+      return;
+    }
+    if (typeof origSet === "function") origSet(z);
+  };
+});
+</script>
+<script>
+window.showBaskEl = function(id, name, from, to, note) {
+  var box = document.getElementById("bask-insp");
+  if (!box) return;
+  box.style.display = "block";
+  box.innerHTML = '<div style="border:1px solid #fbbf24;background:#1e1b0e;border-radius:8px;padding:10px 12px;margin-bottom:10px">' +
+    '<div style="color:#fbbf24;font-weight:800;font-size:13.5px">' + id + ' — ' + name + '</div>' +
+    '<div style="color:#e2e8f0;font-size:12px;margin-top:4px"><b>Откуда:</b> ' + from + '<br><b>Куда:</b> ' + to + '</div>' +
+    (note ? '<div style="color:#38bdf8;font-size:11.5px;margin-top:4px">' + note + '</div>' : '') + '</div>';
+};
+
+document.addEventListener("click", function(ev) {
+  var btn = ev.target.closest("button");
+  if (!btn || btn.textContent.indexOf("X33") < 0) return;
+  ev.preventDefault();
+  ev.stopImmediatePropagation();
+  var app = document.getElementById("app");
+  if (!app) return;
+
+  var mods = [
+    ["A64", "CAN0", "Пульт люльки A64 (JA64, Л. 308)", "Питание F129 (5A, X33-3/11) и CAN0 (X33-9/10)", "Управление режимами стрелы, света и аутригеров из люльки", "При обрыве X33-9/10 пульт люльки отпадает из CAN0"],
+    ["A69", "JOY-L", "Левый джойстик корзины A69 (JA69, Л. 309)", "Опорное 5В и GND от A13 пин H3 через W27 (X33-21..25)", "Сигналы X/Y на входы A12 (C4, B4, A4, A3)", "Подъём, наклон и телескоп стрелы из корзины"],
+    ["A70", "JOY-R", "Правый джойстик корзины A70 (JA70, Л. 309)", "Опорное 5В и GND от A13 пин H3 через W27 (X33-26..30)", "Сигналы X/Y на входы A12 (G4, F4, C3, B3)", "Поворот стрелы, наклон люльки и козырёк"],
+    ["ORECA", "UNIT", "Зарядный блок Oreca в корзине (Л. 312)", "Автомат F23 (CH1 8A, CH2-4 по 4A) -> X31 -> X25 -> X23-1..14", "Питание 24В+, сигнал LS и кнопка STOP модуля Oreca", "При срабатывании автомата F23 блок Oreca обесточивается"]
+  ];
+  var fuses = [
+    ["F129", "5A", "f-5a", "Питание +15 пульта A64 и кнопки насоса S21 (X33-3, Л. 307/308)", "Шкаф прицепа Encl. 3 (F129)", "Клеммы X33-3 (A64, S21, S23)", "Защищает цепи управления в корзине"],
+    ["F131", "5A", "f-5a", "Питание +15 Basket датчиков B35 / B84 (X33-11, Л. 307/308)", "Шкаф прицепа Encl. 3 (F131)", "Клеммы X33-11/13 (B35, B84)", "Питание датчиков давления и козырька"],
+    ["F132", "5A", "f-5a", "Питание джойстиков A69 / A70 (X33-21/26, Л. 306/309)", "Шкаф прицепа Encl. 3 (F132)", "Клеммы X33-21/26 (JA69, JA70)", "Питание джойстиков корзины"],
+    ["F23", "8A/4A", "f-20a", "4-канальный автомат защиты блока Oreca (X23-1, Л. 312)", "Питание Oreca (CH1 8A, CH2-4 по 4A)", "Клеммы X31 -> X25 -> X23-1..14", "Установлен в цепи модуля Oreca"]
+  ];
+  var terms = [
+    ["X33-1 / X33-2", "Кнопка E-STOP люльки S102 (Л. 308)", "От кнопки E-STOP прицепа S103 (W27\\1)", "Возврат в шкаф прицепа X20-48 (W27\\2)", "Нажатие или обрыв глушит всю машину"],
+    ["X33-3 / X33-6", "Кнопка аварийного электронасоса S21 в корзине (Л. 308)", "От F129 (5A, X33-3)", "Через W27\\6 -> X20-94 -> P10 пин 1 на насос M1", "Позволяет сложить стрелу и опустить люльку при заглохшем ДВС"],
+    ["X33-3 / X33-18", "Педаль/кнопка разрешения стрелы S23 (Deadman, Л. 308)", "От +15 Basket (X33-3)", "Через W27\\18 на вход разрешения блока A12/A14", "Без нажатия S23 джойстики A69/A70 заблокированы"],
+    ["X33-4 / X33-5", "Звуковая сирена перегруза люльки H59 (Л. 308)", "От реле перегруза K105 (X20-71)", "На сирену H59 в корзине", "Срабатывает при превышении давления в датчике B35"],
+    ["X33-7 / X33-8", "Датчик давления люльки B35 и концевик козырька B84 (Л. 308)", "От F131 (5A, X33-11/13)", "Сигналы B35 (X33-7) и B84 (X33-8) через W27 в A13/A14", "Контроль перегруза корзины и положения защитного козырька"],
+    ["X33-9 / X33-10", "Шина CAN0 пульта люльки A64 (Л. 308)", "От шкафа прицепа X18 (W27\\9-10)", "На разъём JA64 пульта A64 (CAN0_H / CAN0_L)", "Витая пара связи с контроллерами"],
+    ["X33-21..X33-30", "Клеммы джойстиков A69 (левый) и A70 (правый) (Л. 309)", "От JA69 и JA70 в корзине", "Через кабель W27 -> X25-14..23 -> X20-139..149 на входы A12", "По 2 оси (X/Y) на каждый джойстик"],
+    ["X23-1..X23-14", "Клеммник зарядного модуля Oreca в корзине (Л. 312)", "От автомата F23 и X31-1..14 через X25-43..56", "На блок Oreca basket unit (24V+, LS, STOP, Res. 1-11)", "Отдельная клеммная коробка Oreca в корзине"]
+  ];
+
+  function esc(s){ return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'"); }
+  var mHtml = mods.map(function(x){
+    return '<div class="rel-box" onclick="showBaskEl(\''+esc(x.at(0))+'\',\''+esc(x.at(2))+'\',\''+esc(x.at(3))+'\',\''+esc(x.at(4))+'\',\''+esc(x.at(5))+'\')"><div class="rel-top"></div><div class="rel-lbl">'+x.at(0)+'</div></div>';
+  }).join("");
+  var fHtml = fuses.map(function(x){
+    return '<div class="fuse-box '+x.at(2)+'" onclick="showBaskEl(\''+esc(x.at(0))+'\',\''+esc(x.at(3))+'\',\''+esc(x.at(4))+'\',\''+esc(x.at(5))+'\',\''+esc(x.at(6))+'\')"><span>'+x.at(0)+'</span><span style="font-size:12px;font-weight:900">'+x.at(1)+'</span></div>';
+  }).join("");
+  var tHtml = terms.map(function(x){
+    return '<div class="term-box" onclick="showBaskEl(\''+esc(x.at(0))+'\',\''+esc(x.at(1))+'\',\''+esc(x.at(2))+'\',\''+esc(x.at(3))+'\',\''+esc(x.at(4))+'\')">'+x.at(0)+' — '+x.at(1)+'</div>';
+  }).join("");
+
+  if (typeof updateTabCounts === "function") updateTabCounts(); app.innerHTML = '<div class="cab-wrap">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
+      '<div><div style="font-weight:700;color:#38bdf8;font-size:15px">⚡ Распределительный щиток и пульт в корзине (3 - basket)</div><div style="font-size:12px;color:#94a3b8">Hencon MCEF 170 (P1277 / Ser. 3125) • Листы 308–309, 312</div></div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+        '<button class="btn" onclick="window.CAB_ZONE=\'TUG\';openCab()">Шкаф кабины (Encl. 1)</button>' +
+        '<button class="btn" onclick="window.CAB_ZONE=\'SIDE\';openCab()">🗜 2. Боковой отсек (PVG / Опоры / Смазка)</button>' +
+        '<button class="btn" onclick="window.CAB_ZONE=\'REAR\';openCab()">🔋 3. Задний отсек (АКБ / M1 / Deutz)</button>' +
+        '<button class="btn" style="border-color:#38bdf8;background:#0c4a6e;color:#fff">🧺 4. Корзина / Люлька (X33 / A64 / A69-70)</button>' +
+      '</div>' +
+    '</div>' +
+    '<div style="background:#08101a;border:1px dashed #34d399;border-radius:8px;padding:8px 10px;font-size:12px;color:#34d399;font-weight:700;text-align:center;margin-bottom:10px">⚡ Трасса питания корзины: Шкаф прицепа (F129 / F131 / F132 / F23) ➔ Разъём X25 ➔ Кабель стрелы W27 ➔ Коробка люльки X33 / X23</div>' +
+    '<div id="bask-insp" style="display:none"></div>' +
+    '<div class="cab-grid">' +
+      '<div>' +
+        '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">ВЕРХНИЙ РЯД: ПУЛЬТ A64, ДЖОЙСТИКИ A69/A70 И БЛОК ORECA</div><div class="rel-row" style="display:flex;flex-wrap:wrap;gap:8px">'+mHtml+'</div></div>' +
+        '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">СРЕДНЯЯ РЕЙКА: ПРЕДОХРАНИТЕЛИ И АВТОМАТ КОРЗИНЫ</div><div class="fuse-row" style="display:flex;flex-wrap:wrap;gap:6px">'+fHtml+'</div></div>' +
+        '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">НИЖНЯЯ ШИНА: КЛЕММНИКИ ЛЮЛЬКИ X33 И X23</div><div class="term-row" style="display:flex;flex-wrap:wrap;gap:6px">'+tHtml+'</div></div>' +
+      '</div>' +
+      '<div class="cab-right">' +
+        '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">ПРАВЫЙ ОТСЕК / КОНТРОЛЛЕРЫ</div><div class="ecu-box" style="padding:10px;border-radius:8px;border:1px solid #3b82f6;background:#0f172a"><div style="font-size:10px;color:#94a3b8;letter-spacing:1px">BASKET CONTROL</div><div style="font-size:13px;font-weight:900;color:#60a5fa;margin-top:4px">Пульт A64 (CAN0)<br>Джойстики A69 / A70<br>Модуль Oreca</div></div></div>' +
+        '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">Органы безопасности корзины</div><div class="ecu-box" style="background:#1e293b;border-color:#475569"><div style="font-size:12px;font-weight:800;color:#e2e8f0">E-STOP S102 • Насос S21 • Deadman S23 • Сирена H59</div></div></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}, true);
+</script>
+
+
+
+<script>
+(function(){
+  var sMix = [
+    { n: "102", b: "Контроллер", t: "Controller supply A1 MCUM (P1265 Л. 102)", c: "F5 (3A) -> S7 Emergency mode (пин 139). F6 (30A) -> X5-5 -> A1 пины 201-206 (UBAT) и 246 (CPU). F27 (3A) -> таймеры K22/K20/K27. F15 (5A) -> +30 Head. F32 (10A) и F20 (20A) -> питание в прицеп миксера. ETH2 (218/219/231/232)." },
+    { n: "105", b: "Пожарка FSS", t: "Fire Suppression System A52 (P1265 Л. 105)", c: "F30 (3A) -> блок пожаротушения A52 (JF1/JF2): датчик огня, кнопка активации, клапан FSS, термокабели XK1.3-XK1.8. Сигналы в A1 через R5-R7 (1кОм): пин 110 (Bat), 134 (Fault), 111 (Fire). F31 (3A) -> пины 135, 112, 136." },
+    { n: "106", b: "Кабина 1", t: "Cabin - 1 - Controls & Safety (Педаль B6, реверс S5, двери, Л. 106)", c: "Педаль B6 (JB6 -> X5-25..28): пины 247 (5V), 104 (RAT), 217 (GND), 179 (Safety + R1 10кОм). Подрулевой реверс S5 (J5): 147 (FWD), 148 (NEU), 124 (REV), 152 (Horn). Повороты S3 (149/173). F29 (3A) -> стоп B3 (176), двери S15/S11 (194/170), ремень (191), сиденье (167)." },
+    { n: "107", b: "Климат", t: "Cabin - 2 - AC / Heater (Печка и кондиционер A44, Л. 107)", c: "F19 (30A) -> K10 печка (пин 158) и K13 кондиционер (пин 195). Переключатель S50 -> блок A44 (JA44). F22 (15A) -> K13, датчик давления фреона B12. F11 (5A) и F33 (5A) -> радиоопция." },
+    { n: "108", b: "Панель", t: "Cabin - 3 - Dashboard (Конвертер 12В A10, клавиатуры A57/A58, Л. 108)", c: "F35 (7.5A) -> DC/DC A10 (24V/12V) -> F50 (3A) -> розетка 12В X4. F36 (5A) -> +15 Dashboard -> клавиатуры A57 (JA57, ID 20) и A58 (JA58, ID 21) на CAN0. Зуммер H49 от A1 пин 166 через R3 (1.2кОм)." },
+    { n: "111", b: "Телеметрия", t: "Data - Telemetry & interface (A5, антенна A8, модем A66, Л. 111)", c: "F41 (3A) и F16 (3A) -> телеметрия A5 (антенна A8, шина J1939, вход Driver logged in A1 пин 146). Модемная антенна A66." },
+    { n: "114", b: "Аутригеры", t: "Hydraulics - Outriggers (Опоры и угол рамы, Л. 114)", c: "F44 (5A) -> датчики передних опор (пины 114, 138, 108, 132). Клапаны передних опор (181, 160, 184, 187). Датчик угла рамы (133, 128)." },
+    { n: "20", b: "Блоки приц.", t: "Trailer - Controller supply (A12 TCU1 +2, A13 TCU2 +3, Л. 20)", c: "F101 (5A) -> CPU (пин L1, X20-16) блоков A12 и A13. F125 (5A) -> KL15 (пин K4, X20-10). F102 (10A) -> IO A12 (X20-15). F103 (10A) -> IO A13 (X20-18). Шина CAN0 на пинах C2/B2." },
+    { n: "22", b: "Датчики пр.", t: "Trailer - Sensors (Обороты барабана B87, вода B66, реле PVG K3, Л. 22)", c: "F127 (7.5A) -> уровень воды B66 (A13 G4, X20-53), транспортное положение B85 (A13 F4), датчик оборотов барабана B87 (A13 C3, X20-62). F105 (15A) -> K3 PVG supply (A13 A1) и K2 (A12 J2), давление B86 (A13 H2/D1)." }
+  ];
+  var pMix = [
+    { p: "X5-5", b: "Питание контроллера A1 MCUM (P1265 Л. 102)", c: "Верх: Предохранитель F6 (30A) | Низ: Пины 201–206 (UBAT) и 246 (CPU) A1 MCUM" },
+    { p: "X5-25..X5-28", b: "Педаль хода B6 и реверс S5 (P1265 Л. 106)", c: "Верх: A1 пины 247/104/217/179 (B6) и 147/148/124 (S5) | Низ: Разъёмы JB6 и J5" },
+    { p: "X20-10..X20-18", b: "Шкаф прицепа миксера: питание A12 (+2) и A13 (+3) (Л. 20)", c: "Верх: Преды F101 (5A), F125 (5A), F102 (10A), F103 (10A) | Низ: X20-10 KL15, X20-16 CPU, X20-15/18 IO" },
+    { p: "X20-53..X20-62", b: "Датчики миксера: обороты барабана B87, вода B66, давление B86 (Л. 22)", c: "Верх: Блок A13 пины G4, F4, C3, H2, D1 (F127 7.5A) | Низ: X20-53 вода B66, X20-62 датчик вращения барабана B87" }
+  ];
+  if (typeof DB === "object" && DB["P1265"]) {
+    DB["P1265"].sheets = sMix;
+    pMix.forEach(function(item){ if (!DB["P1265"].pins.some(function(x){ return x.p === item.p; })) DB["P1265"].pins.unshift(item); });
+  }
+})();
+</script>
+<script>
+(function(){
+  var sMix2 = [
+    { n: "05", b: "Общий", t: "CAN - schematic (Карта шин CAN0 500k / CAN1 250k, P1265 Л. 05)", c: "CAN0 (500k): A1 MCUM (R), A57 (ID 20), A58 (ID 21), A20 DCUM (R), в прицепе: пульт A60 (ID 23), A12 TCU1, A13 TCU2 (R). CAN1 J1939 (250k): A1 MCUM (R), JD1 диагностика, G5 Deutz EMR-3, A5 Telematics, A66 контроль шин TPMS, A20 DCUM (R)." },
+    { n: "100", b: "Питание", t: "Supply (АКБ, стартер M8, насос M1, замок S8, петля E-STOP, Л. 100)", c: "АКБ G1/G2, масса S1, FuC 200A. F1 (3A) -> M1 аварийный насос (X5-1). F2 (30A) -> K1 стартер -> M8 (X5-2). A1 пины 102/115 -> D+ G3 (X5-3). F13 (5A) -> X5-57 -> замок S8 (X5-58 пин 122 IGN, X5-59 пин 123 Glow) и петля E-STOP: S100 (X3-1/2) -> S101 (X3-3) -> прицеп S2 -> X3-4/5 -> A1 пин 140 и реле K2 (+15, F3 30A)." },
+    { n: "101", b: "Двигатель", t: "Engine Deutz TCD2013 EMR-3 (G5, B8, B16, B18, B20, Л. 101)", c: "FuB (50A) -> K3 -> G7 свечи (X1-3). F26 (5A) -> K26 Deutz Main Relay, уровень ОЖ B16 (X4-6/8/9, пины 141/127). F4 (25A) -> G5 EMR-3 (X4-1). Фильтр B20 (X4-2/3), вода B18 (X4-4/5), топливо B8 (X6-10..13, пины 242/255)." },
+    { n: "103", b: "Свет 1", t: "Lights/signalling-1 (Фары, повороты, стробоскопы, сигнал, Л. 103)", c: "F7 (10A) -> K25 ближний свет H10/H12 (пин 238). F21 (10A) -> K35 дальний H11/H13 (пин 252). Повороты H18/H19 (101/125). Стробоскопы H31/H32 (150/163). Маяк H1 (178). F8 (10A) -> K30 сигнал H9 (240)." },
+    { n: "104", b: "Свет 2", t: "Lights/Signalling-2 (Рабочий свет, габариты, плафон, Л. 104)", c: "F9 (10A) -> K23 рабочий свет передний (пин 253) и K24 задний H43/H44 (пин 239). Габариты H29/H30 (174). F28 (3A) -> плафон H8 (241)." },
+    { n: "109", b: "Дворники", t: "Cabin - 4 - Wipers (Дворники M2/M3 и омыватель M6, Л. 109)", c: "F37 (20A) -> реле K14 дворник левый M3 (пин 151), K15 правый M2 (151), K16 омыватель M6 (175)." },
+    { n: "112", b: "Гидроход", t: "Hydraulics - Drive (Клапаны хода Y10-Y15, тормоз SAHR Y9, датчики, Л. 112)", c: "Зад: Y10 (180, X5-80), Y11 (159, X5-81), Y12 (183, X5-82). Перед: Y13 (153, X5-83), Y14 (177, X5-84), Y15 (156, X5-85). Тормоз SAHR Y9 (189, X5-102), Y26 (186), разгрузка Y1 (162), дифф. Y28 (165). Датчики B2, B11, B34, B7 SAHR (155, X5-111), уровень B5, темп. B9." },
+    { n: "113", b: "Гидравлика", t: "Hydraulics - Function (PVG K17, мойка на Y50, смазка A53, Л. 113)", c: "F17 (5A) -> K17 PVG supply (пин 254). Мойка высокого давления подключена на Y50 (161/185). F43 (7.5A) -> K5 осушитель (190). F18 (5A) -> K18 центральная смазка A53 (126)." },
+    { n: "19", b: "Прицеп P10", t: "Trailer connections (Ввод в прицеп, E-STOP S2, пульт A60, Л. 19)", c: "Ввод в шкаф прицепа Trailer ENC 1: аварийный стоп прицепа S2 (X20-47/48), пульт прицепа A60 (ID 23, питание F128 5A, шина CAN0 через X21)." }
+  ];
+  var pMix2 = [
+    { p: "X3-1..X3-5", b: "Сквозная петля E-STOP тягача и прицепа миксера (P1265 Л. 100 / 19)", c: "Верх: От F13 (5A, X5-57) -> S100 -> S101 -> прицеп S2 | Низ: Возврат на X3-4/5 -> A1 пин 140 и реле K2 (+15) — Перемычка X5-57 -> X3-4 обходит E-STOP" },
+    { p: "X5-57..X5-59", b: "Питание замка S8 (+30), зажигание IGN и Glow (P1265 Л. 100)", c: "Верх: От предохранителя F13 (5A) | Низ: X5-57 (+30 на S8 и S100), X5-58 (IGN пин 122), X5-59 (Glow пин 123)" },
+    { p: "X5-80..X5-85", b: "Клапаны гидрохода мостов Y10..Y15 (P1265 Л. 112)", c: "Верх: A1 пины 180/159/183 (зад) и 153/177/156 (перед) | Низ: На соленоиды хода Y10-Y15" },
+    { p: "X5-102 / X5-111", b: "Клапан тормоза SAHR Y9 и датчик давления B7 (P1265 Л. 112)", c: "Верх: A1 пин 189 (Y9) и пин 155 (B7) | Низ: На катушку тормоза SAHR и датчик B7" },
+    { p: "X20-47 / X20-48", b: "Кнопка E-STOP прицепа миксера S2 (P1265 Л. 19)", c: "Верх: От разъёма тягача | Низ: На аварийную кнопку S2 прицепа" }
+  ];
+  var errMix = [
+    {
+      b: "SOS ЭВАКУАЦИЯ • Выбивает F13 (5A) — КЗ в петле E-STOP (Миксер P1265 Л. 100)",
+      e: "Сценарий 1 (Миксер 46, 47): Закорочен шлейф E-STOP — нет зажигания и хода",
+      c: "1) Скинь клемму с салонной кнопки S100 (или вытащи нижний провод из X3-4), чтобы отсечь КЗ на массу. 2) Поставь целый F13 (5A) -> +24В появится на X5-57. 3) Кинь перемычку с X5-57 в верхнюю колодку X3-4 (пин 140 A1 + реле +15 K2). Заводи и выезжай."
+    },
+    {
+      b: "SOS ЭВАКУАЦИЯ • Выбивает F20 (20A) или F32 (10A) — КЗ в жгуте прицепа миксера (Л. 102 / 19)",
+      e: "Сценарий 2 (Миксер 46, 47): Перебит кабель прицепа P10 (Сила + CAN0 + E-STOP S2)",
+      c: "1) Не меняй сгоревшие F20/F32 — расстыкуй межсекционный разъём прицепа P10 (или откинь CAN0 на X6), чтобы перебитый жгут прицепа не вешал CAN0 тягача. 2) Подай +24В с X5-57 в верхнюю колодку X3-4 (пин 140 A1 + реле K2). Заводи и выгоняй тягач."
+    }
+  ];
+  if (typeof DB === "object" && DB["P1265"]) {
+    DB["P1265"].sheets = (DB["P1265"].sheets || []).concat(sMix2);
+    pMix2.forEach(function(item){ if (!DB["P1265"].pins.some(function(x){ return x.p === item.p; })) DB["P1265"].pins.unshift(item); });
+    DB["P1265"].errors = errMix.concat(DB["P1265"].errors || []);
+  }
+})();
+</script>
+<script>
+window.getSvg1265 = function(mode) {
+  function box(x,y,w,h,col,t1,t2,t3,desc) {
+    return '<g style="cursor:pointer" onclick="showCustomSchNode(\''+t1+' ('+t2+')\',\''+desc+'\')"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="#0f172a" stroke="'+col+'" stroke-width="2"/><text x="'+(x+w/2)+'" y="'+(y+20)+'" fill="'+col+'" font-size="11" font-weight="bold" text-anchor="middle">'+t1+'</text><text x="'+(x+w/2)+'" y="'+(y+37)+'" fill="#e2e8f0" font-size="10" text-anchor="middle">'+t2+'</text><text x="'+(x+w/2)+'" y="'+(y+53)+'" fill="#94a3b8" font-size="9" text-anchor="middle">'+t3+'</text></g>';
+  }
+  var base = '<svg viewBox="0 0 820 190" style="width:100%;height:auto;background:#070d19;border:1px solid #1e293b;border-radius:10px"><line x1="20" y1="22" x2="800" y2="22" stroke="#ef4444" stroke-width="2"/><text x="25" y="16" fill="#f87171" font-size="10" font-weight="bold">+24V / +30V (Миксер P1265 • Ser. 3106, 3107)</text><line x1="20" y1="172" x2="800" y2="172" stroke="#64748b" stroke-width="2"/><text x="25" y="185" fill="#94a3b8" font-size="10">GND (Шина X2 / X21)</text>';
+  if (mode === "ESTOP") return base +
+    box(25,55,170,68,"#f59e0b","F13 (5A) -> X5-57","Замок S8 / S100","Л. 100 Supply","Питание +30 от F13 (5A) через X5-57 на замок S8 (X5-58/59) и E-STOP кабины S100.") +
+    box(230,55,170,68,"#38bdf8","X3-1/2 -> X3-3","Стоп S100 -> S101","Л. 100 Шасси","Последовательный шлейф аварийного останова S100 и S101.") +
+    box(435,55,170,68,"#a855f7","Прицеп S2 (X20-47/48)","Возврат -> X3-4/5","Л. 19 Прицеп","Петля E-STOP прицепа миксера S2 через разъём P10 обратно на X3-4/5.") +
+    box(640,55,160,68,"#10b981","A1 пин 140 + K2","Emergency stop","Реле +15 (F3 30A)","Пин 140 A1 MCUM и реле K2. Перемычка с X5-57 на X3-4 обходит E-STOP.") + '</svg>';
+  if (mode === "CAN") return base +
+    box(25,55,180,68,"#38bdf8","A1 MCUM (Центр)","CAN0 (500k) / CAN1 (250k)","Л. 05 / 102","CAN0: связь с кабиной и прицепом. CAN1 J1939: Deutz, диагностика, телеметрия.") +
+    box(245,55,190,68,"#10b981","Кабина (CAN0 / CAN1)","A20, A57/58, G5, A5, A66","Л. 05 / 108 / 111","Дисплей A20, клавиатуры A57/A58 (ID 20/21), Deutz G5, телеметрия A5, шины TPMS A66.") +
+    box(475,55,160,68,"#a855f7","Прицеп (CAN0)","A12 TCU1 / A13 TCU2","Л. 05 / 20","Контроллеры прицепа миксера A12 (+2) и A13 (+3, терминатор R).") +
+    box(665,55,135,68,"#f59e0b","Пульт прицепа A60","ID 23 (F128 5A)","Л. 05 / 19","Мембранный пульт управления миксером на прицепе.") + '</svg>';
+  if (mode === "DRIVE") return base +
+    box(25,55,180,68,"#38bdf8","Педаль B6 / Реверс S5","X5-25..28 -> A1","Л. 106 Кабина","Педаль B6 и подрулевой S5 (147 FWD, 148 NEU, 124 REV) + сиденье (167).") +
+    box(245,55,180,68,"#10b981","Задний мост (Y10-Y12)","X5-80 / 81 / 82","Л. 112 Гидроход","Y10 вперёд (X5-80), Y11 назад (X5-81), Y12 разрешение (X5-82).") +
+    box(465,55,170,68,"#10b981","Передний мост (Y13-Y15)","X5-83 / 84 / 85","Л. 112 Гидроход","Y13 вперёд (X5-83), Y14 назад (X5-84), Y15 разрешение (X5-85).") +
+    box(665,55,135,68,"#ef4444","Тормоз SAHR Y9","X5-102 + B7 (X5-111)","Y1 / Y28 / Y50","Тормоз SAHR Y9 (X5-102), датчик B7 (X5-111), мойка на Y50 (Л. 113).") + '</svg>';
+  return base +
+    box(25,55,180,68,"#38bdf8","Блоки A12 (+2) / A13 (+3)","F101-F103 / F125 -> X20","Л. 20 Прицеп","F101 (5A CPU X20-16), F125 (5A KL15 X20-10), F102/F103 (10A IO).") +
+    box(245,55,180,68,"#10b981","Обороты барабана B87","X20-62 -> A13 пин C3","Л. 22 Датчики","Датчик скорости вращения барабана B87, уровень воды B66 (X20-53), реле PVG K3.") +
+    box(465,55,170,68,"#a855f7","Свет и скорость B36","K1 (F104 15A) / K2","Л. 21 Прицеп","Фары H14/H15, стробоскопы H6/H7, фонари H16/H17, одометр B36 (X20-52/54/65).") +
+    box(665,55,135,68,"#f59e0b","Камеры Z12 / Z13 / Z14","DC/DC A11 -> A22 / A23","Л. 110 Видео","3 камеры прицепа (зад, правый борт, выгрузка) через сплиттер A22 на монитор A23.") + '</svg>';
+};
+
+(function(){
+  var sMore = [
+    { n: "110", b: "Дисплей/Видео", t: "Cabin - 5 - Displays & Camera (A20 DCUM, 3 камеры Z12-Z14, Л. 110)", c: "F14 (3A) -> A20 DCUM пин 26 (UBAT, X5-73) и пин 18 (Ignition, X5-72). F38 (3A) -> ETH1 (28/20/29/21). F39 (7.5A) -> DC/DC A11 (24V/12V) -> F55/F56 (5A) -> регистратор A22, монитор A23 и камеры прицепа Z12 (зад), Z13 (борт), Z14 (лоток). Триггеры A1: 169, 196, 172." },
+    { n: "21", b: "Свет/Скорость", t: "Trailer - Drive functions (Фонари H16/H17, стробы H6/H7, скорость B36, Л. 21)", c: "A12 TCU1 (+2): реле K2 (пин H1) -> синие стробоскопы H6/H7 (X20-1/2). Задние фонари H16/H17 (пины K1, F1, D1, G1, E1, X20-3..7) и зуммер H3 (J1, X20-11). Датчик скорости прицепа B36 (Odometer, E3/D3, X20-52/54/65). F104 (15A) -> K1 (B1) -> рабочие фары H14/H15 (X20-17)." }
+  ];
+  var pMore = [
+    { p: "X5-72 / X5-73", b: "Питание дисплея A20 DCUM (P1265 Л. 110)", c: "Верх: Предохранитель F14 (3A) | Низ: X5-72 Ignition (пин 18 A20), X5-73 UBAT (пин 26 A20)" },
+    { p: "X20-1..X20-17", b: "Освещение, стробоскопы H6/H7 и зуммер H3 прицепа (P1265 Л. 21)", c: "Верх: TCU1 A12 и реле K1 (F104 15A), K2 | Низ: X20-1/2 стробы, X20-3..7 фонари H16/17, X20-11 зуммер H3, X20-17 фары H14/15" },
+    { p: "X20-52 / X20-54 / X20-65", b: "Датчик скорости прицепа миксера B36 Odometer (P1265 Л. 21)", c: "Верх: Блок A12 пины E3/D3 | Низ: На датчик скорости B36 на оси прицепа" }
+  ];
+  if (typeof DB === "object" && DB["P1265"]) {
+    DB["P1265"].sheets = (DB["P1265"].sheets || []).concat(sMore);
+    pMore.forEach(function(item){ if (!DB["P1265"].pins.some(function(x){ return x.p === item.p; })) DB["P1265"].pins.unshift(item); });
+  }
+  var prevR = window.renderSchDraw;
+  window.renderSchDraw = function() {
+    if (typeof curPlat !== "undefined" && curPlat === "P1265") {
+      var mode = window.SCH_CUR_MODE || "ESTOP";
+      function bSt(k) { return (mode === k) ? "border-color:#38bdf8;background:#0c4a6e;color:#fff;" : ""; }
+      return '<div class="sch-svg-box"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:#38bdf8;font-size:13px">📐 Принципиальные чертежи: Миксер 46, 47 (P1265)</span><div style="display:flex;flex-wrap:wrap;gap:5px"><button class="btn" style="' + bSt("ESTOP") + '" onclick="setSchMode(\'ESTOP\')">⚡ Л. 100/19 (E-STOP / Питание)</button><button class="btn" style="' + bSt("CAN") + '" onclick="setSchMode(\'CAN\')">⚡ Л. 05 (Шины CAN0 / CAN1)</button><button class="btn" style="' + bSt("DRIVE") + '" onclick="setSchMode(\'DRIVE\')">⚡ Л. 112/113 (Гидроход / SAHR)</button><button class="btn" style="' + bSt("TRL") + '" onclick="setSchMode(\'TRL\')">⚡ Л. 20–22 / 110 (Прицеп / Камеры)</button></div></div><div id="sch-el-info" style="display:none;background:#0f172a;border:1px solid #38bdf8;border-radius:8px;padding:8px 10px;margin-bottom:8px"></div>' + window.getSvg1265(mode) + '</div>';
+    }
+    return prevR ? prevR() : "";
+  };
+})();
+</script>
+<script>
+window.addEventListener("load", function() {
+  if (typeof window.getAllCabZones === "function") {
+    var prevZ3 = window.getAllCabZones;
+    window.getAllCabZones = function(plat) {
+      var zs = prevZ3(plat);
+      if (plat === "P1265" && Array.isArray(zs) && !zs.some(function(x){ return x.z === "MIX_TRL"; })) {
+        zs.push({
+          z: "MIX_TRL",
+          btn: "\u0428\u043a\u0430\u0444 \u043f\u0440\u0438\u0446\u0435\u043f\u0430 \u043c\u0438\u043a\u0441\u0435\u0440\u0430 (A12 / A13 / X20)",
+          tpl: {
+            title: "Шкаф прицепа миксера MCCM (Trailer ENC 1 • Л. 19–22)",
+            sub: "Hencon MCEF / MCCM P1265 (Ser. 3106, 3107) • Контроллеры A12 (+2) и A13 (+3)",
+            ctrl: "Контроллеры прицепа A12 TCU1 (+2) и A13 TCU2 (+3) + Пульт A60 (ID 23)",
+            aux: "Шина CAN0 (500k, терминатор R на A13), реле PVG K3, свет K1/K2",
+            relays: [
+              { id: "K1", amp: "15A", name: "Реле задних рабочих фар H14/H15 (Л. 21)", from: "Пред F104 (15A) / A12 пин B1", to: "Фары H14 и H15 (X20-17)", note: "Освещение зоны выгрузки миксера" },
+              { id: "K2", amp: "10A", name: "Реле синих стробоскопов H6/H7 (Л. 21)", from: "A12 пин H1", to: "Стробоскопы H6 и H7 (X20-1/2)", note: "Синхронизация: 3 импульса на SYNC" },
+              { id: "K3", amp: "15A", name: "Реле питания клапанов PVG прицепа (Л. 22)", from: "Пред F105 (15A) / A13 пин A1", to: "Секции гидрораспределителя бочки миксера", note: "Питание катушек PVG прицепа" }
+            ],
+            fuses: [
+              { id: "F101", amp: "5A", cls: "f-5a", name: "Питание CPU блоков A12 и A13 (X20-16, Л. 20)" },
+              { id: "F102", amp: "10A", cls: "f-10a", name: "Питание выходов IO A12 TCU1 (X20-15, Л. 20)" },
+              { id: "F103", amp: "10A", cls: "f-10a", name: "Питание выходов IO A13 TCU2 (X20-18, Л. 20)" },
+              { id: "F104", amp: "15A", cls: "f-15a", name: "Рабочий свет прицепа H14/H15 через K1 (Л. 21)" },
+              { id: "F105", amp: "15A", cls: "f-15a", name: "Питание клапанов PVG прицепа через K3 (Л. 22)" },
+              { id: "F125", amp: "5A", cls: "f-5a", name: "Зажигание KL15 блоков A12 и A13 (X20-10, Л. 20)" },
+              { id: "F127", amp: "7.5A", cls: "f-7-5a", name: "Датчик оборотов бочки B87 и вода B66 (Л. 22)" },
+              { id: "F128", amp: "5A", cls: "f-5a", name: "Пульт управления миксером A60 ID 23 (Л. 19)" }
+            ],
+            right: [],
+            mega: [],
+            terms: [
+              { id: "X20-1 / X20-2", name: "Синие стробоскопы прицепа H6 / H7 (Л. 21)", from: "От реле K2 (A12 пин H1)", to: "На маяки H6 и H7", note: "Сигнализация прицепа" },
+              { id: "X20-3..X20-7", name: "Задние фонари H16 / H17 и зуммер H3 (X20-11) (Л. 21)", from: "От блока A12 пины K1, F1, D1, G1, E1, J1", to: "На фонари прицепа и зуммер заднего хода", note: "Светотехника прицепа" },
+              { id: "X20-10..X20-18", name: "Питание блоков A12 (+2) и A13 (+3) (Л. 20)", from: "От предов F101, F125, F102, F103", to: "X20-10 KL15, X20-16 CPU, X20-15/18 IO", note: "При сгорании F101 оба блока отпадают из CAN0" },
+              { id: "X20-47 / X20-48", name: "Кнопка E-STOP прицепа миксера S2 (Л. 19)", from: "От тягача (J10 пины 2–3)", to: "На аварийную кнопку S2 на прицепе", note: "Разрыв глушит всю машину" },
+              { id: "X20-52 / 54 / 65", name: "Датчик скорости прицепа B36 Odometer (Л. 21)", from: "От блока A12 пины E3 / D3", to: "На датчик скорости на оси прицепа", note: "Счётчик пути прицепа" },
+              { id: "X20-53 / 58 / 62", name: "Обороты барабана B87, вода B66 и давление B86 (Л. 22)", from: "От блока A13 (F127 7.5A)", to: "X20-53 вода B66, X20-62 датчик вращения бочки B87", note: "Контроль вращения миксера" }
+            ]
+          }
+        });
+      }
+      return zs;
+    };
+  }
+});
+</script>
+<script>
+(function(){
+  var s1 = [
+    { n: "06", b: "Общий", t: "CAN - schematic (4 шины: CAN0, CAN1, CAN2 кресло, CAN3 инклинометры, Л. 06)", c: "CAN0 (500k): A1, A10..A13, A20, A57. CAN1 J1939 (250k): A1, G5 Deutz, A41, A20. CAN2 (500k): джойстики кресла B30 (ID 53), B31 (ID 54) и пульты A58/A59. CAN3 (125k): инклинометры B20 (ID 10), B25 (ID 11), B23 (ID 12) и A60 (ID 23)." },
+    { n: "08", b: "Шкафы", t: "Enclosures Overview (7 отсеков ENC1–ENC7 и разъёмы Harting, Л. 08)", c: "ENC1 Main cabinet (задний отсек: A1, Deutz), ENC2 Head (передок: A11, A12), ENC3 Boom (стрела: A13, J5 Harting 10P), ENC4 Cabin (A10), ENC5 Dashboard (S8, S100), ENC6 Seat (B30/B31), ENC7 Trailer controls (A60, S101)." },
+    { n: "100", b: "Питание 1", t: "Supply 1 (АКБ, масса S1, стартер M8, аварийный насос M1, Л. 100)", c: "Задний отсек ENC 1: АКБ G1/G2, S1, FuC 200A, F1 (3A) -> S29 -> M1, F2 (30A) -> K1 -> стартер M8, генератор G3 (A1 пины 102/115), F26 -> K3 свечи накала (пин 211)." },
+    { n: "101", b: "Питание 2", t: "Supply 2 (Реле зажигания +15 K2, петля E-STOP S100/S101, Trolex A50, Л. 101)", c: "Петля E-STOP от S100 (кабина) и S101 (задний пульт) -> пин 140 A1 MCUM и реле +15 K2 (F4 30A). F52 -> A50 Trolex, таймеры K20/K21." },
+    { n: "102", b: "Разъёмы", t: "Disassembly Connectors (Межсекционные разъёмы J-H1/H2 и J-W2A/W2B, Л. 102)", c: "Разъёмы расстыковки полурам: J-H1/P-H1 (16P) и J-H2/P-H2 (6P) между ENC1 и ENC2; J-W2A/P-W2A (16P) и J-W2B/P-W2B (6P) между ENC2 и ENC4." },
+    { n: "103", b: "Блок кабин.", t: "Cabin - Controller Supply (Питание A10 ID +1 и разъём MURT, Л. 103)", c: "F89 (10A), F92 (5A), F93 (5A) -> питание контроллера кабины A10 (Node ID +1) и разъём MURT (JA51A/B)." },
+    { n: "104", b: "Кабина 1", t: "Cabin - Controls & Safety (Блок A10 ID +1, педаль B6, реверс S2, Л. 104)", c: "Шкаф кабины ENC 4: контроллер A10 (Node ID +1). Педаль B6 (пины A4, F3, H4), реверс S2 (G4 FWD, E4 NEU, D4 REV), повороты S5 (J2/A2), датчик тормоза B7 (C2), кнопки S10 и S110 (сброс E-STOP), плафон H8." },
+    { n: "105", b: "Дворники", t: "Cabin - Wiper (Реле K14/K15/K16 от блока A10, Л. 105)", c: "F100 (10A), F101 (15A), F95 (20A) -> реле K14 (левый дворник M3, A10 F1), K15 (правый M2, E1), K16 (омыватель M6, D1)." },
+    { n: "106", b: "Климат", t: "Cabin - AC / Heater (Реле K10/K13 от A10, блок A44, Л. 106)", c: "Контроллер A10 управляет реле печки K10 (пин B1) и кондиционера K13 (пин D1). Переключатель скорости S11 -> блок климата A44." },
+    { n: "107", b: "Панель", t: "Cabin - Dashboard (Замок S8, E-STOP S100, пульт A57, Л. 107)", c: "Щиток панели (01 ENC 5 Dashboard): замок зажигания S8 (X18), кнопка E-STOP кабины S100 (X18), клавиатура A57 (CAN0) и концевик сиденья Seat." },
+    { n: "108", b: "Кресло", t: "Cabin - Seat (Джойстики подлокотников B30/B31 и пульты A58/A59, Л. 108)", c: "Отсек ENC 6 Seat: левый подлокотник B30 (CAN2 ID 53) + A58 (ID 21), правый B31 (ID 54) + A59 (ID 22), клеммники X-UG-GND и X-HS-15." },
+    { n: "109", b: "Дисплей/Вид.", t: "Cabin - Displays & Camera (A20 DCUM, регистратор A24, 3 камеры, Л. 109)", c: "F96 (3A) -> UBAT A20, F97 (3A) -> IGN A20. Видеорегистратор A24 (F3 5A, DC/DC A23) и 3 камеры (A21 сзади, A26 и A27 на стреле)." },
+    { n: "110", b: "Свет кабин.", t: "Cabin - Lights/Signalling (Фары H10-H13, зуммер H50, RFID, Л. 110)", c: "F90 (15A) -> K25 ближний свет H10/H12 (A10 H1), F94 (15A) -> K35 дальний H11/H13 (G1), зуммер H50 (C1), фары H20/H21 (F98), считыватель RFID." },
+    { n: "111", b: "Блоки пер.", t: "Head - Controller Supply (Передний отсек ENC 2: A11 ID +2, A12 ID +3, Л. 111)", c: "F52 (10A -> IO A11), F50 (5A -> KL15), F51 (5A -> CPU), F54 (10A -> IO A12), шина CAN0 (X6/X7/X12)." }
+  ];
+  if (typeof DB === "object" && DB["S105"]) DB["S105"].sheets = s1;
+})();
+</script>
+<script>
+(function(){
+  var s2 = [
+    { n: "112", b: "Гидроход П", t: "Head - Hydraulics 1 (Блоки A11 ID +2, A12 ID +3, опоры и руль, Л. 112)", c: "Передний отсек (03 Head ENC 2): A12 (ID +3) управляет рулём Y45 (H1), Y49 (G1) и датчиком угла B7; A11 (ID +2) управляет передними опорами Y53 (F1/E1), Y54 (D1/C1), концевиками B55/B56 и гидроходом передка Y71 (E1), Y72 (C1)." },
+    { n: "113", b: "Ход/Руль П", t: "Head - Lights/Drive Front (Скорость B34, дифф. Y27, тормоз SAHR Y9, Л. 113)", c: "Передний отсек ENC 2 (A11 +2): скорость B34 (F60 5A), блокировка дифф. Y27 (H1), руль Y74/75 (G1), тормоз SAHR Y9 (из A1 пин 189), клапан молота Y73." },
+    { n: "114", b: "Свет перед.", t: "Head - Lights (Передние фары и стробоскопы ENC 2, Л. 114)", c: "Реле K11 и K12 от блока A11 (+2) -> фары H18/H19 и стробоскопы H31/H32." },
+    { n: "115", b: "Датчики стр.", t: "Boom - Sensors (Блок стрелы A13 ID +4, инклинометры B20/21/23, Л. 115)", c: "Шкаф стрелы (05 Boom ENC 3): F69 (10A) -> инклинометры CAN3 B20 (ID 10), B23 (ID 12), B21 (ID 11). F64 (5A) -> питание CPU/KL15 блока A13 (ID +4). F65 (5A) и F66 (10A) -> IO стрелы, датчик давления B14 (C4) и B22." },
+    { n: "116", b: "Гидр. стр.", t: "Boom - Hydraulics (Клапаны стрелы Y57-Y64, молот Y63, реле K5, Л. 116)", c: "Блок стрелы A13 (ID +4): F68 -> K5 PVG supply (B1). Секции стрелы оборщика: Y57 подъём (K2), Y59 телескоп (J2), Y60 наклон (G2), Y62 поворот (F2), Y63 гидромолот (D1), Y61 (H1), Y64 (K1), K6 (A1), фары стрелы H40/H41." },
+    { n: "117", b: "Двигатель", t: "Trailer - Engine Deutz EMR-3 (Задний отсек ENC 1, G5, K26, Л. 117)", c: "Задний моторный отсек (04 Trailer ENC 1): FuB (50A) -> K3 -> свечи G7. F4 (25A) -> K26 Deutz Main Relay -> ЭБУ G5 EMR-3. Диагностика J1939 (P18/P19). Датчики в A1 MCUM: ОЖ B15 (141/127), фильтр B19, топливо B4 (242/255)." },
+    { n: "118", b: "Телеметрия", t: "Trailer - Telemetry (Модуль A41 и антенна A15 в заднем отсеке, Л. 118)", c: "F36 (3A), F12 (3A) -> телеметрия A41 и антенна A15 на шине CAN1 J1939." },
+    { n: "119", b: "Контроллер", t: "Trailer - Controller Supply (Главный блок A1 MCUM в заднем отсеке, Л. 119)", c: "Задний отсек (04 Trailer ENC 1): F5 (3A) -> A1 пин 139. F6 (30A) -> A1 пины 201-206 (UBAT) и 246 (CPU). F27 (3A) -> K21 -> таймер K7 -> реле массы K22 (20A GND, X27). ETH2, CAN0/1/2, пульт прицепа и центральная смазка A45." },
+    { n: "120", b: "Гидроход З", t: "Trailer - Hydraulics 1 (Клапаны хода Y10-Y15, температура B9, Л. 120)", c: "Задний блок A1 MCUM: клапаны хода заднего моста Y10-Y12 (180/159/183) и переднего Y13-Y15 (153/177/156), разгрузка Y1 (162), дифф. Y28 (165), темп. B9 (103/243)." },
+    { n: "121", b: "Гидр. задн.", t: "Trailer - Hydraulics 2 (Реле PVG K4, клапаны Y50/Y52/Y55, Л. 121)", c: "F33 (7.5A) -> реле K4 PVG supply, клапаны Y50, Y52, Y55 и датчики B78, B57, B60, B61." },
+    { n: "122", b: "Свет задн.", t: "Trailer - Lights / Signalling (Фонари H16/17, стробы H30/31, зуммер H3, Л. 122)", c: "Задний отсек: стробоскопы H30/H31, фонари H16/H17 (пины 134, 101, 125, 137), зуммер H3 (166), фары H13/H15 (K25, F7), K30 (F8)." },
+    { n: "123", b: "Пульт задн.", t: "Trailer - Controls (Клавиатура A60 и кнопка E-STOP S101, Л. 123)", c: "Задний пульт (04 Trailer ENC 7): клавиатура A60 (JA60 на CAN0, F25) и аварийный стоп S101 (E-STOP Trailer, JS101/PS102)." }
+  ];
+  var pSc = [
+    { p: "X1..X5 / X11 (ENC 1 Задний)", b: "Клеммники главного шкафа ENC 1 в заднем моторном отсеке (P1325 Л. 08 / 119)", c: "Верх: A1 MCUM и преды F1-F36 | Низ: X1-3 свечи G7, X3 петля E-STOP (пин 140 + K2), X4 Deutz EMR-3, X5 клапаны Y10-Y15, X11 шины CAN0/1/2/3" },
+    { p: "X27 (04 Trailer ENC 1)", b: "Масса главного контроллера A1 MCUM через таймер K7/K22 (P1325 Л. 119)", c: "Верх: Реле массы K22 (20A GND) и таймер K7 (F27 3A) | Низ: Минусовые пины A1 MCUM (118-121, 142-145)" },
+    { p: "J-H1 / P-H1 (16P) и J-H2 / P-H2 (6P)", b: "Межсекционные разъёмы расстыковки между ENC 1 (Зад) и ENC 2 (Перед) (Л. 102)", c: "Верх: Задний отсек ENC 1 | Низ: Передний отсек ENC 2 — через J-H1 идёт растормаживание SAHR Y9 (пин 189) и шины CAN" },
+    { p: "J-W2A / P-W2A (16P) и J-W2B (6P)", b: "Разъёмы перехода из переднего отсека ENC 2 в кабину ENC 4 (Л. 102)", c: "Верх: Передний отсек ENC 2 | Низ: Шкаф кабины ENC 4 (блок A10 ID +1, E-STOP, педаль, CAN0/CAN2)" },
+    { p: "X6 / X7 / X12 (03 Head ENC 2)", b: "Клеммники переднего отсека: блоки A11 (+2) и A12 (+3), руль и опоры (Л. 111–113)", c: "Верх: F50-F60 и блоки A11/A12 | Низ: Рулевые клапаны Y45/Y49, опоры Y53/Y54, скорость B34, тормоз SAHR Y9" },
+    { p: "X8 / X9 / X13 (01 Cabin ENC 4)", b: "Клеммники шкафа кабины: блок A10 (+1), педаль B6, реверс S2, сброс S110 (Л. 103–104)", c: "Верх: F89-F101 и блок кабины A10 | Низ: Педаль B6, реверс S2, кнопка сброса E-STOP S110, реле света K25/K35" },
+    { p: "X16 / X18 (01 ENC 5 Dashboard)", b: "Клеммники панели кабины: замок S8, E-STOP S100 и пульт A57 (Л. 107)", c: "Верх: Питание +30/+15 кабины | Низ: Замок зажигания S8, салонный грибок E-STOP S100 и клавиатура A57" },
+    { p: "X-UG-GND / X-HS-15 (ENC 6 Seat)", b: "Клеммы подлокотников кресла: джойстики B30/B31 и пульты A58/A59 (Л. 108)", c: "Верх: Питание +15 и шина CAN2 (500k) | Низ: Левый (B30 ID 53, A58 ID 21) и правый (B31 ID 54, A59 ID 22) подлокотники" },
+    { p: "J5 (10P) / X14 / X15 (ENC 3 Boom)", b: "Разъём стрелы J5 и шкаф стрелы оборщика: блок A13 (+4) и гидромолот (Л. 09 / 115–116)", c: "Верх: F64-F69, K5 PVG и блок A13 | Низ: Секции стрелы Y57-Y64, гидромолот Y63, инклинометры B20/21/23 (CAN3)" },
+    { p: "JS101 / PS102 (04 Trailer ENC 7)", b: "Задний пульт Скеллеры: кнопка E-STOP S101 и пульт A60 (Л. 123)", c: "Верх: Шлейф E-STOP из кабины S100 | Низ: Грибок S101 и клавиатура A60 (ID 23, CAN3)" }
+  ];
+  var errSc = [
+    {
+      b: "SOS ЭВАКУАЦИЯ • Скеллера P1325 (Ser. 3179): Отказ стрелы / перебит кабель на стрелу ENC 3",
+      e: "Сценарий 1 (Скеллера 105): КЗ в жгуте стрелы или инклинометров B20/B21/B23",
+      c: "1) Отключи питание шкафа стрелы (05 Boom ENC 3) — вытащи преды F64 (5A), F65 (5A), F66 (10A) и F69 (10A) или расстыкуй разъём стрелы J5 (10P), чтобы перебитый кабель не вешал шины CAN0/CAN3. 2) Главный контроллер A1 MCUM и двигатель Deutz стоят в заднем отсеке (04 Trailer ENC 1) — машина сохраняет ход и рулевое управление. Выгоняй машину на базу."
+    },
+    {
+      b: "SOS ЭВАКУАЦИЯ • Скеллера P1325: Разрыв петли E-STOP (S100 в кабине или S101 сзади)",
+      e: "Сценарий 2 (Скеллера 105): Заблокирован запуск и ход из-за обрыва контура E-STOP",
+      c: "1) Проверь состояние салонного грибка S100 (клеммы X18 на панели 01 ENC 5 Dashboard) и заднего грибка S101 (разъём JS101/PS102 на заднем пульте ENC 7). 2) После восстановления цепи E-STOP обязательно нажми кнопку сброса S110 (вход блока кабины A10, Л. 104) и запускай ДВС."
+    }
+  ];
+  if (typeof DB === "object" && DB["S105"]) {
+    DB["S105"].sheets = (DB["S105"].sheets || []).concat(s2);
+    pSc.forEach(function(item){ if (!DB["S105"].pins.some(function(x){ return x.p === item.p; })) DB["S105"].pins.unshift(item); });
+    DB["S105"].errors = errSc.concat(DB["S105"].errors || []);
+  }
+})();
+</script>
+<script>
+window.getSvg1325 = function(mode) {
+  function box(x,y,w,h,col,t1,t2,t3,desc) {
+    return '<g style="cursor:pointer" onclick="showCustomSchNode(\''+t1+' ('+t2+')\',\''+desc+'\')"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="#0f172a" stroke="'+col+'" stroke-width="2"/><text x="'+(x+w/2)+'" y="'+(y+20)+'" fill="'+col+'" font-size="11" font-weight="bold" text-anchor="middle">'+t1+'</text><text x="'+(x+w/2)+'" y="'+(y+37)+'" fill="#e2e8f0" font-size="10" text-anchor="middle">'+t2+'</text><text x="'+(x+w/2)+'" y="'+(y+53)+'" fill="#94a3b8" font-size="9" text-anchor="middle">'+t3+'</text></g>';
+  }
+  var base = '<svg viewBox="0 0 820 190" style="width:100%;height:auto;background:#070d19;border:1px solid #1e293b;border-radius:10px"><line x1="20" y1="22" x2="800" y2="22" stroke="#ef4444" stroke-width="2"/><text x="25" y="16" fill="#f87171" font-size="10" font-weight="bold">+24V / +30V (Скеллера P1325 • Ser. 3179)</text><line x1="20" y1="172" x2="800" y2="172" stroke="#64748b" stroke-width="2"/><text x="25" y="185" fill="#94a3b8" font-size="10">GND (Шина X2 / X27)</text>';
+  if (mode === "ESTOP") return base +
+    box(25,55,175,68,"#f59e0b","Кабина ENC 5 (X18)","Замок S8 / E-STOP S100","Л. 101 / 107","Щиток панели кабины: замок S8 и грибок S100.") +
+    box(230,55,175,68,"#38bdf8","Задний пульт ENC 7","Грибок S101 (JS101)","Л. 101 / 123","Аварийный стоп на задней секции Скеллеры.") +
+    box(435,55,175,68,"#a855f7","A1 MCUM (ENC 1)","Пин 140 + Реле K2 (+15)","Л. 101 / 119","Главный контроллер A1 стоит в заднем моторном отсеке ENC 1.") +
+    box(640,55,160,68,"#10b981","Сброс S110 (Блок A10)","Кнопка Reset в кабине","Л. 104 Кабина","После отжатия грибков нажать сброс S110 (A10 ID +1).") + '</svg>';
+  if (mode === "CAN") return base +
+    box(20,55,180,68,"#38bdf8","CAN0 (500k) / CAN1 (250k)","A1, A10, A11, A12, A13, G5","Л. 06 Шины","Связь всех 5 контроллеров (A1 + A10..A13), дисплея A20 и ЭБУ Deutz G5.") +
+    box(230,55,185,68,"#10b981","CAN2 (500k) Подлокотники","Джойстики B30/B31, A58/59","Л. 06 / 108","Левый (B30 ID 53, A58 ID 21) и правый (B31 ID 54, A59 ID 22) пульты кресла.") +
+    box(445,55,175,68,"#f59e0b","CAN3 (125k) Стрела","Инклинометры B20/23/25","Л. 06 / 115","Датчики угла B20 (ID 10), B25 (ID 11), B23 (ID 12) и пульт A60 (ID 23).") +
+    box(650,55,150,68,"#a855f7","Разъёмы J-H1 / J-W2A","Harting 16P / 6P / 10P","Л. 08 / 102","Межсекционные разъёмы расстыковки полурам и стрелы J5.") + '</svg>';
+  if (mode === "DRIVE") return base +
+    box(25,55,180,68,"#38bdf8","Блок кабины A10 (+1)","Педаль B6 / Реверс S2","Л. 104 Кабина","Педаль B6 (A4/F3/H4) и реверс S2 (G4 FWD, E4 NEU, D4 REV) в ENC 4.") +
+    box(245,55,180,68,"#10b981","Задний отсек ENC 1","A1: Y10–Y15 / Deutz G5","Л. 117 / 120","Клапаны гидрохода Y10–Y15, разгрузка Y1, дифф. Y28, темп. B9.") +
+    box(465,55,170,68,"#a855f7","Передний отсек ENC 2","A11 (+2) / A12 (+3)","Л. 111–113","Рулевое управление Y45/Y49, опоры Y53/Y54, дифф. Y27, руль Y74/75.") +
+    box(665,55,135,68,"#ef4444","Тормоз SAHR Y9","A1 пин 189 -> J-H1 -> ENC 2","Датчик B11","Растормаживание идёт из заднего блока A1 через разъём J-H1 в передок.") + '</svg>';
+  return base +
+    box(25,55,180,68,"#38bdf8","Шкаф стрелы ENC 3","Блок A13 (Node ID +4)","Л. 09 / 115","F64 (5A CPU/KL15), F65/66 (IO), F68 -> K5 PVG supply.") +
+    box(245,55,180,68,"#10b981","Секции стрелы Y57–Y68","Подъём, телескоп, наклон","Л. 116 Стрела","Y57 подъём, Y59 телескоп, Y60 наклон, Y62/68 поворот, B81 давление.") +
+    box(465,55,170,68,"#ef4444","Гидромолот Y63 / Y64","A13 D1/K1 + A1 пин 155","Л. 113 / 116","Клапаны управления гидромолотом оборщика и центральная смазка A49.") +
+    box(665,55,135,68,"#f59e0b","Камеры A26 / A27","Монитор A24 (DC/DC A23)","Л. 109 Видео","2 камеры на стреле + 1 камера заднего хода A21.") + '</svg>';
+};
+
+(function(){
+  var prevR1 = window.renderSchDraw;
+  window.renderSchDraw = function() {
+    if (typeof curPlat !== "undefined" && curPlat === "S105") {
+      var mode = window.SCH_CUR_MODE || "ESTOP";
+      function bSt(k) { return (mode === k) ? "border-color:#38bdf8;background:#0c4a6e;color:#fff;" : ""; }
+      return '<div class="sch-svg-box"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:#38bdf8;font-size:13px">📐 Принципиальные чертежи: Скеллера 105 (P1325 • Ser. 3179)</span><div style="display:flex;flex-wrap:wrap;gap:5px"><button class="btn" style="' + bSt("ESTOP") + '" onclick="setSchMode(\'ESTOP\')">⚡ Л. 100/101 (Питание / E-STOP)</button><button class="btn" style="' + bSt("CAN") + '" onclick="setSchMode(\'CAN\')">⚡ Л. 06/08 (4 шины CAN0–CAN3)</button><button class="btn" style="' + bSt("DRIVE") + '" onclick="setSchMode(\'DRIVE\')">⚡ Л. 112/120 (Ход / Руль / SAHR)</button><button class="btn" style="' + bSt("TRL") + '" onclick="setSchMode(\'TRL\')">⚡ Л. 115/116 (Стрела / Молот)</button></div></div><div id="sch-el-info" style="display:none;background:#0f172a;border:1px solid #38bdf8;border-radius:8px;padding:8px 10px;margin-bottom:8px"></div>' + window.getSvg1325(mode) + '</div>';
+    }
+    return prevR1 ? prevR1() : "";
+  };
+
+  var s261A = [
+    { n: "06", b: "Общий", t: "Overview CAN bus (CAN0 500k, CAN1 250k, CAN2 125k, P5042 Л. 06)", c: "CAN0 (500k): A1 MCUM, A20 DCUM (ID 127, R), A57 (ID 20), прицеп: A12 (+2), A13 (+3), A14 (+4), пульт A8 (ID 21), джойстики A9/A16 (ID 51/52), платформа: пульт A10 (ID 22, R), джойстики A21/A22 (ID 53/54). CAN1: G5 Deutz EMR-3. CAN2: инклинометр B40 (ID 10)." },
+    { n: "100", b: "Питание", t: "Supply (АКБ, стартер M8, насос M1, замок S8, петля E-STOP, Л. 100)", c: "F1 (3A) -> M1 аварийный насос. F2 (30A) -> K1 стартер M8. F13 (5A) -> X5-57 -> замок S8 и последовательная петля E-STOP: S100 (кабина) -> S103 (прицеп) -> S104 (верхняя платформа) -> пин 140 A1 и реле K2 (+15, F3 30A)." },
+    { n: "101", b: "Двигатель", t: "Engine Deutz TCD2013 EMR-3 (G5, B8, B16, B18, B20, Л. 101)", c: "FuB (50A) -> K3 -> свечи G7. F47 (5A) -> K26 Deutz Main Relay, уровень ОЖ B16 (141/127). F4 (25A) -> G5 EMR-3. Фильтр B20, вода B18, топливо B8 (242/255)." },
+    { n: "102", b: "Контроллер", t: "Controller supply A1 MCUM, таймеры K22/K20/K27 (Л. 102)", c: "F5 (3A) -> S7 (139). F6 (30A) -> A1 (201-206, 246). F27 (3A) -> K22/K20/K27. F32 (10A) и F20 (20A) -> питание прицепа TO TRAILER." },
+    { n: "103", b: "Свет 1", t: "Lights/signalling-1 (Фары H10-H13, стробы H24/H25, сигнал H9, Л. 103)", c: "F7 (10A) -> K25 ближний свет (238), F21 (10A) -> K35 дальний (252), повороты H18/19 (101/125), стробы H24/25 (163/150), маяк H1 (178), F8 (10A) -> K30 сигнал H9 (240)." },
+    { n: "104", b: "Свет 2", t: "Lights/Signalling-2 (Рабочий свет K23/K24, габариты, плафон, Л. 104)", c: "F9 (10A) -> K23 передний свет H45/46 (253) и K24 задний H43/44 (239), габариты H29/30 (174), F28 (3A) -> плафон H8 (241)." },
+    { n: "105", b: "Пожарка FSS", t: "Fire Suppression System A52 (Л. 105)", c: "F30 (3A) -> блок A52 (JF1/JF2): датчики огня, кнопка, клапан, термокабели. Сигналы в A1: 110 (Bat), 134 (Fault), 111 (Fire)." },
+    { n: "106", b: "Кабина 1", t: "Cabin - 1 - Controls & Safety (Педаль B6, реверс S5, двери, Л. 106)", c: "Педаль B6 (247/104/217/179), реверс S5 (147 FWD, 148 NEU, 124 REV), стоп B3 (176), двери S15/S11 (194/170), сиденье (167)." },
+    { n: "107", b: "Климат", t: "Cabin - 2 - AC / Heater (Печка K10, кондиционер K13, A44, Л. 107)", c: "F19 (30A) -> K10 печка (158) и K13 кондиционер (195), переключатель S50 -> блок A44, датчик фреона B12." },
+    { n: "108", b: "Панель", t: "Cabin - 3 - Dashboard (Клавиатура A57 ID 20 и зуммер H48, Л. 108)", c: "F36 (5A) -> клавиатура A57 (ID 20, CAN0), зуммер H48 от A1 пин 166 через R3 (1.2кОм)." },
+    { n: "109", b: "Дворники", t: "Cabin - 4 - Wipers (Дворники M2/M3 и омыватель M6, Л. 109)", c: "F37 (20A) -> реле K14 (левый M3, 151), K15 (правый M2, 151), K16 (омыватель M6, 175)." },
+    { n: "110", b: "Дисплей/Вид.", t: "Cabin - 5 - Displays & Camera (A20 DCUM, регистратор A18, камеры Z3/Z4, Л. 110)", c: "F14 (3A) -> A20 DCUM. Видеорегистратор A18 (сплиттер), монитор A19 и камеры Z3/Z4 (триггеры 169, 196, 172)." },
+    { n: "112", b: "Гидроход", t: "Hydraulics - Drive (Клапаны хода Y10-Y15, тормоз SAHR Y9, B7, Л. 112)", c: "Зад: Y10-Y12 (180/159/183). Перед: Y13-Y15 (153/177/156). Тормоз SAHR Y9 (189), разгрузка Y1 (162), дифф. Y28 (165), датчик B7 (155)." }
+  ];
+  if (typeof DB === "object" && DB["P5042"]) DB["P5042"].sheets = s261A;
+})();
+</script>
+<script>
+(function(){
+  var s261B = [
+    { n: "114", b: "Аутригеры П", t: "Hydraulics - Outriggers (Передние опоры Y53/Y54, угол B24, Л. 114)", c: "F44 (5A) -> датчики передних опор B55/56, B13/14, клапаны Y53/Y54 (181/160/184/187), угол рамы B24 (133/128), блокировки руля Y74/Y75 (137/193)." },
+    { n: "115", b: "Прицеп P10", t: "Trailer - Connections (Разъём P10, инклинометр B40 ID 10, Л. 115)", c: "Разъём прицепа P10 (16P Harting) -> X18/X20/X21; F125 -> инклинометр B40 (ID 10, CAN2 125k, R15)." },
+    { n: "116", b: "Блоки TCU1/2", t: "Trailer - Controller supply (A12 ID +2, A13 ID +3, Л. 116)", c: "F101 (5A CPU X20-16), F126 (5A KL15 X20-10), F102 (10A IO A12), F103 (10A IO A13)." },
+    { n: "117", b: "Блок TCU3", t: "Trailer - Controller supply (Блок платформы A14 ID +4, Л. 117)", c: "Питание третьего контроллера прицепа A14 (Node ID +4): F104 (10A IO), F125 (5A KL15), F101 (5A CPU)." },
+    { n: "118", b: "Свет приц.", t: "Trailer - Lights/signalling (Фары H14/15, стробы H33/34, фонари, Л. 118)", c: "F106 (15A) -> K101 свет платформы H14/15 (A12 B1), K102 стробоскопы H33/34 (H1), фонари H16/17, зуммер H5." },
+    { n: "119", b: "Датчики пр.", t: "Trailer - Sensors 1 (Скорость B36, опоры B52/53, вода B66, Л. 119)", c: "F124 (7.5A) -> скорость B36 (A12 D3/E3), концевики B63/64, вода B66, давление B57, датчики опор B52/53/60/61 (A13)." },
+    { n: "120", b: "Датчики ст.", t: "Trailer - Sensors 2 (Датчики угла подъёма платформы B79 и B80, Л. 120)", c: "Датчики высоты/угла ножничного механизма B79 и B80 (A12 E4/C4, A14 H4)." },
+    { n: "121", b: "Гидр. стола", t: "Trailer - Hydraulics (Подъём стола Y51/Y75, опоры Y55/56/81, Л. 121)", c: "A13: замок качания Y63, задние опоры Y55/56/81. A12: реле K12 PVG. A14: подъём/опускание ножничной платформы Y51 / Y75." },
+    { n: "122", b: "Пульт приц.", t: "Trailer - Controls/functions (Пульт A8 ID 21, джойстики A9/A16, S103, Л. 122)", c: "Отсек Trailer enc 2: клавиатура A8 (ID 21), джойстики A9 (ID 51) и A16 (ID 52), грибок E-STOP S103, кнопка насоса S4 (F129)." },
+    { n: "123", b: "Платформа", t: "Platform Control/functions (Верхний пульт A10 ID 22, A21/A22, S104, Л. 123)", c: "Верхний щиток платформы (2 - Platform enclosure): пульт A10 (ID 22), джойстики A21 (ID 53) и A22 (ID 54), грибок E-STOP S104, реле света K103 (H17/18/40)." },
+    { n: "124", b: "Кран", t: "Trailer - Hydraulics crane (Клапаны крана Y105/106/107, реле K21, Л. 124)", c: "F24 (10A) -> реле K21, клапаны крана-манипулятора на прицепе Y105, Y106, Y107 (A14 K2/J2/H2/G2)." }
+  ];
+  var p261 = [
+    { p: "X3-1..X3-5 / X5-57", b: "Сквозной шлейф E-STOP: S100 (кабина) -> S103 (прицеп) -> S104 (платформа) (Л. 100)", c: "Верх: F13 (5A, X5-57) -> S100 -> P10 -> S103 -> S104 | Низ: Возврат на X3-4/5 -> пин 140 A1 и реле K2 — Перемычка X5-57 -> X3-4 обходит E-STOP" },
+    { p: "X5-80..X5-85 / X5-102", b: "Клапаны хода Y10-Y15 и тормоз SAHR Y9 Подъёмника 261 (Л. 112)", c: "Верх: A1 пины 180/159/183 (зад), 153/177/156 (перед), 189 (SAHR Y9) | Низ: На соленоиды хода и тормоза" },
+    { p: "P10 (16P) / X18 / X20 / X21", b: "Разъём прицепа P10 и клеммы шкафа прицепа (A12 +2, A13 +3, A14 +4) (Л. 115–117)", c: "Верх: F101-F104, F125, F126 | Низ: X18 CAN0/E-STOP, X20-10 KL15, X20-16 CPU, X20-15/18 IO, инклинометр B40 (ID 10)" },
+    { p: "X20 (Ножничный стол и опоры)", b: "Клапаны подъёма платформы Y51/Y75, датчики высоты B79/B80 и кран Y105-107 (Л. 120–124)", c: "Верх: Блоки A12, A13, A14 и реле K12 / K21 | Низ: Подъём стола Y51/75, опоры Y55/56/81, кран Y105-107" },
+    { p: "Trailer enc 2 (A8 / A9 / A16 / S103)", b: "Нижний пульт на прицепе: клавиатура A8 (ID 21), джойстики A9/A16 (ID 51/52), насос S4 (Л. 122)", c: "Верх: Шина CAN0 (500k) и F129 | Низ: Нижний пульт прицепа и грибок E-STOP S103" },
+    { p: "2 - Platform enclosure (A10 / A21 / A22 / S104)", b: "Верхний пульт на подъёмной платформе: A10 (ID 22), джойстики A21/22 (ID 53/54), S104 (Л. 123)", c: "Верх: Кабель подъёмной платформы от шкафа прицепа | Низ: Пульт A10, джойстики платформы A21/A22, грибок S104, свет K103" }
+  ];
+  var err261 = [
+    { b: "SOS ЭВАКУАЦИЯ • Подъёмник 261 (P5042): Обрыв или КЗ в петле E-STOP (S100 / S103 / S104)", e: "Сценарий 1 (Подъёмник 261): Закорочен кабель на ножничную платформу S104 или прицеп S103", c: "1) Отсеки КЗ на массу (скинь нижний провод на X3-4 или расстыкуй разъём прицепа P10). 2) Поставь целый F13 (5A) -> +24В появится на X5-57. 3) Кинь перемычку с X5-57 на верхнюю колодку X3-4 (пин 140 A1 MCUM + реле +15 K2). Заводи и выезжай." },
+    { b: "SOS ЭВАКУАЦИЯ • Подъёмник 261 (P5042): Выбивает F20 (20A) / F32 (10A) — перебит жгут прицепа P10", e: "Сценарий 2 (Подъёмник 261): Перебит кабель прицепа P10 (Сила + CAN0 + E-STOP)", c: "1) Не меняй сгоревшие F20/F32 — расстыкуй разъём прицепа P10, чтобы перебитый жгут не вешал шину CAN0 тягача. 2) Подай +24В с X5-57 на верхнюю колодку X3-4 (пин 140 A1 + реле K2). Заводи и выгоняй тягач." }
+  ];
+  if (typeof DB === "object" && DB["P5042"]) {
+    DB["P5042"].sheets = (DB["P5042"].sheets || []).concat(s261B);
+    p261.forEach(function(item){ if (!DB["P5042"].pins.some(function(x){ return x.p === item.p; })) DB["P5042"].pins.unshift(item); });
+    DB["P5042"].errors = err261.concat(DB["P5042"].errors || []);
+  }
+})();
+</script>
+<script>
+window.getSvg5042 = function(mode) {
+  function box(x,y,w,h,col,t1,t2,t3,desc) {
+    return '<g style="cursor:pointer" onclick="showCustomSchNode(\''+t1+' ('+t2+')\',\''+desc+'\')"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="#0f172a" stroke="'+col+'" stroke-width="2"/><text x="'+(x+w/2)+'" y="'+(y+20)+'" fill="'+col+'" font-size="11" font-weight="bold" text-anchor="middle">'+t1+'</text><text x="'+(x+w/2)+'" y="'+(y+37)+'" fill="#e2e8f0" font-size="10" text-anchor="middle">'+t2+'</text><text x="'+(x+w/2)+'" y="'+(y+53)+'" fill="#94a3b8" font-size="9" text-anchor="middle">'+t3+'</text></g>';
+  }
+  var base = '<svg viewBox="0 0 820 190" style="width:100%;height:auto;background:#070d19;border:1px solid #1e293b;border-radius:10px"><line x1="20" y1="22" x2="800" y2="22" stroke="#ef4444" stroke-width="2"/><text x="25" y="16" fill="#f87171" font-size="10" font-weight="bold">+24V / +30V (Подъёмник 261 P5042 • Ser. MSLT503613370)</text><line x1="20" y1="172" x2="800" y2="172" stroke="#64748b" stroke-width="2"/><text x="25" y="185" fill="#94a3b8" font-size="10">GND (Шина X2 / X21 / X22)</text>';
+  if (mode === "ESTOP") return base +
+    box(25,55,175,68,"#f59e0b","F13 (5A) -> X5-57","Замок S8 / S100 Кабина","Л. 100 Supply","Питание +30 на замок S8 и салонный грибок E-STOP S100.") +
+    box(230,55,175,68,"#38bdf8","Прицеп P10 -> S103","Нижний E-STOP прицепа","Л. 115 / 122","Последовательная петля через разъём P10 на грибок прицепа S103.") +
+    box(435,55,175,68,"#a855f7","Платформа S104","Верхний грибок стола","Л. 123 Платформа","Кабель на ножничную платформу к верхнему аварийному стопу S104.") +
+    box(640,55,160,68,"#10b981","A1 пин 140 + K2","Emergency stop","Реле +15 (F3 30A)","Возврат петли на пин 140 A1 MCUM и реле K2. Перемычка X5-57 -> X3-4 обходит E-STOP.") + '</svg>';
+  if (mode === "CAN") return base +
+    box(20,55,185,68,"#38bdf8","CAN0 (500k) Тягач","A1 MCUM, A20 DCUM, A57","Л. 06 Шины","Главный контроллер A1, дисплей A20 (ID 127) и пульт кабины A57 (ID 20).") +
+    box(235,55,190,68,"#10b981","CAN0 Прицеп (P10)","A12, A13, A14, A8, A9, A16","Л. 06 / 116 / 122","Блоки A12 (+2), A13 (+3), A14 (+4), пульт A8 (ID 21) и джойстики A9/A16 (ID 51/52).") +
+    box(455,55,180,68,"#a855f7","CAN0 Платформа","Пульт A10, A21, A22","Л. 06 / 123","Верхний пульт платформы A10 (ID 22, R) и джойстики A21 (ID 53), A22 (ID 54).") +
+    box(665,55,135,68,"#f59e0b","CAN1 / CAN2","G5 Deutz / B40 (ID 10)","Л. 06 / 101 / 115","CAN1 (250k): ЭБУ Deutz G5. CAN2 (125k): инклинометр шасси B40.") + '</svg>';
+  if (mode === "DRIVE") return base +
+    box(25,55,180,68,"#38bdf8","Педаль B6 / Реверс S5","X5-25..33 -> A1","Л. 106 Кабина","Педаль B6, подрулевой реверс S5 (147/148/124), двери и сиденье.") +
+    box(245,55,180,68,"#10b981","Задний мост (Y10-Y12)","X5-80 / 81 / 82","Л. 112 Гидроход","Y10 вперёд (X5-80), Y11 назад (X5-81), Y12 разрешение (X5-82).") +
+    box(465,55,170,68,"#10b981","Передний мост (Y13-Y15)","X5-83 / 84 / 85","Л. 112 Гидроход","Y14 вперёд (X5-83), Y13 назад (X5-84), Y15 разрешение (X5-85).") +
+    box(665,55,135,68,"#ef4444","Тормоз SAHR Y9","X5-102 + B7 (X5-111)","Y1 / Y28 / Y53-54","Тормоз SAHR Y9, датчик B7, передние аутригеры Y53/Y54 (Л. 114).") + '</svg>';
+  return base +
+    box(25,55,180,68,"#38bdf8","Ножничный стол","Y51 / Y75 + B79 / B80","Л. 120 / 121","Подъём/опускание платформы Y51/Y75 (A14) и датчики высоты/угла B79/B80.") +
+    box(245,55,180,68,"#10b981","Задние аутригеры","Y55 / Y56 / Y81 / Y63","Л. 119 / 121","Аутригеры прицепа (A13), замок качания Y63 и концевики B52/B53/B60/B61.") +
+    box(465,55,170,68,"#a855f7","Пульты прицепа и стола","A8 (ID 21) / A10 (ID 22)","Л. 122 / 123","Нижний пульт (A8, A9/A16, насос S4) и верхний пульт платформы (A10, A21/A22).") +
+    box(665,55,135,68,"#f59e0b","Кран-манипулятор","Y105 / Y106 / Y107","Л. 124 Кран","Клапаны крана на прицепе (A14 K2/J2/H2/G2, реле K21, F24 10A).") + '</svg>';
+};
+
+(function(){
+  var prevR2 = window.renderSchDraw;
+  window.renderSchDraw = function() {
+    if (typeof curPlat !== "undefined" && curPlat === "P5042") {
+      var mode = window.SCH_CUR_MODE || "ESTOP";
+      function bSt(k) { return (mode === k) ? "border-color:#38bdf8;background:#0c4a6e;color:#fff;" : ""; }
+      return '<div class="sch-svg-box"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:#38bdf8;font-size:13px">📐 Принципиальные чертежи: Подъёмник 261 (P5042)</span><div style="display:flex;flex-wrap:wrap;gap:5px"><button class="btn" style="' + bSt("ESTOP") + '" onclick="setSchMode(\'ESTOP\')">⚡ Л. 100/123 (E-STOP / Питание)</button><button class="btn" style="' + bSt("CAN") + '" onclick="setSchMode(\'CAN\')">⚡ Л. 06 (Шины CAN0 / CAN1 / CAN2)</button><button class="btn" style="' + bSt("DRIVE") + '" onclick="setSchMode(\'DRIVE\')">⚡ Л. 112/114 (Гидроход / SAHR)</button><button class="btn" style="' + bSt("TRL") + '" onclick="setSchMode(\'TRL\')">⚡ Л. 116–124 (Стол / Платформа / Кран)</button></div></div><div id="sch-el-info" style="display:none;background:#0f172a;border:1px solid #38bdf8;border-radius:8px;padding:8px 10px;margin-bottom:8px"></div>' + window.getSvg5042(mode) + '</div>';
+    }
+    return prevR2 ? prevR2() : "";
+  };
+})();
+</script>
+<script>
+(function(){
+  var s161A = [
+    { n: "07", b: "Общий", t: "Overview CAN bus (4 шины: CAN0, CAN1, CAN2, CAN3 джойстики, P1402 Л. 07)", c: "CAN0 (500k): A1, A20 (R), A57/58 (ID 20/21), прицеп: A12 (+2), A13 (+3), A14 (+4), A60/61, люлька A62 (ID 23, R). CAN1 (250k): G5 Deutz EMR-3, A20. CAN2 (125k): B40 (ID 10). CAN3 (250k): джойстики прицепа B43/B44 (ID 33/34) и люльки B41/B42 (ID 35/36, R)." },
+    { n: "100", b: "Питание", t: "Head - Supply (АКБ, насос M1, стартер M8, диоды D2/D3, E-STOP, Л. 100)", c: "F1 (3A) -> M1 аварийный насос (X5-1, диоды D2/D3). F2 (30A) -> K1 стартер M8. Генератор G3 D+ через R2 (471 Ом, пины 102/115). F13 (5A) -> замок S8 (122 IGN, 123 Glow) и петля E-STOP S100 -> прицеп -> люлька -> X3-1 -> пин 140 A1 и реле K2 (+15, F3 30A)." },
+    { n: "101", b: "Двигатель", t: "Head - Engine Deutz TCD2013 EMR-3 (G5, B8, B16, B18, B20, Л. 101)", c: "FuB (50A) -> K3 -> свечи G7. F26 (5A) -> K26 Deutz Main Relay, уровень ОЖ B16 (X4-9, пины 141/127, R9 1кОм). F4 (25A) -> G5 EMR-3. Фильтр B20, вода B18, топливо B8 (242/255)." },
+    { n: "102", b: "Контроллер", t: "Head - Controller supply (A1 MCUM, S7, таймеры K20/22/27/29, Л. 102)", c: "F5 (3A) -> S7 Emergency mode (пин 139). F6 (30A) -> A1 (201-206, 246). F27 (3A) -> таймеры K22/K20/K27/K29. F15 (5A) -> +30 Head. F32 (10A) и F20 (20A) -> питание в прицеп TO TRAILER." },
+    { n: "103", b: "Свет 1", t: "Head - Lights/signalling-1 (Фары H10-H13, стробы H3/H35, сигнал H5, Л. 103)", c: "F7 (10A) -> K25 ближний свет H10/12 (238), F21 (10A) -> K35 дальний H11/13 (252), повороты H18/19 (101/125), стробы H3 (150), H35 (163), маяк H1 (178), F8 (10A) -> K30 сигнал H5 (240)." },
+    { n: "104", b: "Свет 2", t: "Head - Lights/Signalling-2 (Рабочий свет K23/K24, габариты, плафон, Л. 104)", c: "F9 (10A) -> K23 передний свет H45/46 (253) и K24 задний H43/44 (239), габариты H29/30 (174), F28 (3A) -> плафон H8 (241)." },
+    { n: "105", b: "Пожарка FSS", t: "Head - Fire Suppression System A100 (Резисторы R5-R7, Л. 105)", c: "F30 (3A) -> блок пожаротушения A100 (JF1/JF2): датчик огня, кнопка, клапан, термокабели XK1.3-XK1.8. Сигналы в A1 через R5-R7: пин 111 (Fire), 134 (Fault), 110 (Bat, X5-40)." },
+    { n: "106", b: "Кабина 1", t: "Head - Cabin - 1 - Controls & Safety (Педаль B6 + R1, подрулевой B4, Л. 106)", c: "Педаль B6 (247/104/217/179 + резистор R1 10кОм). Подрулевой B4 (147 FWD, 148 NEU, 124 REV, 149/173 повороты, 152 сигнал). F29 (3A) -> стоп B3 (176), двери S6/S10 (194/170), сиденье (167)." },
+    { n: "107", b: "Климат", t: "Head - Cabin - 2 - AC / Heater (Печка K10, кондиционер K13, A44, Л. 107)", c: "F19 (30A) -> K10 печка (158) и K13 кондиционер (195), переключатель S50 -> блок A44 (JA6), датчик фреона B12." },
+    { n: "108", b: "Панель", t: "Head - Cabin - 3 - Dashboard (Клавиатуры A57/A58 и зуммер H48 + R3, Л. 108)", c: "F36 (5A) -> +15 Dashboard -> клавиатуры A57 (ID 20) и A58 (ID 21) на CAN0, зуммер H48 от A1 пин 166 через резистор R3 (1.2кОм, X5-60)." },
+    { n: "109", b: "Дворники", t: "Head - Cabin - 4 - Wipers (Дворники M2/M3 и омыватель M6, Л. 109)", c: "F37 (20A) -> реле K14 (левый M3, 151), K15 (правый M2, 151), K16 (омыватель M6, 175)." },
+    { n: "110", b: "Дисплей/Вид.", t: "Head - Cabin - 5 - Displays & Camera (A20 DCUM, регистратор A18, камеры Z3/Z4, Л. 110)", c: "F14 (3A) -> A20 DCUM пины 26/18. Видеорегистратор A18 (сплиттер WA255), монитор A19 и камеры Z3 (перед), Z4 (борт) + 2 камеры прицепа PA25. Триггеры A1: 169, 196, 172." },
+    { n: "111", b: "Телеметрия", t: "Head - Data - Telemetry & interface (A5, MURT A7, DC/DC A15, Л. 111)", c: "F41 (3A) и F16 (3A) -> телеметрия A5 (антенна A32). Система MURT A7 (JA51A/B/C, K11). F35 (7.5A) -> DC/DC A15 -> F50 (5A)." },
+    { n: "112", b: "Гидроход", t: "Head - Hydraulics - Drive (Клапаны хода Y10-Y15, тормоз SAHR Y9, Л. 112)", c: "Зад: Y10-Y12 (180/159/183). Перед: Y13-Y15 (153/177/156). Тормоз SAHR Y9 (189), Y26 (186), разгрузка Y1 (162), дифф. Y28/29 (165). Скорость B34 (117 + R4 470 Ом), тормоз B7 (130), уровень масла B5 (116 + R10 1кОм, X5-113), темп. B9 (103/243)." },
+    { n: "113", b: "Гидравлика", t: "Head - Hydraulics - Function (Реле PVG K17, смазка A26, осушитель K37, Л. 113)", c: "F17 (5A) -> K17 PVG supply (254). Сварка (171), мойка (154), кран (157), ретардер Y50 (161/185), F43 (7.5A) -> K37 осушитель (190), F18 (5A) -> K18 смазка A26 (126), датчик компрессора B10 (109, X5-132)." }
+  ];
+  if (typeof DB === "object" && DB["P1402"]) DB["P1402"].sheets = s161A;
+})();
+</script>
+<script>
+(function(){
+  var s161B = [
+    { n: "114", b: "Аутригеры П", t: "Head - Hydraulics - Outriggers (Передние опоры Y53/Y54, угол B24, Л. 114)", c: "F44 (5A) -> датчики передних опор B55/56, B13/14 (114/138/108/132), клапаны Y53/Y54 (181/160/184/187), угол рамы B24 (133/128), блокировки руля Y74/Y75 (137/193)." },
+    { n: "300", b: "Прицеп P10", t: "Trailer - Connections (Разъём P10, инклинометр B40, джойстики B43/B44 CAN3, Л. 300)", c: "Разъём прицепа P10 -> шкаф 09 1 (X18/X20/X21). F128 (3A) -> инклинометр B40 (ID 10, CAN2 125k, R15). Джойстики прицепа на шине CAN3: B43 (ID 33) и B44 (ID 34)." },
+    { n: "301", b: "Блоки TCU", t: "Trailer - Controller supply (A12 +2, A13 +3, A14 +4 в шкафу 09 1, Л. 301)", c: "F101 (5A CPU X20-16), F125 (5A KL15 X20-10), F102 (10A IO A12), F103 (10A IO A13), F104 (10A IO A14)." },
+    { n: "302", b: "Свет приц.", t: "Trailer - Drive functions (Фонари H16/17, стробы H33/34, скорость B36, Л. 302)", c: "A12 (+2): K102 стробоскопы H33/34 (H1), фонари H16/17 (K1/F1/D1/G1/E1), зуммер H5 (J1), клапан Y36 (C1), скорость B36 (E3/D3), K101 фары H14/15 (B1)." },
+    { n: "303", b: "Датчики пр.", t: "Trailer - Sensors (Задние опоры B52/57/58/82/83, вода B66, Л. 303)", c: "F126 (7.5A) -> вода B66 (A14 A3), замки B60/61 (E3/D3), концевики и датчики давления задних опор B52/57/58/82/83 (A13), F106 (20A) -> K6 насос воды (A14 B1)." },
+    { n: "304", b: "Датчики стр.", t: "Trailer - Boom sensors (Давление B54, угол B25, транспорт B62, Л. 304)", c: "Давление стрелы B54 (A13 C4), поворот B25 (J4), транспортное положение B62 (E2), перегруз люльки (F2)." },
+    { n: "305", b: "Сигнал. стр.", t: "Trailer - Boom signalling (Фары стрелы H40, центр H61, реле K103-105, Л. 305)", c: "A14: индикатор центра стрелы H61 (J1), реле перегруза K105 (K1). A13: реле фар люльки K103 (A1) и фар стрелы K104 (B1, фары H40)." },
+    { n: "306", b: "Пульты пр.", t: "Trailer - Controls (Клавиатуры A60/61, E-STOP S103, насос S20, Л. 306)", c: "F134 (5A) -> клавиатуры прицепа A60 (ID 22) и A61 на CAN0, E-STOP прицепа S103, F129/F131 (5A) -> питание в люльку, переключатель насоса S20." },
+    { n: "307", b: "Люлька 09 4", t: "Trailer - Basket (Пульт A62 ID 23, джойстики CAN3 B41/42, S102, Л. 307)", c: "Отсек люльки (09 4 - Basket enclosure, X33): пульт A62 (ID 23), джойстики CAN3 B41 (ID 35) и B42 (ID 36), E-STOP люльки S102, насос S21 (F129), разрешение S23, сирена H59, камера Z1." },
+    { n: "308", b: "Гидр. стр.", t: "Trailer - Hydraulics 2 (PVG стрелы Y57-Y60, козырёк Y100, Orica Y3, реле K12, Л. 308)", c: "F130 (7.5A) -> реле K12 PVG Supply (A14 пин A1). Через коробку стрелы 09 2 (X25): Y57 наклон (J2), Y58 подъём (G2), Y59 телескоп (H2), Y60 люлька (F2), Y100 козырёк (F1/E1), Y3 Orica (D1/C1), R14 (10кОм -> E4)." },
+    { n: "309", b: "Гидр. приц.", t: "Trailer - Hydraulics 1 (Поворот Y68, замок Y63, опоры Y55/56/81/82, Л. 309)", c: "A14: поворот стрелы Y68 (K2), замок качания Y63 (H1/G1). A13: задние опоры Y55 (F1/E1), Y56 (K1/J1), выдвижение Y81 (H1/G1), Y82 (D1/C1), клапан Orica Y4." },
+    { n: "310", b: "Oreca", t: "Trailer - Oreca unit (F132 15A -> шкаф 09 1 -> стрела 09 2 -> корзина Oreca, Л. 310)", c: "F132 (15A) -> Oreca 24V+, линии Oreca LS, Oreca STOP и Res. 1..11 из шкафа прицепа 09 1 через коробку стрелы 09 2 (X25) в блок 16 - Oreca basket unit (X23)." }
+  ];
+  var p161 = [
+    { p: "Гребёнка диодов/резисторов Encl. 1", b: "Реальный монтаж: R2, D4, D2, D3, D1, D6, R4, R10, R1, R3, R5-R7, R9 (P1402 фото)", c: "Слева направо: R2 (471 Ом ген. D+), D4, D2/D3 (насос M1), D1, D6, R4 (470 Ом скорость B34), R10 (1кОм масло X5-113), R1 (10кОм педаль B6), R3 (1.2кОм зуммер X5-60), R5-R7 (FSS X5-40), R9 (1кОм ОЖ X4-9)" },
+    { p: "Колодка предов FU5–FU18 (Encl. 1)", b: "Реальный монтаж: FU5(3A), FU6(30A), FU7-9(10A), FU13(3/5A), FU14(5A), FU15(3A), FU16-17(5A), FU18(30A)", c: "Верх: Шина +30 / +15 | Низ: FU6 питание A1 MCUM, FU9 источник +24В для аварийного обхода на X3-1, FU13 замок S8 и E-STOP" },
+    { p: "X3-1 (FU9 -> X3-1)", b: "Возврат шлейфа E-STOP в Encl. 1 на пин 140 A1 и реле K2 (P1402 Л. 100)", c: "Верх: От FU9 (10A) при аварийном обходе | Низ: Возврат от люльки S102 / прицепа S103 / кабины S100" },
+    { p: "CAN3 (B41 / B42 / B43 / B44)", b: "Отдельная цифровая шина джойстиков прицепа и люльки 250k (P1402 Л. 07 / 307)", c: "Верх: A1 MCUM (терм. R) -> B43/B44 (прицеп) | Низ: Кабель стрелы W27 -> X33 -> B41/B42 в люльке 09 4" }
+  ];
+  if (typeof DB === "object" && DB["P1402"]) {
+    DB["P1402"].sheets = (DB["P1402"].sheets || []).concat(s161B);
+    p161.forEach(function(item){ if (!DB["P1402"].pins.some(function(x){ return x.p === item.p; })) DB["P1402"].pins.unshift(item); });
+  }
+})();
+</script>
+<script>
+window.getSvg1402 = function(mode) {
+  function box(x,y,w,h,col,t1,t2,t3,desc) {
+    return '<g style="cursor:pointer" onclick="showCustomSchNode(\''+t1+' ('+t2+')\',\''+desc+'\')"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="#0f172a" stroke="'+col+'" stroke-width="2"/><text x="'+(x+w/2)+'" y="'+(y+20)+'" fill="'+col+'" font-size="11" font-weight="bold" text-anchor="middle">'+t1+'</text><text x="'+(x+w/2)+'" y="'+(y+37)+'" fill="#e2e8f0" font-size="10" text-anchor="middle">'+t2+'</text><text x="'+(x+w/2)+'" y="'+(y+53)+'" fill="#94a3b8" font-size="9" text-anchor="middle">'+t3+'</text></g>';
+  }
+  var base = '<svg viewBox="0 0 820 190" style="width:100%;height:auto;background:#070d19;border:1px solid #1e293b;border-radius:10px"><line x1="20" y1="22" x2="800" y2="22" stroke="#ef4444" stroke-width="2"/><text x="25" y="16" fill="#f87171" font-size="10" font-weight="bold">+24V / +30V (Проходка 161, 164, 239, 2318 • P1402 • Ser. 3289, 3294)</text><line x1="20" y1="172" x2="800" y2="172" stroke="#64748b" stroke-width="2"/><text x="25" y="185" fill="#94a3b8" font-size="10">GND (Шина X2 / X21 / X22)</text>';
+  if (mode === "ESTOP") return base +
+    box(25,55,175,68,"#f59e0b","F13 (5A) -> S8 / S100","Замок зажигания и E-STOP","Л. 100 Supply","Питание +30 от F13 (5A) на замок S8 (122 IGN, 123 Glow) и кнопку E-STOP кабины S100.") +
+    box(230,55,175,68,"#38bdf8","Прицеп S103 (Л. 306)","Люлька S102 (Л. 307)","Кабель стрелы W27","Последовательный шлейф E-STOP через прицеп S103 и люльку S102.") +
+    box(435,55,175,68,"#a855f7","X3-1 -> A1 пин 140","Emergency stop + K2","Реле +15 (F3 30A)","Возврат E-STOP в Encl. 1 на клемму X3-1 -> пин 140 A1 и реле K2.") +
+    box(640,55,160,68,"#10b981","Обход: FU9 -> X3-1","Аварийная перемычка","Без КЗ в прицепе","Расстыковать прицеп/CAN3 и подать +24В с FU9 (10A) на X3-1.") + '</svg>';
+  if (mode === "CAN") return base +
+    box(20,55,180,68,"#38bdf8","CAN0 (500k) Основная","A1, A20, A57/58, A12-14","Л. 07 Шины","Связь A1, дисплея A20, клавиатур кабины A57/58, прицепа A60/61 и люльки A62.") +
+    box(230,55,180,68,"#10b981","CAN1 J1939 (250k)","A1 MCUM <-> Deutz G5","Л. 07 / 101","Связь главного контроллера с ЭБУ двигателя Deutz TCD2013 EMR-3 и дисплеем A20.") +
+    box(440,55,190,68,"#a855f7","CAN3 (250k) Джойстики","B43/B44 (Приц.) + B41/42 (Люлька)","Л. 07 / 307","Цифровые джойстики стрелы и корзины работают по отдельной шине CAN3!") +
+    box(655,55,145,68,"#f59e0b","CAN2 (125k)","Инклинометр B40","ID 10","Датчик наклона шасси B40 на шине CAN2.") + '</svg>';
+  if (mode === "DRIVE") return base +
+    box(25,55,180,68,"#38bdf8","Педаль B6 (R1 10кОм)","Подрулевой B4 (Л. 106)","X5-25..33 -> A1","Педаль B6 (247/104/217/179 + R1) и подрулевой переключатель B4 (147/148/124).") +
+    box(245,55,180,68,"#10b981","Задний мост (Y10-Y12)","X5-80 / 81 / 82","Л. 112 Гидроход","Y10 вперёд (180), Y11 назад (159), Y12 разрешение (183).") +
+    box(465,55,170,68,"#10b981","Передний мост (Y13-Y15)","X5-83 / 84 / 85","Л. 112 Гидроход","Y13 вперёд (153), Y14 назад (177), Y15 разрешение (156).") +
+    box(665,55,135,68,"#ef4444","Тормоз SAHR Y9","Пин 189 + B7 (130)","Y1 / Y28 / Y29","Тормоз SAHR Y9 (189), разгрузка Y1 (162), дифф. Y28/29 (165), скорость B34 (R4).") + '</svg>';
+  return base +
+    box(25,55,180,68,"#38bdf8","Блоки A12 / A13 / A14","F101-F104 / F125 -> X20","Л. 301 Прицеп","Контроллеры прицепа A12 (+2), A13 (+3), A14 (+4) в шкафу 09 1.") +
+    box(245,55,180,68,"#10b981","Опоры и поворот стрелы","Y68, Y63, Y55/56, Y81/82","Л. 303 / 309","Поворот Y68 (A14 K2), замок Y63, задние опоры Y55/56/81/82, клапан Y4.") +
+    box(465,55,170,68,"#a855f7","Люлька 09 4 (X33)","A62 (ID 23) + B41/42 (CAN3)","Л. 306 / 307","Пульт A62, джойстики CAN3 B41/B42, S102 E-STOP, насос S21 (F129), сирена H59.") +
+    box(665,55,135,68,"#f59e0b","Гребёнка Encl. 1","R2, D1-D6, R1, R3-R10","Фото монтажа","Диоды D2/D3 (насос M1), R1 (педаль B6), R3 (зуммер), R5-R7 (FSS A100).") + '</svg>';
+};
+
+(function(){
+  var prevR3 = window.renderSchDraw;
+  window.renderSchDraw = function() {
+    if (typeof curPlat !== "undefined" && (curPlat === "P1402" || curPlat === "P2402")) {
+      var mode = window.SCH_CUR_MODE || "ESTOP";
+      function bSt(k) { return (mode === k) ? "border-color:#38bdf8;background:#0c4a6e;color:#fff;" : ""; }
+      return '<div class="sch-svg-box"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:#38bdf8;font-size:13px">📐 Принципиальные чертежи: Проходка 161, 164, 239, 2318 (P1402)</span><div style="display:flex;flex-wrap:wrap;gap:5px"><button class="btn" style="' + bSt("ESTOP") + '" onclick="setSchMode(\'ESTOP\')">⚡ Л. 100 (E-STOP / Обход FU9->X3-1)</button><button class="btn" style="' + bSt("CAN") + '" onclick="setSchMode(\'CAN\')">⚡ Л. 07 (4 шины CAN0–CAN3)</button><button class="btn" style="' + bSt("DRIVE") + '" onclick="setSchMode(\'DRIVE\')">⚡ Л. 112 (Гидроход / SAHR)</button><button class="btn" style="' + bSt("TRL") + '" onclick="setSchMode(\'TRL\')">⚡ Л. 301–310 (Прицеп / Люлька 09 4)</button></div></div><div id="sch-el-info" style="display:none;background:#0f172a;border:1px solid #38bdf8;border-radius:8px;padding:8px 10px;margin-bottom:8px"></div>' + window.getSvg1402(mode) + '</div>';
+    }
+    return prevR3 ? prevR3() : "";
+  };
+})();
+</script>
+<script>
+(function(){
+  var pRear = [
+    { p: "X1-3 (04 Trailer ENC 1)", b: "Силовой выход свечей накаливания Deutz G7 (P1325 Л. 117)", c: "Верх: Мегапред FuB (50A) -> реле K3 (A1 пин 211) | Низ: На свечи накала G7 двигателя Deutz" },
+    { p: "X3 (04 Trailer ENC 1)", b: "Возврат шлейфа E-STOP с кабины S100 и пульта S101 в задний шкаф (P1325 Л. 101)", c: "Верх: Пин 140 A1 MCUM + катушка реле зажигания K2 (+15) | Низ: От J-H1 (кабина S100) и JS101 (задний грибок S101)" },
+    { p: "X4 (04 Trailer ENC 1)", b: "ЭБУ Deutz EMR-3 G5, реле K26 и датчики B15, B19, B4 (P1325 Л. 117)", c: "Верх: F4 (25A) -> K26 Deutz Main Relay и входы A1 (141/127 ОЖ, 242/255 топливо) | Низ: Жгут двигателя G5 и датчики B15/B19/B4" },
+    { p: "X5 (04 Trailer ENC 1)", b: "Клапаны гидрохода Y10–Y15, PVG Y50/52/55 и датчики B9/B78 (P1325 Л. 120–121)", c: "Верх: A1 пины 180/159/183 (зад), 153/177/156 (перед), 162 (Y1), 165 (Y28) и реле K4 PVG | Низ: На гидромоторы и распределитель" },
+    { p: "X11 (04 Trailer ENC 1)", b: "Узел всех 4 шин CAN0, CAN1, CAN2, CAN3 в заднем шкафу (P1325 Л. 06 / 119)", c: "Верх: Главный контроллер A1 MCUM (терминаторы R) | Низ: Переход в J-H1 (на передок/кабину) и на ЭБУ Deutz G5" },
+    { p: "X27 (04 Trailer ENC 1)", b: "Минусовые пины A1 MCUM через реле-таймер массы K22 (20A GND) (Л. 119)", c: "Верх: Таймер K7 / K21 -> катушка K22 (F27 3A) | Низ: Пины 118–121, 142–145 A1 MCUM — при обрыве K22 блок A1 обесточен" }
+  ];
+  if (typeof DB === "object" && DB["S105"]) {
+    pRear.forEach(function(item){ if (!DB["S105"].pins.some(function(x){ return x.p === item.p; })) DB["S105"].pins.unshift(item); });
+  }
+})();
+
+window.showScRearEl = function(id, name, from, to, note) {
+  var box = document.getElementById("sc-rear-insp");
+  if (!box) return;
+  box.style.display = "block";
+  box.innerHTML = '<div style="border:1px solid #fbbf24;background:#1e1b0e;border-radius:8px;padding:10px 12px;margin-bottom:10px">' +
+    '<div style="color:#fbbf24;font-weight:800;font-size:13.5px">' + id + ' — ' + name + '</div>' +
+    '<div style="color:#e2e8f0;font-size:12px;margin-top:4px"><b>Откуда:</b> ' + from + '<br><b>Куда:</b> ' + to + '</div>' +
+    (note ? '<div style="color:#38bdf8;font-size:11.5px;margin-top:4px">' + note + '</div>' : '') + '</div>';
+};
+
+document.addEventListener("click", function(ev) {
+  var btn = ev.target.closest("button");
+  if (!btn || btn.textContent.indexOf("ENC 1") < 0) return;
+  ev.preventDefault();
+  ev.stopImmediatePropagation();
+  var app = document.getElementById("app");
+  if (!app) return;
+  var rels = [
+    ["K1", "30A", "Реле стартера M8 (Л. 100)", "Пред F2 (30A) / A1 пин 251", "Втягивающее стартера M8 Deutz"],
+    ["K2", "30A", "Главное реле зажигания +15 (Л. 101)", "Возврат петли E-STOP (X3 / S100 / S101)", "Шина +15 и пин 140 A1 MCUM"],
+    ["K3", "50A", "Реле свечей накала G7 (Л. 100 / 117)", "Мегапред FuB (50A) / A1 пин 211", "Клемма X1-3 -> свечи накала G7"],
+    ["K26", "25A", "Deutz Main Relay ЭБУ G5 (Л. 117)", "Пред F4 (25A)", "Питание ЭБУ двигателя Deutz EMR-3 (X4)"],
+    ["K4", "7.5A", "Реле питания клапанов PVG (Л. 121)", "Пред F33 (7.5A) / A1", "Клапаны Y50, Y52, Y55 в заднем отсеке"],
+    ["K22", "20A", "Реле-таймер массы A1 MCUM (Л. 119)", "Таймеры K7 / K21 (F27 3A)", "Клеммник X27 -> минусовые пины A1 MCUM"],
+    ["K25/K30", "10A", "Реле заднего света H13/H15 и сигнала (Л. 122)", "Преды F7 / F8 (10A)", "Задние фары и звуковой сигнал"]
+  ];
+  var fuses = [
+    ["FuC", "200A", "f-30a", "Главный силовой мегапред АКБ (Л. 100)", "АКБ G1/G2", "Общая шина +30 заднего шкафа"],
+    ["FuB", "50A", "f-30a", "Мегапред свечей накала G7 (Л. 117)", "Шина +30", "Реле K3 -> клемма X1-3"],
+    ["F1", "3A", "f-5a", "Аварийный гидронасос M1 (Л. 100)", "Шина +30", "Кнопка S29 -> насос M1"],
+    ["F2", "30A", "f-30a", "Силовая цепь стартера M8 (Л. 100)", "Шина +30", "Реле K1 -> стартер M8"],
+    ["F4", "25A", "f-20a", "Питание ЭБУ Deutz EMR-3 и K26 (Л. 117)", "Шина +30", "Клеммы X4 -> G5 EMR-3"],
+    ["F5", "3A", "f-5a", "Вход аварийного режима A1 пин 139 (Л. 119)", "Шина +30", "Пин 139 A1 MCUM"],
+    ["F6", "30A", "f-30a", "Основное питание A1 MCUM (Л. 119)", "Шина +30", "Пины 201–206 (UBAT) и 246 (CPU) A1"],
+    ["F7/F8", "10A", "f-10a", "Задний свет K25 и сигнал K30 (Л. 122)", "Шина +15", "Фары H13/H15 и реле K30"],
+    ["F12/36", "3A", "f-5a", "Телеметрия A41 и антенна A15 (Л. 118)", "Шина +30/+15", "Модуль телеметрии A41"],
+    ["F27", "3A", "f-5a", "Таймеры массы K7 / K21 / K22 (Л. 119)", "Шина +30", "Обмотка реле массы K22 (X27)"],
+    ["F32", "10A", "f-10a", "Датчики гидрохода и масла B9 (Л. 120)", "Шина +15", "Датчики заднего отсека"],
+    ["F33", "7.5A", "f-7-5a", "Питание реле клапанов PVG K4 (Л. 121)", "Шина +15", "Клапаны Y50, Y52, Y55"],
+    ["F52", "3A", "f-5a", "Питание модуля A50 Trolex (Л. 101)", "Шина +15", "Система контроля A50 Trolex"]
+  ];
+  var terms = [
+    ["X1-3", "Свечи накала Deutz G7 (Л. 117)", "От реле K3 (FuB 50A)", "На свечи накала двигателя G7"],
+    ["X2", "Общая шина массы GND (Л. 100)", "От выключателя массы S1", "Минус всех реле и датчиков заднего шкафа"],
+    ["X3", "Возврат E-STOP на A1 пин 140 и K2 (Л. 101)", "От кабины S100 и заднего грибка S101", "Пин 140 A1 MCUM и катушка реле +15 K2"],
+    ["X4", "Жгут двигателя Deutz EMR-3 G5 (Л. 117)", "От F4 (25A), K26 и A1 MCUM", "ЭБУ G5, датчики ОЖ B15, фильтра B19, топлива B4"],
+    ["X5", "Клапаны хода Y10–Y15 и PVG Y50/52/55 (Л. 120–121)", "От A1 MCUM и реле K4", "Гидромоторы заднего/переднего моста и распределитель"],
+    ["X11", "Узел 4 шин CAN0, CAN1, CAN2, CAN3 (Л. 06 / 119)", "От A1 MCUM (терминаторы R)", "На передний отсек (J-H1), кабину и Deutz G5"],
+    ["X27", "Коммутируемая масса A1 MCUM (Л. 119)", "От реле-таймера массы K22 (20A GND)", "Минусовые пины 118–121, 142–145 блока A1"]
+  ];
+  function esc(s){ return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'"); }
+  var rH = rels.map(function(x){ return '<div class="rel-box" onclick="showScRearEl(\''+esc(x.at(0))+'\',\''+esc(x.at(2))+'\',\''+esc(x.at(3))+'\',\''+esc(x.at(4))+'\',\'\')"><div class="rel-top"></div><div class="rel-lbl">'+x.at(0)+'</div></div>'; }).join("");
+  var fH = fuses.map(function(x){ return '<div class="fuse-box '+x.at(2)+'" onclick="showScRearEl(\''+esc(x.at(0))+'\',\''+esc(x.at(3))+'\',\''+esc(x.at(4))+'\',\''+esc(x.at(5))+'\',\'\')"><span>'+x.at(0)+'</span><span style="font-size:12px;font-weight:900">'+x.at(1)+'</span></div>'; }).join("");
+  var tH = terms.map(function(x){ return '<div class="term-box" onclick="showScRearEl(\''+esc(x.at(0))+'\',\''+esc(x.at(1))+'\',\''+esc(x.at(2))+'\',\''+esc(x.at(3))+'\',\'\')">'+x.at(0)+' — '+x.at(1)+'</div>'; }).join("");
+
+  app.innerHTML = '<div class="cab-wrap">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
+      '<div><div style="font-weight:700;color:#38bdf8;font-size:15px">⚡ Задний главный шкаф на корме Скеллеры (04 Trailer ENC 1 - Main cabinet)</div><div style="font-size:12px;color:#94a3b8">Hencon MSCL 105 (P1325 / Ser. 3179) • Контроллер A1 MCUM, Deutz EMR-3, реле, преды FuC–F52</div></div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px"><button class="btn" onclick="openCab()">← Назад к шкафам кабины и передка</button></div>' +
+    '</div>' +
+    '<div id="sc-rear-insp" style="display:none"></div>' +
+    '<div class="cab-grid"><div>' +
+      '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">ВЕРХНИЙ РЯД: РЕЛЕ ЗАДНЕГО ШКАФА (K1, K2, K3, K26, K4, K22, K25/30)</div><div class="rel-row" style="display:flex;flex-wrap:wrap;gap:8px">'+rH+'</div></div>' +
+      '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">СРЕДНЯЯ РЕЙКА: МЕГАПРЕДЫ FuC/FuB И ПРЕДОХРАНИТЕЛИ F1–F52</div><div class="fuse-row" style="display:flex;flex-wrap:wrap;gap:6px">'+fH+'</div></div>' +
+      '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">НИЖНЯЯ ШИНА: КЛЕММНИКИ ЗАДНЕГО ШКАФА X1, X2, X3, X4, X5, X11, X27</div><div class="term-row" style="display:flex;flex-wrap:wrap;gap:6px">'+tH+'</div></div>' +
+    '</div><div class="cab-right"><div class="cab-sec" style="padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">КОНТРОЛЛЕРЫ ЗАДНЕГО ШКАФА</div><div class="ecu-box" style="padding:10px;border-radius:8px;border:1px solid #3b82f6;background:#0f172a"><div style="font-size:13px;font-weight:900;color:#60a5fa">A1 MCUM (Главный блок)<br>G5 Deutz TCD2013 EMR-3<br>A41 Телеметрия</div></div></div></div></div></div>';
+}, true);
+
+window.addEventListener("load", function() {
+  if (typeof window.getAllCabZones === "function") {
+    var prevZ4 = window.getAllCabZones;
+    window.getAllCabZones = function(plat) {
+      var zs = prevZ4(plat);
+      if (plat === "S105" && Array.isArray(zs) && !zs.some(function(x){ return x.z === "SC_REAR"; })) {
+        zs.unshift({ z: "SC_REAR", btn: "\uD83D\uDD0B 1. \u0417\u0430\u0434\u043D\u0438\u0439 \u0433\u043B\u0430\u0432\u043D\u044B\u0439 \u0448\u043A\u0430\u0444 (ENC 1 \u043D\u0430 \u043A\u043E\u0440\u043C\u0435)", tpl: {} });
+      }
+      return zs;
+    };
+  }
+});
+</script>
+<script>
+window.showLiftEl = function(id, name, from, to, note) {
+  var box = document.getElementById("lift-insp");
+  if (!box) return;
+  box.style.display = "block";
+  box.innerHTML = '<div style="border:1px solid #fbbf24;background:#1e1b0e;border-radius:8px;padding:10px 12px;margin-bottom:10px">' +
+    '<div style="color:#fbbf24;font-weight:800;font-size:13.5px">' + id + ' — ' + name + '</div>' +
+    '<div style="color:#e2e8f0;font-size:12px;margin-top:4px"><b>Откуда:</b> ' + from + '<br><b>Куда:</b> ' + to + '</div>' +
+    (note ? '<div style="color:#38bdf8;font-size:11.5px;margin-top:4px">' + note + '</div>' : '') + '</div>';
+};
+
+window.renderLiftPanel = function(isTop) {
+  var app = document.getElementById("app");
+  if (!app) return;
+  var title = isTop ? "🧺 Верхний пульт на самой люльке кассеты (2 - Platform enclosure • Л. 123)" : "🎛️ Нижний пульт управления кассетой на прицепе (Trailer enc 2 • Л. 122)";
+  var sub = isTop ? "Подъёмник 261 (P5042 • MSLT503613370) • Пульт A10 (ID 22), джойстики A21/A22 (ID 53/54), E-STOP S104" : "Подъёмник 261 (P5042 • MSLT503613370) • Пульт A8 (ID 21), джойстики A9/A16 (ID 51/52), E-STOP S103, насос S4";
+  var mods = isTop ? [
+    ["A10 (ID 22)", "CAN0", "Верхний пульт люльки кассеты (8 кнопок, терм. R, Л. 123)", "Кабель подъёмной платформы от шкафа прицепа (F130)", "Управление подъёмом, опорами и режимами с люльки кассеты", "Стоит оконечный терминатор R шины CAN0 (500 kbit/s)"],
+    ["A21 (ID 53)", "CAN0", "Джойстик стрелы/стола на люльке кассеты (Л. 123)", "Шина CAN0 и питание +15 Platform (разъём X15)", "Управление подъёмом/опусканием кассеты из корзины", "Цифровой джойстик CAN0 (Node ID 53)"],
+    ["A22 (ID 54)", "CAN0", "Джойстик корзины/крана на люльке кассеты (Л. 123)", "Шина CAN0 и питание +15 Platform (разъём X14)", "Вспомогательные движения платформы/стрелы из корзины", "Цифровой джойстик CAN0 (Node ID 54)"],
+    ["K103", "15A", "Реле освещения люльки кассеты H17, H18, H40 (Л. 123)", "Блок A13 / пред F106", "Фары рабочей зоны люльки H17, H18, H40", "Включается с верхнего или нижнего пульта"]
+  ] : [
+    ["A8 (ID 21)", "CAN0", "Нижний пульт управления кассетой (15 кнопок, Л. 122)", "Шина CAN0 и пред F130 (5A)", "Управление аутригерами, подъёмом кассеты и светом снизу", "Установлен на борту прицепа в коробе Trailer enc 2"],
+    ["A9 (ID 51)", "CAN0", "Нижний джойстик 1 (Joystick Boom Trailer, Л. 122)", "Шина CAN0 и пред F107 (5A)", "Управление подъёмом/опусканием кассеты с нижнего поста", "Цифровой джойстик CAN0 (Node ID 51)"],
+    ["A16 (ID 52)", "CAN0", "Нижний джойстик 2 (Joystick Basket Trailer, Л. 122)", "Шина CAN0 и пред F107 (5A)", "Управление опорами / краном с нижнего поста", "Цифровой джойстик CAN0 (Node ID 52)"]
+  ];
+  var fuses = isTop ? [
+    ["F130", "5A", "f-5a", "Питание верхнего пульта A10 и джойстиков A21/A22 на люльке (Л. 123)", "Шкаф прицепа Trailer enclosure", "Кабель платформы -> разъёмы X14/X15/X100"],
+    ["F106", "15A", "f-15a", "Питание освещения люльки кассеты через K103 (Л. 118 / 123)", "Шкаф прицепа Trailer enclosure", "Фары люльки H17, H18, H40"]
+  ] : [
+    ["F129", "5A", "f-5a", "Питание кнопки аварийного электронасоса S4 внизу кассеты (Л. 122)", "Шкаф прицепа Trailer enclosure", "Переключатель S4 -> через P10 на насос M1 в тягаче"],
+    ["F107", "5A", "f-5a", "Питание нижних джойстиков кассеты A9 и A16 (Л. 122)", "Шкаф прицепа Trailer enclosure", "Разъёмы джойстиков A9 (ID 51) и A16 (ID 52)"],
+    ["F130", "5A", "f-5a", "Питание нижнего пульта A8 ID 21 (Л. 122)", "Шкаф прицепа Trailer enclosure", "Разъём JA8 пульта A8"]
+  ];
+  var terms = isTop ? [
+    ["S104 (E-STOP Люльки)", "Верхний грибок аварийного останова на самой люльке кассеты (Л. 123)", "От нижнего грибка прицепа S103 по кабелю платформы", "Возврат через P10 на X3-4/5 -> пин 140 A1 и реле K2"],
+    ["X14 / X15 / X100", "Разъёмы джойстиков A21/A22 и пульта A10 в коробе люльки (Л. 123)", "Кабель подъёмной платформы от шкафа прицепа", "На джойстики A21 (ID 53), A22 (ID 54) и пульт A10 (ID 22)"],
+    ["CAN0_H / CAN0_L (Терм. R)", "Оконечный узел шины CAN0 (500 kbit/s) на люльке кассеты (Л. 06 / 123)", "От шкафа прицепа по кабелю платформы", "В пульт A10 (встроенный терминатор 120 Ом)"]
+  ] : [
+    ["S103 (E-STOP Прицепа)", "Нижний грибок аварийного останова внизу кассеты (Л. 122)", "От салонного грибка S100 через разъём P10", "Далее на верхний грибок люльки S104"],
+    ["S4 (Аварийный насос M1)", "Переключатель аварийного опускания кассеты внизу прицепа (Л. 122)", "От предохранителя F129 (5A)", "Через P10 на электронасос M1 в тягаче (опускание кассеты при заглохшем ДВС)"],
+    ["JA8 / X18 (CAN0 Прицепа)", "Подключение нижнего пульта A8 и джойстиков A9/A16 к шине CAN0 (Л. 122)", "От шкафа прицепа Trailer enclosure", "На A8 (ID 21), A9 (ID 51) и A16 (ID 52)"]
+  ];
+  function esc(s){ return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'"); }
+  var mH = mods.map(function(x){ return '<div class="rel-box" onclick="showLiftEl(\''+esc(x.at(0))+'\',\''+esc(x.at(2))+'\',\''+esc(x.at(3))+'\',\''+esc(x.at(4))+'\',\''+esc(x.at(5))+'\')"><div class="rel-top"></div><div class="rel-lbl">'+x.at(0)+'</div></div>'; }).join("");
+  var fH = fuses.map(function(x){ return '<div class="fuse-box '+x.at(2)+'" onclick="showLiftEl(\''+esc(x.at(0))+'\',\''+esc(x.at(3))+'\',\''+esc(x.at(4))+'\',\''+esc(x.at(5))+'\',\'\')"><span>'+x.at(0)+'</span><span style="font-size:12px;font-weight:900">'+x.at(1)+'</span></div>'; }).join("");
+  var tH = terms.map(function(x){ return '<div class="term-box" onclick="showLiftEl(\''+esc(x.at(0))+'\',\''+esc(x.at(1))+'\',\''+esc(x.at(2))+'\',\''+esc(x.at(3))+'\',\'\')">'+x.at(0)+' — '+x.at(1)+'</div>'; }).join("");
+
+  app.innerHTML = '<div class="cab-wrap">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
+      '<div><div style="font-weight:700;color:#38bdf8;font-size:15px">'+title+'</div><div style="font-size:12px;color:#94a3b8">'+sub+'</div></div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+        '<button class="btn" onclick="openCab()">← Назад к основным шкафам</button>' +
+        '<button class="btn" style="'+(!isTop?'border-color:#38bdf8;background:#0c4a6e;color:#fff':'')+'" onclick="renderLiftPanel(false)">🎛️ Нижний пульт кассеты (A8 / A9-16)</button>' +
+        '<button class="btn" style="'+(isTop?'border-color:#38bdf8;background:#0c4a6e;color:#fff':'')+'" onclick="renderLiftPanel(true)">🧺 Верхний пульт люльки кассеты (A10 / A21-22)</button>' +
+      '</div>' +
+    '</div>' +
+    '<div id="lift-insp" style="display:none"></div>' +
+    '<div class="cab-grid"><div>' +
+      '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">ОРГАНЫ УПРАВЛЕНИЯ И ДЖОЙСТИКИ КАССЕТЫ (CAN0)</div><div class="rel-row" style="display:flex;flex-wrap:wrap;gap:8px">'+mH+'</div></div>' +
+      '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">ПРЕДОХРАНИТЕЛИ ЦЕПЕЙ УПРАВЛЕНИЯ КАССЕТОЙ</div><div class="fuse-row" style="display:flex;flex-wrap:wrap;gap:6px">'+fH+'</div></div>' +
+      '<div class="cab-sec" style="margin-bottom:10px;padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">КЛЕММЫ, РАЗЪЁМЫ И КНОПКИ БЕЗОПАСНОСТИ (E-STOP / НАСОС M1)</div><div class="term-row" style="display:flex;flex-wrap:wrap;gap:6px">'+tH+'</div></div>' +
+    '</div><div class="cab-right"><div class="cab-sec" style="padding:10px;background:#0b1322;border:1px solid #1e293b;border-radius:8px"><div class="cab-sec-t">АВАРИЙНОЕ ОПУСКАНИЕ КАССЕТЫ</div><div class="ecu-box" style="padding:10px;border-radius:8px;border:1px solid #3b82f6;background:#0f172a"><div style="font-size:12px;font-weight:800;color:#e2e8f0">Нижний пост: кнопка S4 (F129 5A) запускает электронасос M1 для опускания кассеты</div></div></div></div></div></div>';
+};
+
+document.addEventListener("click", function(ev) {
+  var btn = ev.target.closest("button");
+  if (!btn) return;
+  if (btn.textContent.indexOf("A8 / A9-16") >= 0) { ev.preventDefault(); ev.stopImmediatePropagation(); renderLiftPanel(false); }
+  if (btn.textContent.indexOf("A10 / A21-22") >= 0) { ev.preventDefault(); ev.stopImmediatePropagation(); renderLiftPanel(true); }
+}, true);
+
+window.addEventListener("load", function() {
+  if (typeof window.getAllCabZones === "function") {
+    var prevZ5 = window.getAllCabZones;
+    window.getAllCabZones = function(plat) {
+      var zs = prevZ5(plat);
+      if (plat === "P5042" && Array.isArray(zs) && !zs.some(function(x){ return x.z === "LIFT_BOT"; })) {
+        zs.push({ z: "LIFT_BOT", btn: "\uD83C\uDF9B\uFE0F \u041D\u0438\u0436\u043D\u0438\u0439 \u043F\u0443\u043B\u044C\u0442 \u043A\u0430\u0441\u0435\u0442\u044B (A8 / A9-16 / S103)", tpl: {} });
+        zs.push({ z: "LIFT_TOP", btn: "\uD83E\uDDFA \u0412\u0435\u0440\u0445\u043D\u0438\u0439 \u043F\u0443\u043B\u044C\u0442 \u043B\u044E\u043B\u044C\u043A\u0438 \u043A\u0430\u0441\u0435\u0442\u044B (A10 / A21-22 / S104)", tpl: {} });
+      }
+      return zs;
+    };
+  }
+});
+</script>
+<script>
+(function(){
+  if (typeof DB !== "object") return;
+  var map = {
+    "P1277": ["X3-4", "Возврат E-STOP на пин 140 A1 и K2 (перемычка X5-57 -> X3-4, Л. 100)"],
+    "P5053": ["X3-10", "Возврат E-STOP на пин 140 A1 и K2 (перемычка X5-9 -> X3-10, Л. 101)"],
+    "P1265": ["X3-4", "Возврат E-STOP на пин 140 A1 и K2 (перемычка X5-57 -> X3-4, Л. 100)"],
+    "P5042": ["X3-4", "Возврат E-STOP на пин 140 A1 и K2 (перемычка X5-57 -> X3-4, Л. 100)"],
+    "S105":  ["X3 (ENC 1)", "Возврат E-STOP в задний шкаф ENC 1 на пин 140 A1 и K2 + сброс S110 (Л. 101/104)"]
+  };
+  Object.keys(map).forEach(function(k) {
+    if (!DB[k]) return;
+    if (Array.isArray(DB[k].pins)) {
+      DB[k].pins = DB[k].pins.filter(function(x){ return String(x.p||"").trim() !== "X3-1"; });
+    }
+    if (Array.isArray(DB[k].evac)) {
+      DB[k].evac.forEach(function(e){
+        if (e.s) e.s = e.s.replace(/X3-1/g, map[k].at(0));
+        if (e.c) e.c = e.c.replace(/X3-1/g, map[k].at(0));
       });
     }
   });
 })();
-</script>
-<script>
-(function(){
-  if (typeof DB === "undefined") return;
 
-  if (DB["S105"]) {
-    DB["S105"].errors = [
-      {b:"Гидромолот • Л. 113", e:"Не бьёт гидромолот при нажатии кнопки на джойстике", c:"Проверить пред F20 (10A), реле PVG стрелы и молота K17 (пред F17 5A, пин 254 A1), реле блокировки молота на левом крыле и катушку соленоида бойка."},
-      {b:"Стрела • Л. 113", e:"Не двигается стрела оборщика или передний отвал", c:"Проверить срабатывание реле K17 (контакт 87 должен выдавать +24В на блок PVG левого крыла), пред F44 (5A) и питание выходов A1 MCUM (F6 30A, пины 201–206)."},
-      {b:"Орошение • Крыло 2", e:"Не подаётся вода на пылеподавление при оборке", c:"Проверить пред F20 (10A), реле клапана орошения K22 в шкафу Encl. 1 / левом крыле и катушку водяного клапана на стреле."},
-      {b:"Смазка A26 • Крыло 3", e:"Не работает автосмазка пики молота и стрелы (Lincoln)", c:"Проверить пред F18 (5A), реле K18 (пин 126 A1 MCUM), уровень смазки в бачке на правом крыле и питание мотора станции A26."},
-      {b:"Гидравлика • Крыло 3", e:"Перегрев или аварийный уровень гидравлического масла", c:"Проверить работу вентилятора маслоохладителя (реле K_FAN / пред F_COOL 15A) и датчики уровня/температуры в клеммной коробке правого крыла."},
-      {b:"E-STOP / ДВС • Л. 101", e:"Висит E-STOP или не запускается двигатель Deutz TCD2013", c:"Проверить +24В на клемме X3-1 (пин 140 A1), пред F9 (5A), грибки стопа кабины и рамы, реле зажигания K2 (F3 30A) и реле ДВС K26 (F4 25A / F26 5A)."}
-    ];
-  }
-
-  if (DB["P1265"]) {
-    DB["P1265"].errors = [
-      {b:"Барабан • Л. 22", e:"Не вращается барабан миксера (ни загрузка, ни выгрузка)", c:"1) Проверить концевик люка мойки B90 (клемма XC1-1 ➔ пин G4 A13, пред F127 7.5A) — при открытом люке вращение блокируется! 2) Проверить реле PVG K9 (пин B1 A13) и пред F106 (15A) в шкафу Encl. 3."},
-      {b:"Прицеп • Л. 19, 20", e:"Нет связи с контроллерами миксера A12 (TCU1) и A13 (TCU2)", c:"Проверить межсекционный разъём ENC 1 (пины 1–7), пред F101 (5A, питание CPU пины L1/J3) и силовые преды F102 (10A) / F103 (10A) в шкафу прицепа Encl. 3."},
-      {b:"Корма A60 • Л. 19, 22", e:"Не работает выносной пульт на корме или подача воды Y84", c:"Проверить пред F125 (5A) на пульт A60 (CAN0 ID 23), герметичность разъёма клавиатуры и выход пина G1 блока A13 на клапан воды Y84."},
-      {b:"E-STOP S2 • Л. 19", e:"Машина глохнет и не заводится — сработал задний стоп прицепа", c:"Проверить заднюю грибковую кнопку S2 на корме миксера и её провода через разъём ENC 1 (пины 8–9) до клеммы X3-1 (пин 140 A1 MCUM)."},
-      {b:"Ход • Л. 112, 21", e:"Ошибка хода или пробой катушки клапана Y10 на массу", c:"Прозвонить катушки хода Y10–Y15 на сопротивление (норма 18–24 Ом) и на пробой относительно массы рамы (типовой дефект Y10 на бортах 46/47), а также выход Y36 (пин C1 A12)."}
-    ];
-  }
-
-  if (DB["P5042"]) {
-    DB["P5042"].errors = [
-      {b:"Платформа • Л. 115, 121", e:"Платформа не поднимается вверх (блокировка по наклону / высоте)", c:"Проверить датчик угла наклона шасси B40 (CAN2 ID 10 + R15, пред F125 5A), датчики высоты B79 (пин E4) / B80 (пин C4 A12) и выход K2 блока A12 на клапан подъёма Y81."},
-      {b:"Корзина A10 • Л. 123", e:"Не работает верхний пульт управления в корзине (A10 ID 22)", c:"Проверить пред F120 (5A), разъём X100 и гибкий кабель в кабель-канале ножничного механизма (обрыв CAN0 или питания джойстиков A21/A22)."},
-      {b:"Кран K21 • Л. 117, 124", e:"Не работает кран-манипулятор на платформе", c:"Проверить пред F104 (10A, питание блока крана A14 +4), силовой пред F124 (10A), реле крана K21 (пин B1 A13) и секции PVG Y105–Y107."},
-      {b:"E-STOP • Л. 116", e:"Висит E-STOP — нажата кнопка на нижнем или верхнем пульте", c:"Проверить грибки S103 (нижний пульт A8) и S104 (верхний пульт корзины A10) через 16-пиновый разъём Harting P10 (пины 8–9) до пина 140 A1 MCUM."},
-      {b:"Аутригеры • Л. 121", e:"Не выдвигаются или не складываются опоры (аутригеры)", c:"Проверить силовой пред F103 (10A) блока A13 (+3) в шкафу Trailer 1 и катушки клапанов опор Y55 / Y56."}
-    ];
-  }
-
-  if (typeof draw === "function") draw();
-})();
-</script>
-<script>
-(function(){
-  if (typeof DICT_BASE === "undefined") return;
-  var techTerms = [
-    {k:"A1 MCUM (Master Control Unit)", v:"Главный управляющий контроллер тягача (Danfoss PLUS+1, шкаф Encl. 1). Управляет гидроходом (пины 180–189), контуром E-STOP (пин 140), зажиганием и обменом по шинам CAN0 / CAN1."},
-    {k:"A20 DCUM (Display Control Unit)", v:"Бортовой цветной дисплей оператора в кабине (CAN0 Node ID 1). Отображает параметры ДВС Deutz, диагностические коды SPN/FMI, статус E-STOP и меню сервисного доступа HSF."},
-    {k:"A11 / A12 / A13 / A14 (TCU)", v:"Выносные контроллеры рабочих установок и прицепов на шине CAN0: A11 — прицеп зарядника, A12/A13 — стрела, миксер или ножницы платформы, A14 — кран-манипулятор."},
-    {k:"BOSCH EMR-3 (ECU Deutz)", v:"Электронный блок управления двигателем Deutz TCD2013 (правый отсек шкафа Encl. 1). Питается через реле K26 (преды F4/F6 25A и F26 5A), обменивается с A1 и A20 по шине CAN1 (SAE J1939, 250 кбит/с)."},
-    {k:"PVG 32 (Danfoss)", v:"Пропорциональный электрогидравлический распределитель со встроенными модулями управления (PVEA/PVEH). Питается +24В через реле K17 / K40 / K9 / K21, управляется ШИМ-сигналом (PWM) или по CAN."},
-    {k:"PWM (ШИМ — Широтно-импульсная модуляция)", v:"Способ плавного управления током электромагнитных катушек гидрораспределителя и хода (100 Гц). Позволяет пропорционально изменять скорость движения и работы стрелы от положения педали или джойстика."},
-    {k:"LS Line (Load Sensing)", v:"Сигнальная линия обратной связи по нагрузке (например, пин 5 разъёма JT3 от Orica на пин D4 блока A12). Даёт команду регулятору аксиально-поршневого насоса поднять давление в гидросистеме."},
-    {k:"AUTEC A77 (RCUM)", v:"Приёмник промышленного радиопульта управления стрелой (CAN0 Node ID 100, пред F62 5A). Через реле K7 замыкает линию безопасности WEMR\\1–2 в общем шлейфе E-STOP тягача."},
-    {k:"Orica Front Box", v:"Пультовой модуль управления зарядным оборудованием в кабине (преды F32 10A и F14 7.5A). Связан с прицепом через 24-пиновый разъём Harting JT3/PT3, передаёт сигналы Start (G1), Stop (F1) и импульсы метража шланга (пины 123/147 A1)."},
-    {k:"Harting (JT1 / JT3 / P10 / ENC 1)", v:"Промышленные многопиновые разъёмы в герметичном корпусе для межсекционного соединения тягача с прицепом или платформой. Несут силовое питание +24В, логику CPU, шину CAN0 и шлейф E-STOP."},
-    {k:"A52 FSS (Fire Suppression System)", v:"Блок автоматической системы пожаротушения (пред F30 3A / F29 7.5A). Контролирует целостность шлейфа через эталонные резисторы R5–R7 (1 кОм) на пины 110, 111 и 134 контроллера A1 MCUM."},
-    {k:"A26 Lincoln (Автосмазка)", v:"Станция централизованной импульсной смазки шарниров рамы, пальцев стрелы и втулки гидромолота. Питается от реле K18 (пред F18 5A, управляющий пин 126 A1 MCUM)."},
-    {k:"B6 (Педаль акселератора + R1 10 кОм)", v:"Потенциометрический датчик хода: питание +5В (пин 247 A1), выход сигнала 0.5–4.5В (пин 104 A1) и аналоговая масса через контрольный резистор R1 (10 кОм) на пин 217 A1."},
-    {k:"B40 (Инклинометр шасси)", v:"Двухосевой датчик угла наклона на шине CAN2 (125 кбит/с, Node ID 10, пред F125 5A). Блокирует подъём ножничной платформы или стрелы при превышении допустимого крена машины."},
-    {k:"B90 / B85 / B87 (Датчики миксера)", v:"Датчики шкафа прицепа Encl. 3 (пред F127 7.5A): B90 — концевик люка мойки (клемма XC1-1, пин G4 A13, блокирует барабан при открытии); B85 — транспортное положение (F4); B87 — счётчик оборотов (C3)."},
-    {k:"FuM / FuC / FuB (Силовые мега-преды)", v:"Главные силовые предохранители в отсеке АКБ: FuM (400A) — общая шина питания машины; FuC (200A) — аварийный электронасос M1 (кнопка S29); FuB (50A) — свечи накала коллектора Deutz (реле K3)."},
-    {k:"S7 (Сервисный переключатель аварийного режима)", v:"Тумблер в шкафу Encl. 1 (пин 139 A1 MCUM). Переводит контроллер в аварийный режим движения для эвакуации машины в ремонтную камеру при отказе датчиков."}
-  ];
-  techTerms.forEach(function(item){
-    if (!DICT_BASE.some(function(x){ return x.k === item.k; })) DICT_BASE.push(item);
-  });
-  if (typeof draw === "function") draw();
-})();
-</script>
-<style>
-@media (max-width: 768px) {
-  .hdr-sub, header > div:nth-child(2) { display: none !important; }
-  #nav, .nav {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow: hidden !important;
-    justify-content: space-between !important;
-    padding: 4px 2px calc(6px + env(safe-area-inset-bottom)) 2px !important;
-    gap: 2px !important;
-  }
-  .nb {
-    flex: 1 1 0 !important;
-    min-width: 0 !important;
-    padding: 5px 1px !important;
-    font-size: 9px !important;
-    text-align: center !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-}
-</style>
-<script>
-(function(){
-  var kg = document.querySelector('button[onclick*="openKeyGen"]');
-  if (kg && !document.getElementById("fs-btn")) {
-    var b = document.createElement("button");
-    b.id = "fs-btn";
-    b.className = "btn";
-    b.textContent = "⛶ Экран";
-    b.style.cssText = "border-color:#38bdf8;color:#38bdf8;margin-left:6px";
-    b.onclick = function() {
-      if (typeof window.toggleFullScr === "function") window.toggleFullScr();
+window.addEventListener("load", function() {
+  if (typeof window.getAllCabZones === "function") {
+    var prevClean = window.getAllCabZones;
+    window.getAllCabZones = function(plat) {
+      var zs = prevClean(plat);
+      var map = {
+        "P1277": ["X3-4", "Возврат E-STOP на пин 140 A1 и реле K2 (перемычка X5-57 -> X3-4)"],
+        "P5053": ["X3-10", "Возврат E-STOP на пин 140 A1 и реле K2 (перемычка X5-9 -> X3-10)"],
+        "P1265": ["X3-4", "Возврат E-STOP на пин 140 A1 и реле K2 (перемычка X5-57 -> X3-4)"],
+        "P5042": ["X3-4", "Возврат E-STOP на пин 140 A1 и реле K2 (перемычка X5-57 -> X3-4)"],
+        "S105":  ["X3 (ENC 1)", "Возврат E-STOP в заднем шкафу ENC 1 на пин 140 A1 и K2 (+ сброс S110)"]
+      };
+      if (map[plat] && Array.isArray(zs) && zs.at(0) && zs.at(0).tpl && Array.isArray(zs.at(0).tpl.terms)) {
+        zs.at(0).tpl.terms.forEach(function(tm) {
+          if (tm.id === "X3-1") {
+            tm.id = map[plat].at(0);
+            tm.name = map[plat].at(1);
+          }
+        });
+      }
+      return zs;
     };
-    kg.parentNode.insertBefore(b, kg.nextSibling);
   }
-  if (window.innerWidth <= 768) {
-    var map = {"tab-s":"⚡Схемы","tab-p":"🔌Пины","tab-d":"⚠️Ошибки","tab-w":"📖Словарь","tab-e":"🚨Эвак","tab-a":"🤖ИИ","tab-c":"⚡Щит"};
-    Object.keys(map).forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) el.textContent = map[id];
-    });
+});
+</script>
+<script>
+window.PCAB_DATA = {
+  rels: [
+    ["K2", "Главное реле +15 (30A)", "Возврат E-STOP (X3) + F3 (30A)", "Общая шина зажигания +15", "При обрыве E-STOP реле K2 обесточено"],
+    ["K10", "Реле вентилятора печки", "A1 пин 158 / F19 (30A)", "Переключатель S50 -> блок A44", "Отопитель кабины"],
+    ["K13", "Реле кондиционера", "A1 пин 195 / F19 (30A)", "Датчик B12 -> муфта Y5", "Кондиционер кабины"],
+    ["K14", "Реле левого дворника M3", "A1 пин 151 / F37 (20A)", "Мотор M3 (X5-65..67)", "Стеклоочиститель L"],
+    ["K15", "Реле правого дворника M2", "A1 пин 151 / F37 (20A)", "Мотор M2 (X5-68..70)", "Стеклоочиститель R"],
+    ["K16", "Реле насоса омывателя M6", "A1 пин 175 / F37 (20A)", "Насос бачка M6", "Омыватель стекла"],
+    ["K17", "Реле клапанов PVG", "A1 пин 254 / F17 (5A)", "Питание катушек PVG", "Без K17 стоит гидравлика"],
+    ["K18", "Реле центральной смазки A26", "A1 пин 126 / F18 (5A)", "Насос смазки A26 (X5-127)", "Автосмазка шасси"],
+    ["K23", "Реле передних фар H45/H46", "A1 пин 253 / F9 (10A)", "Фары H45, H46 (X5-17)", "Передний рабочий свет"],
+    ["K24", "Реле задних фар H43/H44", "A1 пин 239 / F9 (10A)", "Фары H43, H44 (X5-18)", "Задний рабочий свет"]
+  ],
+  fuses: [
+    ["FU1", "3A", "#a855f7", "Аварийный насос M1", "Шина +30", "X5-1 -> насос M1 24VDC"],
+    ["FU2", "30A", "#22c55e", "Стартер M8 Deutz", "Шина +30", "Реле K1 -> X5-2 -> стартер"],
+    ["FU4", "25A", "#f8fafc", "ЭБУ BOSCH EMR-3 (G5)", "Шина +30", "X4-1 -> пины 1, 3, 5 EMR-3"],
+    ["FU5", "3A", "#a855f7", "Аварийный режим S7", "Шина +30", "Кнопка S7 -> A1 пин 139"],
+    ["FU6", "30A", "#22c55e", "Основное питание A1 MCUM", "Шина +30", "X5-5 -> пины 201–206, 246"],
+    ["FU7", "10A", "#ef4444", "Ближний свет H10/H11", "Шина +15", "Реле K25 -> ближний свет"],
+    ["FU8", "10A", "#ef4444", "Звуковой сигнал H9/H5", "Шина +15", "Реле K30 -> звуковой сигнал"],
+    ["FU9", "10A", "#ef4444", "Рабочий свет K23/24 (SOS +24В)", "Шина +15", "Источник +24В для обхода на X3-1"],
+    ["FU13", "5A", "#d6b88d", "Замок S8 и петля E-STOP", "Шина +30", "X5-57 -> замок S8 и E-STOP"],
+    ["FU14", "5A", "#d6b88d", "Дисплей A20 DCUM", "Шина +30/+15", "X5-72/73 -> A20 пины 18, 26"],
+    ["FU16", "5A", "#d6b88d", "Телеметрия A5", "Шина +30", "Модуль телеметрии A5"],
+    ["FU17", "5A", "#f97316", "Реле клапанов PVG (K17)", "Шина +15", "Питание катушки K17"],
+    ["FU19", "30A", "#22c55e", "Печка и кондиционер", "Шина +30", "Реле K10 и K13"],
+    ["FU20", "20A", "#eab308", "Сила прицепа (+30 Trailer)", "Шина +30", "Разъём прицепа P10 / JT1"]
+  ],
+  diodes: [
+    ["R2", "471 Ом", "Возбуждение генератора D+", "A1 пин 115", "X5-3 -> D+ генератора G3"],
+    ["D2/D3", "Диоды", "Развязка аварийного насоса M1", "Кнопки насоса", "Насос M1 (X5-1)"],
+    ["R4", "470 Ом", "Датчик скорости B34", "Шина +15", "A1 пин 117 / B34"],
+    ["R10", "1 кОм", "Датчик уровня масла B5", "Шина +15", "X5-113 -> A1 пин 116"],
+    ["R1", "10 кОм", "Контроль педали хода B6", "Педаль B6 (JB6)", "A1 пин 179 (Safety)"],
+    ["R3", "1.2 кОм", "Резистор зуммера панели H48", "A1 пин 166", "X5-60 -> зуммер H48"],
+    ["R5-R7", "1 кОм", "Шлейф пожарки FSS A100/A52", "Блок FSS", "A1 пины 111, 134, 110 (X5-40)"],
+    ["R9", "1 кОм", "Датчик уровня ОЖ B16", "Бачок ОЖ B16", "X4-9 -> A1 пины 141, 127"]
+  ],
+  terms: [
+    ["X1", "Свечи G7 и стартер", "FuB 50A / FuC 200A", "Двигатель Deutz TCD2013"],
+    ["X2 (GND)", "Общая шина массы шкафа", "Выключатель массы S1", "Все минусы шкафа Encl. 1"],
+    ["X3 (E-STOP)", "Клеммы аварийного стопа", "Замок/F13 -> кнопки S100/102/103", "Пин 140 A1 + реле +15 K2"],
+    ["X4 (EMR-3)", "Двигатель Deutz и датчики", "FU4 25A, K26, A1 MCUM", "Жгут блока BOSCH EMR-3 справа"],
+    ["X5 (Главная)", "Основная колодка X5-1..147", "Контроллер A1 и реле", "Ход Y10-15, тормоз Y9, свет, B6"],
+    ["X6 (CAN)", "Узел шин CAN0 / CAN1 / CAN2", "A1 MCUM (терминаторы R)", "A20 DCUM, EMR-3, прицеп P10/JT1"]
+  ]
+};
+</script>
+<script>
+window.showPhotoCabInfo = function(title, from, to, note) {
+  var box = document.getElementById("pcab-info");
+  if (!box) return;
+  box.style.display = "block";
+  box.innerHTML = '<div style="border:1px solid #fbbf24;background:#1e1b0e;border-radius:8px;padding:10px 12px;margin-bottom:10px">' +
+    '<div style="color:#fbbf24;font-weight:800;font-size:13.5px">' + title + '</div>' +
+    '<div style="color:#e2e8f0;font-size:12px;margin-top:4px"><b>Откуда:</b> ' + from + '<br><b>Куда:</b> ' + to + '</div>' +
+    (note ? '<div style="color:#38bdf8;font-size:11.5px;margin-top:4px">' + note + '</div>' : '') + '</div>';
+};
+
+window.openPhotoCabinet = function() {
+  var app = document.getElementById("app"), D = window.PCAB_DATA;
+  if (!app || !D) return;
+  function esc(s){ return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'"); }
+  var rSvg = D.rels.map(function(r, i){
+    var x = 14 + i * 56;
+    return '<g style="cursor:pointer" onclick="showPhotoCabInfo(\'Реле '+esc(r.at(0))+' — '+esc(r.at(1))+'\',\''+esc(r.at(2))+'\',\''+esc(r.at(3))+'\',\''+esc(r.at(4))+'\')"><rect x="'+x+'" y="28" width="48" height="44" rx="4" fill="#18181b" stroke="#52525b" stroke-width="1.5"/><rect x="'+(x+4)+'" y="72" width="40" height="22" rx="2" fill="#9ca3af" stroke="#4b5563"/><text x="'+(x+24)+'" y="87" fill="#090d16" font-size="10" font-weight="900" text-anchor="middle">'+r.at(0)+'</text></g>';
+  }).join("");
+  var fSvg = D.fuses.map(function(f, i){
+    var x = 14 + i * 28;
+    return '<g style="cursor:pointer" onclick="showPhotoCabInfo(\'Предохранитель '+esc(f.at(0))+' ('+esc(f.at(1))+') — '+esc(f.at(3))+'\',\''+esc(f.at(4))+'\',\''+esc(f.at(5))+'\',\'Нажмите на любой элемент шкафа для проверки цепи\')"><rect x="'+x+'" y="128" width="24" height="14" rx="2" fill="#e2e8f0"/><text x="'+(x+12)+'" y="138" fill="#0f172a" font-size="7.5" font-weight="bold" text-anchor="middle">'+f.at(0).replace("FU","")+'</text><rect x="'+x+'" y="144" width="24" height="36" rx="3" fill="'+f.at(2)+'" stroke="#0f172a" stroke-width="1.5"/><text x="'+(x+12)+'" y="166" fill="#090d16" font-size="8.5" font-weight="900" text-anchor="middle">'+f.at(1).replace("A","")+'</text></g>';
+  }).join("");
+  var dSvg = D.diodes.map(function(d, i){
+    var x = 414 + i * 21;
+    return '<g style="cursor:pointer" onclick="showPhotoCabInfo(\'Элемент '+esc(d.at(0))+' ('+esc(d.at(1))+') — '+esc(d.at(2))+'\',\''+esc(d.at(3))+'\',\''+esc(d.at(4))+'\',\'Серая диодно-резисторная гребёнка\')"><rect x="'+x+'" y="134" width="18" height="46" rx="2" fill="#94a3b8" stroke="#334155"/><rect x="'+(x+5)+'" y="142" width="8" height="24" rx="2" fill="'+(d.at(0).indexOf("D")===0?"#1e293b":"#d97706")+'"/><text x="'+(x+9)+'" y="191" fill="#fbbf24" font-size="7" font-weight="bold" text-anchor="middle">'+d.at(0)+'</text></g>';
+  }).join("");
+  var tSvg = D.terms.map(function(tm, i){
+    var x = 14 + i * 130, isGnd = tm.at(0).indexOf("X2") === 0;
+    return '<g style="cursor:pointer" onclick="showPhotoCabInfo(\'Клеммник '+esc(tm.at(0))+' — '+esc(tm.at(1))+'\',\''+esc(tm.at(2))+'\',\''+esc(tm.at(3))+'\',\'Нижняя DIN-рейка главного шкафа Encl. 1\')"><rect x="'+x+'" y="232" width="122" height="46" rx="5" fill="'+(isGnd?"#14532d":"#1e293b")+'" stroke="'+(isGnd?"#22c55e":"#38bdf8")+'" stroke-width="1.5"/><text x="'+(x+61)+'" y="251" fill="'+(isGnd?"#86efac":"#38bdf8")+'" font-size="11" font-weight="900" text-anchor="middle">'+tm.at(0)+'</text><text x="'+(x+61)+'" y="267" fill="#e2e8f0" font-size="8.5" text-anchor="middle">'+tm.at(1).slice(0,22)+'</text></g>';
+  }).join("");
+  var svg = '<svg viewBox="0 0 810 295" style="width:100%;height:auto;background:#111317;border:2px solid #475569;border-radius:10px"><rect x="6" y="6" width="798" height="283" rx="8" fill="#181b20" stroke="#334155"/><text x="16" y="21" fill="#94a3b8" font-size="10" font-weight="bold">ВЕРХНЯЯ РЕЙКА: РЕЛЕ K2 — K24 (ПО РЕАЛЬНОМУ ФОТО)</text>' + rSvg + '<text x="16" y="118" fill="#94a3b8" font-size="10" font-weight="bold">СРЕДНЯЯ РЕЙКА: ПРЕДОХРАНИТЕЛИ FU1–FU20 + ГРЕБЁНКА ДИОДОВ И РЕЗИСТОРОВ</text>' + fSvg + dSvg + '<rect x="592" y="14" width="14" height="202" fill="#475569" stroke="#1e293b"/><g style="cursor:pointer" onclick="showPhotoCabInfo(\'BOSCH EMR-3 (G5) и реле K26\',\'FU4 (25A) / F26 (5A) через X4\',\'Форсунки, турбина, свечи G7, CAN1 J1939\',\'Правый отсек за кабель-каналом\')"><rect x="614" y="22" width="182" height="190" rx="8" fill="#cbd5e1" stroke="#64748b" stroke-width="2"/><rect x="622" y="34" width="44" height="164" rx="4" fill="#1e293b"/><rect x="676" y="45" width="110" height="140" rx="4" fill="#f8fafc" stroke="#94a3b8"/><text x="731" y="85" fill="#0f172a" font-size="13" font-weight="900" text-anchor="middle">BOSCH</text><text x="731" y="108" fill="#dc2626" font-size="15" font-weight="900" text-anchor="middle">EMR-3</text><text x="731" y="130" fill="#334155" font-size="9.5" font-weight="bold" text-anchor="middle">DEUTZ TCD2013</text><text x="731" y="148" fill="#475569" font-size="8.5" text-anchor="middle">CAN1 • X4 • K26</text></g><text x="16" y="224" fill="#94a3b8" font-size="10" font-weight="bold">НИЖНЯЯ DIN-РЕЙКА: КЛЕММНИКИ X1, X2 (GND), X3 (E-STOP), X4 (EMR), X5 (1..147), X6 (CAN)</text>' + tSvg + '</svg>';
+  app.innerHTML = '<div class="cab-wrap"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px"><div><div style="font-weight:700;color:#fbbf24;font-size:15px">📸 Фото-макет главного шкафа Encl. 1 (по реальному фото монтажа)</div><div style="font-size:12px;color:#94a3b8">Нажмите на любое реле, предохранитель, диод/резистор, BOSCH EMR-3 или нижний клеммник</div></div><button class="btn" onclick="openCab()">← Назад к стандартному виду шкафа</button></div><div id="pcab-info" style="display:none"></div>' + svg + '</div>';
+};
+
+document.addEventListener("click", function(ev) {
+  var btn = ev.target.closest("button");
+  if (!btn || btn.textContent.indexOf("Фото-макет") < 0) return;
+  ev.preventDefault(); ev.stopImmediatePropagation(); openPhotoCabinet();
+}, true);
+
+window.addEventListener("load", function() {
+  if (typeof window.getAllCabZones === "function") {
+    var prevZ6 = window.getAllCabZones;
+    window.getAllCabZones = function(plat) {
+      var zs = prevZ6(plat);
+      if (Array.isArray(zs) && !zs.some(function(x){ return x.z === "PHOTO_CAB"; })) {
+        zs.push({ z: "PHOTO_CAB", btn: (plat === "S105" ? "\uD83D\uDCF8 \u0424\u043E\u0442\u043E-\u043C\u0430\u043A\u0435\u0442 \u0437\u0430\u0434\u043D\u0435\u0433\u043E \u0448\u043A\u0430\u0444\u0430 ENC 1 \u043D\u0430 \u043A\u043E\u0440\u043C\u0435 (BOSCH EMR)" : "\uD83D\uDCF8 \u0424\u043E\u0442\u043E-\u043C\u0430\u043A\u0435\u0442 \u0448\u043A\u0430\u0444\u0430 \u043A\u0430\u0431\u0438\u043D\u044B Encl. 1 (BOSCH EMR)"), tpl: {} });
+      }
+      return zs;
+    };
   }
-})();
+});
 </script>
 </body>
 </html>
